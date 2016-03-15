@@ -1,0 +1,29 @@
+[
+    {
+	"description":"check to see if subtitles are shown when clicked on subtitles show button"
+    },
+    
+    
+    {"action":"waitForVisibility",
+     "tag":"#language_icon",
+     "des":"wait for language icon",
+     "callback":""},
+    
+    {"action":"click",
+     "tag":"#language_icon",
+     "des":"click on language icon",
+     "callback":""},
+    
+    {"action":"waitForVisibility",
+     "tag":"#languages > div:nth-child(1)",
+     "des":"wait for first element in list (Albanian)",
+     "callback":""},
+    
+    {"action":"click",
+     "tag":"#languages > div:nth-child(1)",
+     "des":"click (Albanian)",
+     "callback":""},
+  
+    {"action":"done"}
+
+]

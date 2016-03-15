@@ -1,0 +1,27 @@
+[
+    {
+	"description":"check to see if timer value in ui and the network one match"
+    },
+    
+
+        
+    {"action":"waitForVisibility",
+     "tag":"#finger > svg > text",
+     "callback":""},
+
+    {"action":"getElementContent",
+     "tag":"#finger > svg > text > tspan",
+     "callback":""},
+    
+    {"action":"getNetworkContent",
+     "key":"countdown",
+     "callback":""},
+    
+    {"action":"compareTestTubeBeaker",
+     "callback":""},
+    
+    
+    
+    {"action":"done"}
+
+]

@@ -1,0 +1,29 @@
+[
+    {
+	"description":"change language to Azeri"
+    },
+    
+    
+    {"action":"waitForVisibility",
+     "tag":"#language_icon",
+     "des":"wait for language icon",
+     "callback":""},
+    
+    {"action":"click",
+     "tag":"#language_icon",
+     "des":"click on language icon",
+     "callback":""},
+    
+    {"action":"waitForVisibility",
+     "tag":"#languages > div:nth-child(2)",
+     "des":"wait for first element in list (Albanian)",
+     "callback":""},
+    
+    {"action":"click",
+     "tag":"#languages > div:nth-child(2)",
+     "des":"click (Albanian)",
+     "callback":""},
+  
+    {"action":"done"}
+
+]

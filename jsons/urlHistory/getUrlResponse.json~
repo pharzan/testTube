@@ -1,0 +1,19 @@
+[
+    {
+	"description":"get the url from response"
+    },
+    
+
+   
+    {"action":"wait",
+     "key":"25",
+     "callback":""},
+    
+    {"action":"getNetworkContent",
+     "key":"url",
+     "callback":""},
+    
+    
+    {"action":"done"}
+
+]

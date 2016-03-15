@@ -1,0 +1,62 @@
+[
+    {
+	"description":"answer wrong then check the total score change in DOM"
+    },
+    
+    
+    {"action":"waitForVisibility",
+     "tag":".answer_box.p5.m5>.subtitles_disabled",
+     "des":"wait for the subtitles/no subtitles button to apear.",
+     "callback":""},
+    
+    {"action":"click",
+     "tag":".answer_box.p5.m5>.subtitles_disabled",
+     "des":"click on no subtitles",
+     "callback":""},
+
+    
+    {"action":"waitForVisibility",
+     "tag":".answer_box.unselectable.p5.m5",
+     "des":"wait for answer boxes to appear",
+     "callback":""},
+    
+    {"action":"getNetworkContent",
+     "key":"distractor",
+     "des":"fill the beaker with answer keys from the network responses",
+     "callback":""},
+
+    {"action":"getElementContent",
+     "tag":"#score_boxes > div:nth-child(3) > div.score_box.last > div > a",
+     "des":"get the total score from the DOM before answering",
+     "callback":""},
+    
+    {"action":"searchAndClickFromBeaker",
+     "des":"search the ui element divs for the beaker content (network responses) and click on the found one",
+     "callback":""},
+
+    {"action":"wait",
+     "key":"100",
+     "des":"",
+     "callback":""},
+    
+    {"action":"getElementContent",
+     "tag":"#score_boxes > div:nth-child(3) > div.score_box.last > div > a",
+     "des":"get the total score from the DOM after answering",
+     "callback":""},
+
+    {"action":"compareTestTubes",
+     "tag":"",
+     "des":"compares the old and current total score",
+     "callback":""},
+
+    {"action":"waitForVisibility",
+     "tag":"#finger>i",
+     "callback":""},
+
+    {"action":"click",
+     "tag":"#finger>i",
+     "callback":""},
+    
+    {"action":"done"}
+
+]

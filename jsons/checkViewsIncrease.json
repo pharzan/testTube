@@ -1,0 +1,57 @@
+[
+    {
+	"description":"answer wrong then check the success views change in DOM"
+    },
+    
+    
+    {"action":"waitForVisibility",
+     "tag":".answer_box.p5.m5>.subtitles_disabled",
+     "des":"wait for the subtitles/no subtitles button to apear.",
+     "callback":""},
+    
+    {"action":"click",
+     "tag":".answer_box.p5.m5>.subtitles_disabled",
+     "des":"click on no subtitles",
+     "callback":""},
+
+
+    {"action":"getElementContent",
+     "tag":"#info > div:nth-child(3)",
+     "des":"get the views text",
+     "callback":""},
+
+    
+    {"action":"waitForVisibility",
+     "tag":".answer_box.unselectable.p5.m5",
+     "des":"wait for answer boxes to appear",
+     "callback":""},
+    
+
+    {"action":"wait",
+     "key":"100",
+     "des":"",
+     "callback":""},
+    
+    {"action":"getElementContent",
+     "tag":"#info > div:nth-child(3)",
+     "des":"views",
+     "callback":""},
+
+    {"action":"compareTestTubes",
+     "expect":"false",
+     "des":"compares the old and current views and if not the same it has changed",
+     "callback":""},
+
+
+    
+    {"action":"waitForVisibility",
+     "tag":"#finger>i",
+     "callback":""},
+
+    {"action":"click",
+     "tag":"#finger>i",
+     "callback":""},
+    
+    {"action":"done"}
+
+]

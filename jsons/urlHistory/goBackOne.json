@@ -1,0 +1,14 @@
+[
+    {
+	"description":"go back after playback has ended"
+    },
+    
+    {"action":"waitPlaybackEnd",
+     "callback":"console.log('onPlayBack')"},
+            
+    {"action":"historyBack",
+     "callback":""},
+    
+    {"action":"done"}
+
+]

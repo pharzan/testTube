@@ -1,0 +1,29 @@
+[
+    {
+	"description":"get url content from the page url"
+    },
+    
+    {
+        "action": "waitForVisibility",
+        "tag": "[href='/pg/voKido/green']",
+        "des": "wait for green icon",
+        "callback": ""
+    },
+
+    {
+        "action": "click",
+        "tag": "[href='/pg/voKido/green']",
+        "des": "click on green icon",
+        "callback": ""
+    },
+
+    
+    {"action":"wait",
+     "key":"120",
+     "des":"wait so the page renders after reload",
+     "callback":""},
+
+    
+    {"action":"done"}
+
+]

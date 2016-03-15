@@ -1,0 +1,19 @@
+[
+    {
+	"description":"click on products icon"
+    },
+    
+    
+    {"action":"waitForVisibility",
+     "tag":"#products_icon",
+     "des":"wait for products icon",
+     "callback":""},
+    
+    {"action":"click",
+     "tag":"#products_icon",
+     "des":"click on products icon",
+     "callback":""},
+      
+    {"action":"done"}
+
+]

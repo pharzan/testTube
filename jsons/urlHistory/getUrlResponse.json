@@ -1,0 +1,22 @@
+[
+    {
+	"description":"Compare Current url and previous url and see if it changed?"
+    },
+    
+
+   
+    {"action":"wait",
+     "key":"25",
+     "callback":""},
+        
+    {"action":"compare",
+     "type":"dataToDataEquals",
+     "arg0":"currentUrl",
+     "arg1":"oldUrl",
+     "expect":"false",
+     "des":"check to see if url has changed? ",
+     "callback":""},
+    
+    {"action":"done"}
+
+]

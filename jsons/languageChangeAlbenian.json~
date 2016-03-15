@@ -1,0 +1,30 @@
+[
+    {
+	"description":"check to see if subtitles are shown when clicked on subtitles show button"
+    },
+    
+    
+    {"action":"waitForVisibility",
+     "tag":"#question_field > div:nth-child(2) > div:nth-child(2)",
+     "des":"wait for the subtitles/no subtitles button to apear.",
+     "callback":""},
+    
+    {"action":"click",
+     "tag":"#question_field > div:nth-child(2) > div:nth-child(2)",
+     "des":"click on with subtitles",
+     "callback":""},
+
+    
+    {"action":"waitForVisibility",
+     "tag":"#subtitle",
+     "des":"wait for subtitles to apear",
+     "callback":""},
+
+    {"action":"reload",
+     "desc":"this is needed so the test continues to next one and doesn't stop here"
+
+    },
+    
+    {"action":"done"}
+
+]

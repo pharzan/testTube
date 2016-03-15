@@ -1,0 +1,13 @@
+[
+    {
+	"description":"one complete cycle, subtitles disabled, right choice clicked"
+    },
+
+    {"action":"sendKeys",
+     "key":"",
+     "des":"wait for the subtitles/no subtitles button to apear.",
+     "callback":""},
+    
+        {"action":"done"}
+
+]

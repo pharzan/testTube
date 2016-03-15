@@ -1,0 +1,34 @@
+[
+    {
+	"description":"check title bar elements to see if they exist"
+    },
+    
+
+    {"action":"waitForVisibility",
+     "tag":"#main > header > div",
+     "des":"check to see if the header exists",
+     "callback":""},
+    
+    {"action":"waitForVisibility",
+     "tag":"#profile_icon",
+     "des":"check profile icon",
+     "callback":""},
+    
+    {"action":"waitForVisibility",
+     "tag":"#language_icon",
+     "des":"check language icon",
+     "callback":""},
+    
+    {"action":"waitForVisibility",
+     "tag":"#products_icon",
+     "des":"check products icon",
+     "callback":""},
+    
+    {"action":"waitForVisibility",
+     "tag":"#user_bar > div:nth-child(4)",
+     "des":"check playlist icon",
+     "callback":""},
+    
+    {"action":"done"}
+
+]

@@ -1,0 +1,18 @@
+[
+    {
+	"description":"infopanel"
+    },
+    
+    {"action":"waitForVisibility",
+     "tag":"#info > div:nth-child(1) > div",
+     "des":"wait for info panel to be visible",
+     "callback":""},
+    
+    {"action":"click",
+     "tag":"#info > div:nth-child(1) > div",
+     "des":"click info panel to be visible",
+     "callback":""},
+    
+    {"action":"done"}
+
+]

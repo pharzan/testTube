@@ -1,0 +1,17 @@
+[
+    {
+	"description":"wait and click for next finger"
+    },
+    
+    {"action":"waitForVisibility",
+     "tag":"#finger>i",
+     "des":"wait for next finger to appear",
+     "callback":""},
+
+    {"action":"click",
+     "tag":"#finger>i",
+     "callback":""},
+    
+    {"action":"done"}
+
+]

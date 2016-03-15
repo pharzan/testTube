@@ -1,0 +1,18 @@
+[
+    {
+	"description":"click on infopanel"
+    },
+    {
+	"action":"click",
+	"tag":"",
+	"callback":""
+    },
+    {
+	"action":"waitPlaybackEnd",
+	"dec":"wait until the video has played back again",
+	"callback":"console.log('videoEnded')"
+    },
+    
+    {"action":"done"}
+
+]

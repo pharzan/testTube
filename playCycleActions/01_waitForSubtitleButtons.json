@@ -1,0 +1,19 @@
+[
+    {
+	"description":"waits for subtitle buttons and clicks on no subtitles"
+    },
+    
+
+    {"action":"waitForVisibility",
+     "tag":".answer_box.p5.m5>.subtitles_disabled",
+     "des":"wait for the subtitles/no subtitles button to apear.",
+     "callback":""},
+    
+    {"action":"click",
+     "tag":".answer_box.p5.m5>.subtitles_disabled",
+     "des":"click on no subtitles",
+     "callback":""},
+    
+    {"action":"done"}
+
+]

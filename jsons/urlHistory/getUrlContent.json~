@@ -1,0 +1,18 @@
+[
+    {
+	"description":"Compare Current url and previous url and see if it changed?"
+    },
+    
+
+   
+    {"action":"wait",
+     "key":"25",
+     "callback":""},
+        
+    {"action":"getUrlContent",
+     "des":"put url in testTube ",
+     "callback":""},
+    
+    {"action":"done"}
+
+]

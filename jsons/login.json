@@ -1,0 +1,51 @@
+[
+    {
+	"description":"google test search for keyword #lst-ib"
+    },
+    
+    
+    {"action":"waitForVisibility",
+     "tag":"#auth > div.pane.cflex > input[type='text']:nth-child(2)",
+     "des":"wait for inputbox to appear.",
+     "callback":""},
+    
+    {"action":"focus",
+     "tag":"#auth > div.pane.cflex > input[type='text']:nth-child(2)",
+     "des":"get focus of the username fieled",
+     "callback":""},
+    
+    {"action":"sendKeys",
+     "tag":"#auth > div.pane.cflex > input[type='text']:nth-child(2)",
+     "key":"ee@ee.com",
+     "des":"type something",
+     "callback":""},
+
+    {"action":"focus",
+     "tag":"#auth > div.pane.cflex > input[type='password']:nth-child(4)",
+     "des":"get focus for the password filed",
+     "callback":""},
+
+    
+    {"action":"sendKeys",
+     "tag":"#auth > div.pane.cflex > input[type='password']:nth-child(4)",
+     "key":"ee",
+     "des":"type something",
+     "callback":""},
+
+
+     {"action":"wait",
+     "key":"100",
+     "des":"",
+     "callback":""},
+
+    
+    
+    {"action":"click",
+     "tag":"button.btn",
+     "des":"click signin button",
+     "callback":""},
+
+    
+    {"action":"done"}
+
+]

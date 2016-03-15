@@ -1,0 +1,22 @@
+[
+    {
+	"description":"Compare testTube contents"
+    },
+    
+
+   
+    {"action":"wait",
+     "key":"25",
+     "callback":""},
+        
+    {"action":"compare",
+     "type":"dataToDataEquals",
+     "arg0":"testTube",
+     "arg1":"oldTestTube",
+     "expect":"true",
+     "des":"check to see if url has changed? ",
+     "callback":""},
+    
+    {"action":"done"}
+
+]

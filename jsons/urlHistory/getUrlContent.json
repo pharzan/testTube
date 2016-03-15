@@ -1,0 +1,19 @@
+[
+    {
+	"description":"get url content from the page url"
+    },
+    
+     
+    
+    {"action":"wait",
+     "key":"100",
+     "callback":"console.log('hi')"},
+
+    
+    {"action":"getUrlContent",
+     "des":"put url in testTube ",
+     "callback":""},
+    
+    {"action":"done"}
+
+]
