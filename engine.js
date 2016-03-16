@@ -10,7 +10,6 @@ var fs = require('fs'),
         networkResponses: [],
 	urlHistorySize:7,
 	urlHistory:[]
-	
     };
 
 PubSub.subscribe('testStepsComplete', function() {
@@ -19,11 +18,8 @@ PubSub.subscribe('testStepsComplete', function() {
 
 function sendKeys(element,key,page, callback) {
     return new Promise(function(resolve, reject) {
-
 	var e = page.evaluate(function(element,key) {
-	    
 	    var input = document.querySelector(element); // Get the element where you want to press.
-	    
 	    
 	    var myEvent=new Event('change');
 	    input.value=key;
@@ -31,19 +27,9 @@ function sendKeys(element,key,page, callback) {
 	    return document.querySelector(element);
 	}, element,key);
 	//e.value=key
-	
-	
-	
-	
 	// page.sendEvent('keypress', key, null, null,null);
-	
 	// e.dispatchEvent(myEvent);
-	
-	
-	
 	 return resolve('done');
-	
-	
 	
     });
 }
@@ -193,15 +179,9 @@ function getElementContent(element, page) {
 		Global.oldTestTube = Global.testTube;
             Global.testTube = result;
             resolve('done');
-	
 	    }
 	    });
 
-        
-            
-         
-            
-        
     });
 };
 
@@ -547,7 +527,6 @@ var urlWatcher={
     // 	window.clearInterval(urlCheckInterval);
     // }
 };
-
 
 function reset() {
 

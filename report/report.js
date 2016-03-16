@@ -95,7 +95,7 @@ var description={
     view:function(){
 	return m('',
 		 m('','Current step description:'),
-		 m('',globals.stepDescription)
+		 m('',globals.stepDescription),m.component(descriptionHistory)
 		)
 		 
 	
@@ -103,9 +103,35 @@ var description={
 }
 
 var descriptionHistory={
-    view:function(){
-	return m('',m('','Current step description:'),m('',globals.stepDescription))
+    controller:function(){
+	var self=this;
+	this.descriptionHistory=[];
+	setInterval(function(){
+	    var length=self.descriptionHistory.length;
+	    if(self.descriptionHistory[length-1]!==globals.stepDescription){
+		self.descriptionHistory.push(globals.stepDescription);
+		
+	    }
+	    
+	},10);
+
+    },
+    view:function(ctrl){
+	var self=this;
+	return m('',
+		 m('','Step History:'),
+		 m('.historyBox',
+		   ctrl.descriptionHistory.map(function(description,i){
+		       return m('',
+				m('span',i+')'),
+				m('span',description)
+			       );
+		   })
+		  )
+		);
+	
     }
+    
 };
 m.mount(document.body,test);
 
