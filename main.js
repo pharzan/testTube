@@ -1,6 +1,7 @@
 var port = 8000,
     slimerjs = require('node-phantom-simple'),
     test = require('./engine.js'),
+    PubSub = require('./pubsub.js'),
     // server = http.createServer(),
     jsons = require('./data.js'),
     jsonFileCounter = 0,
@@ -33,14 +34,7 @@ var http = require('http'),
     io = require('socket.io').listen(app);
 
 // Send current time to all connected clients
-function sendTime() {
-    io.emit('time', {
-        time: new Date().toJSON()
-    });
-}
 
-// Send current time every 10 secs
-setInterval(sendTime, 1);
 
 // Emit welcome message on connection
 io.on('connection', function(socket) {
@@ -52,9 +46,31 @@ io.on('connection', function(socket) {
     });
     socket.on('i am client', console.log);
 });
-
 app.listen(3000);
+
 var globalData = {};
+
+function networkTap(){
+    globalData.page.onResourceReceived = function(response, networkRequest) {
+
+        if (response.stage == 'end') {
+            if (response.url.indexOf('question_service') != -1 && response.bodySize != 0) {
+                response.body = JSON.parse(response.body);
+                if (networkResponses.length >= networkArraySize) {
+                    // networkResponses.pop();
+                    networkResponses.shift();
+                    // test.Global.networkResponses.pop();
+                    test.engineGlobal.networkResponses.shift();
+
+
+                }
+                networkResponses.push(response.body);
+                test.engineGlobal.networkResponses.push(response.body);
+                //console.log('netResp' + test.Global.networkResponses);
+            }
+        }
+    };
+};
 
 function startBrowser(url) {
     return new Promise(function(resolve) {
@@ -86,17 +102,27 @@ function startBrowser(url) {
 
 }
 
+function wait(t) {
+    return new Promise(function(resolve) {;
+        var i = 0;
+        var inter = setInterval(function() {
+            i++;
+            if (i == 10) {
+                clearInterval(inter);
+                return resolve('done'); // Note we're not returning `p` directly
+            }
+        }, t);
+    });
+}
+
 function run(testSteps) {
     return new Promise(function(resolve) {
 	
         testSteps.map(function(step) {
             function stepSwitchCheck(step, page) {
 		
-
-	
                 switch (step.action) {
                 case 'waitForVisibility':
-		    
                         return test.waitForVisibility(step.tag, page);
 		    case 'click':
                         return test.clickClass(step.tag, page);
@@ -167,18 +193,21 @@ function run(testSteps) {
 		    break;
                 };
             };
-
+	   
             if (typeof(stepPromise) == 'undefined') {
-		
                 stepPromise = stepSwitchCheck(step, page);
             } else {
                 stepPromise = stepPromise.then(function(msg) {
                     if (step.action == 'done') {
+			
                         PubSub.publish('testStepsComplete');
                         return resolve('done');
                     }
-                    if (typeof step.des !== 'undefined')
+                    if (typeof step.des !== 'undefined'){
+			console.log('here',step.des);
+			globalData.currentStepDescription=step.des;
                         test.log('des', step.des);
+		    }
                     return wait(10).then(function() {
                         return stepSwitchCheck(step, page);
                     });
@@ -188,27 +217,15 @@ function run(testSteps) {
     });
 };
 
-function wait(t) {
-    return new Promise(function(resolve) {;
-        var i = 0;
-        var inter = setInterval(function() {
-            i++;
-            if (i == 10) {
-                clearInterval(inter);
-                return resolve('done'); // Note we're not returning `p` directly
-            }
-        }, t);
-    });
-}
-
 function start() {
     var testSet = testSets[testSetCounter];
     var testSteps = test.load(testSet[jsonFileCounter].testFile);
+    
     run(testSteps);
 
     p2 = PubSub.subscribe('testStepsComplete', function() {
 	jsonFileCounter++;
-	if(testSet[jsonFileCounter].status=='testSetComplete'){
+	if(typeof testSet[jsonFileCounter]!=='undefined' && testSet[jsonFileCounter].status=='testSetComplete'){
 	    PubSub.publish('nextSet');
 	}else
 	{testSteps= test.load(testSet[jsonFileCounter].testFile);
@@ -217,37 +234,64 @@ function start() {
     });
     
     p3 = PubSub.subscribe('nextSet', function() {
+	
 	testSetCounter++;
 	//set current testSet
 	testSet=testSets[testSetCounter];
 	jsonFileCounter=-1;
     	test.log('info','Next Set of TestFiles-----------------------------------------------');
-	PubSub.publish('testStepsComplete');
-	if(testSets.length==testSetCounter){
+	
+	
+	if(typeof testSet === 'undefined'){
 	    test.log('blink','ALL DONE');
+	}else{
+	    PubSub.publish('testStepsComplete');
 	}
-    	
     });
-
-
 };
 
+
 var testSets = [
-    jsons.leftPlayCycle
+    jsons.networkTimerCheck,
+    jsons.leftPlayCycle,
+    jsons.checkViewsIncrease,
+    jsons.rightPlayCycle,
+    jsons.rightPlayCycle,
+    jsons.rightPlayCycle    
 ];
 
 var page;
+
+function sendData() {
+    io.emit('time', {
+        time: new Date().toJSON(),
+	data:globalData,
+	currentUrl:test.engineGlobal.currentUrl,
+	oldUrl:test.engineGlobal.oldUrl,
+	testTube:test.engineGlobal.testTube,
+	oldTestTube:test.engineGlobal.oldTestTube,
+	beaker:test.engineGlobal.networkBeaker,
+	stepDescription:globalData.currentStepDescription
+	
+    });
+    // console.log(globalData.currentStepDescription)
+}
+
+// Send current time every 10 secs
+setInterval(sendData, 1);
+
 var url='http://dev.fev1/';
 startBrowser(url).then(function() {
     page=globalData.page;
     console.log('browser Started');
+    
     globalData.page.set('viewportSize', {
         width: 1200,
         height: 750
     });
+    
+    test.urlWatcher.start(globalData.page,250);
+    networkTap();
     start();
-    globalData.onResourceReceived = function(response) {
-	// if(response.contentType==='text/html')
-        //     console.log(response.contentType,response.body)
-    };
+    
 });

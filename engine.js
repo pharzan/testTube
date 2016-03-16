@@ -10,10 +10,11 @@ var fs = require('fs'),
         networkResponses: [],
 	urlHistorySize:7,
 	urlHistory:[]
+	
     };
 
 PubSub.subscribe('testStepsComplete', function() {
-    _reset();
+    //_reset();
 });
 
 function sendKeys(element,key,page, callback) {
@@ -126,30 +127,22 @@ function log(type, message, report) {
 }
 
 function waitForVisibility(selector, page, timeOut) {
-    page.onConsoleMessage = function(msg, lineNum, sourceId) {
-	console.log('CONSOLE: ' , msg );
-    };
     if (typeof timeOut == 'undefined')
         timeOut = 60;
     return new Promise(function(resolve, reject) {
-	 page.includeJs('http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js', function (err) {
+	 
         var startTime = new Date().getTime();
         var interval = setInterval(function() {
 	   
-
-
-
-	    
-	    
             var e = page.evaluate(function(selector) {
-                var a=document.querySelector('#question_field > div:nth-child(2) > div:nth-child(1)');
+                var a=document.querySelector(selector);
 		
 		if(a.offsetParent !== null)
-		    return true
-		else return false
+		    return true;
+		else
+		    return false;
 		
-            },function(err,result){
-		console.log(result);
+            },selector,function(err,result){
 	
 		if (result) {
                     log('pass', 'waitForVisibility: ' + selector + ' element Now VISIBLE ');
@@ -166,7 +159,7 @@ function waitForVisibility(selector, page, timeOut) {
             }
 	    
         }, 250);
-	      })
+	     
     });
 };
 
@@ -180,25 +173,35 @@ function getElementContent(element, page) {
      the value retrieved is stored in Global.testTube;
      */
     return new Promise(function(resolve, reject) {
-        var e = page.evaluate(function(element) {
+        page.evaluate(function(element) {
             var e = document.querySelector(element);
             if (e && e != null) {
-                return e;
-            }
-        }, element);
-
-        if (e != null && typeof(e) != 'undefined') {
-            var content = e.textContent;
-            log('pass', 'TestTube:: ' + content);
-	    
-		Global.oldTestTube = Global.testTube;
-            Global.testTube = content;
-            resolve('done');
-
-        } else {
-            log('fail', 'Element ' + element + ' content not found');
+		if (e != null && typeof(e) != 'undefined') {
+		    var content = e.textContent;
+                    return content;
+		}
+		return false;
+	    }
+        }, element,function(err,result){
+	    console.log('!!##!',result);
+	    if (!result){
+		log('fail', 'Element ' + element + ' content not found');
             resolve('error');
-        }
+	    }else{
+		log('pass', 'TestTube:: ' + result);
+	
+		Global.oldTestTube = Global.testTube;
+            Global.testTube = result;
+            resolve('done');
+	
+	    }
+	    });
+
+        
+            
+         
+            
+        
     });
 };
 
@@ -257,25 +260,37 @@ function getNetworkContent(networkResponses, key) {
     };
 };
 
-function clickClass(element, page) {
+function clickClass(selector, page) {
     
     return new Promise(function(resolve, reject) {
-        var e = page.evaluate(function(element) {
-    
-            return document.querySelector(element);
-        }, element);
-
-        if (e != null && typeof(e) != 'undefined') {
-            if (e.offsetParent !== null) {
-                e.click();
+	
+        page.evaluate(function(selector) {
+	    
+            var a= document.querySelector(selector);
+	    
+	    if (a != null && typeof(a) !== 'undefined') {
+		if (a.offsetParent !== null) {
+                    a.click();
+		    return true;
+		}
+            } else {
 		
-                log('pass', 'clickClass: ' + element + ' clicked');
-                return resolve('done');
+		return false;
             }
-        } else {
-            log('fail', 'clickClass Something went wrong ' + element + 'element Not Found! ');
-            return resolve('fail');
-        }
+        }, selector,function(err,result){
+	    
+	    if (result){
+		log('pass', 'clickClass: ' + selector + ' clicked');
+		return resolve('done');
+	    }
+	    else{
+		log('fail', 'clickClass Something went wrong ' + selector + 'element Not Found! ');
+		return resolve('fail');
+	    }
+
+	});
+
+        
     });
 
 
@@ -511,18 +526,21 @@ var urlWatcher={
 	var urlCheckInterval=setInterval(function () {
 	    // console.log(page.url)
 	    
-            if (Global.currentUrl != page.url) {
-		Global.oldUrl=Global.currentUrl;
-		Global.currentUrl = page.url;
-		Global.urlHistory.push(Global.currentUrl);
-		log('url', ' Change: '+Global.currentUrl);
-	
+	    page.get('url',function(err,url){
+		if (Global.currentUrl != url) {
+		    Global.oldUrl=Global.currentUrl;
+		    Global.currentUrl = url;
+		    Global.urlHistory.push(Global.currentUrl);
+		    log('url', ' Change: '+Global.currentUrl);
+		
 		return 
 	
 	    }else
-		return;
+		return;	
+	    });
+            
 	    
-	}, 10);
+	}, 250);
     }
     // stop:function(urlCheckInterval){
 	
@@ -558,5 +576,5 @@ module.exports = {
     wait:wait,
     compare:compare,
     log: log,
-    Global: Global
+    engineGlobal: Global
 };

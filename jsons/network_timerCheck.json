@@ -5,20 +5,25 @@
     
     {"action":"waitForVisibility",
      "tag":"#finger > svg > text",
+     "des": "wait for visibility of next finger",
      "callback":""},
 
     {"action":"getElementContent",
      "tag":"#finger > svg > text > tspan",
+     "des": "get the timer element text content and put it inside a beaker",
      "callback":""},
 
     {"action":"getNetworkContent",
      "key":"countdown",
+     "des": "get the network key countdown",
      "callback":""},
 
     {"action":"compareTestTubeBeaker",
+     "des": "compare testTube and beaker content",
      "callback":""},
 
     {"action":"reload",
+     "des": "reload the page",
      "callback":""},
     
     {"action":"done"}

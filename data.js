@@ -304,7 +304,9 @@ var checkViewsIncrease=[
         url: 'http://dev.fev1/',
         testFile: 'jsons/checkViewsIncrease.json'
     },
-    
+    {
+	status:'testSetComplete'
+    }
     
 ];
 
@@ -434,6 +436,17 @@ var voscreenIconClickUrlCheck=[
     }
 ];
 
+var networkTimerCheck=[
+
+    {  loopCount: 0,
+        url: 'http://dev.fev1/',
+        testFile: 'jsons/network_timerCheck.json'
+    },
+    
+    {
+	status:'testSetComplete'
+    }
+]
 
 module.exports = {
     //Karisik
@@ -461,5 +474,8 @@ module.exports = {
     login:login,
     //Compare TestTubes:
     compareTestTubes:compareTestTubes,
-    compareTestTubesFalse:compareTestTubesFalse
+    compareTestTubesFalse:compareTestTubesFalse,
+
+    //
+    networkTimerCheck:networkTimerCheck
 };
