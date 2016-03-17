@@ -15,7 +15,6 @@ socket.on('time', function(data) {
     m.startComputation();
     time=data.time;
     globals=data;
-    
     m.endComputation();
     //addMessage(data.time);
     
@@ -38,22 +37,24 @@ socket.on('message', console.log.bind(console));
 
 var test={
     view:function(){
-	return m('',m('.class',time),
+	return m('',
+		 m('.span.six',
+		   m('.class',time),
 		 m.component(description),
 		 m.component(url),
 		 m.component(testTube),
 		 m.component(beaker)
-		);
+		  ),m('.span.six',m.component(messages)));
     }
 };
 
 var url={
     view:function(){
 	
-	return m('',
-		 m('',m('a',{href:globals.currentUrl},
+	return m('.span.twelve',
+		 m('.span.twelve',m('a',{href:globals.currentUrl},
 			m('img',{src:'./img/link.png'}),globals.currentUrl)),
-		 m('',m('a',{href:globals.oldUrl},
+		 m('.span.twelve',m('a',{href:globals.oldUrl},
 			m('img',{src:'./img/linkGrey.png'}),globals.oldUrl))
 		);
     }
@@ -61,14 +62,17 @@ var url={
 
 var testTube={
         view:function(){
-	    return m('',
-		     
-		       m('img',{src:(globals.testTube!=='')?'./img/testTube.png':'./img/testTubeEmpty.png'}
-			   
-		       ),globals.testTube,
-		     m('img',
+	    return m('.span.twelve',
+		     m('.span.three',
+		       m('img',{src:'./img/keys.png'}),
+		       m('',globals.testTubeKey)),
+		     m('.span.three',
+		       m('img',{src:(globals.testTube!=='')?'./img/testTube.png':'./img/testTubeEmpty.png'}	   
+			   ),globals.testTube),
+		     m('.span.three',
+		       m('img',
 		       {src:(globals.oldTestTube!=='')?'./img/testTube.png':'./img/testTubeEmpty.png'}
-		      ),globals.oldTestTube);
+				      ),globals.oldTestTube));
 		     
     }
 
@@ -79,14 +83,18 @@ var beaker={
 	
 	if(typeof globals.beaker !=='undefined')
 	    var mappable=true;
-	return m('',mappable?globals.beaker.map(function(beakerContent){
-	    return  m('.beaker',m('img',
-		       {src:'./img/beaker.png'}
-				 ),beakerContent)
+	return m('.span.twelve',
+		 m('.span.three',
+		   m('img',{src:'./img/network.png'}),m('',globals.beakerKey)),mappable?globals.beaker.map(function(beakerContent){
+		       return  m('.beaker',
+				 m('.span.four',
+				   m('img',
+				     {src:'./img/beaker.png'}
+				    ),beakerContent));
 
 	    
-       }):null);
-		     
+		   }):null);
+	
 		     
     }
 };
@@ -95,12 +103,11 @@ var description={
     view:function(){
 	return m('',
 		 m('','Current step description:'),
-		 m('',globals.stepDescription),m.component(descriptionHistory)
-		)
+		 m('',globals.stepDescription));
 		 
 	
     }
-}
+};
 
 var descriptionHistory={
     controller:function(){
@@ -118,9 +125,9 @@ var descriptionHistory={
     },
     view:function(ctrl){
 	var self=this;
-	return m('',
+	return m('.historyBox',
 		 m('','Step History:'),
-		 m('.historyBox',
+		 m('',
 		   ctrl.descriptionHistory.map(function(description,i){
 		       return m('',
 				m('span',i+')'),
@@ -133,9 +140,111 @@ var descriptionHistory={
     }
     
 };
+
+var messages={
+    
+    view:function(){
+	var mappable;
+	if(globals.messagePool)
+	    mappable=true;
+	else
+	    mappable=false;
+	return m('',mappable?globals.messagePool.map(function(message){
+	    var status,icon='.fa.fa-file',color;
+	    switch (message.status){
+	    case '\033[97m\033[42m PASS \033[37m\033[49m ':
+		status='pass';
+		icon='.fa.fa-check';
+		break;
+	    case '\033[107m\033[34m >>>> \033[37m\033[49m ':
+		status='step';
+		icon='.fa.fa-clock-o';
+		break;
+	    case '\033[97m\033[44m INFO \033[37m\033[49m ':
+		status='info';
+		icon='.fa.fa-info-circle';
+		break;
+	    case '\033[97;48;5;165m URL  \033[0m\033[37m\033[49m':
+		status='url';
+		icon='.fa.fa-link';
+		break;
+	    case '\033[97m\033[41m FAIL \033[37m\033[49m ':
+		status='fail';
+		icon='.fa.fa-times';
+		break;
+	    case '\033[1m NEXT \033[0m\033[37m\033[49m ':
+		status='seperate';
+		icon='.fa.fa-circle-o';
+		message.content='---------------------------------------------------------------------';
+		break;
+	    }
+	    return m('',
+		     m('i'+icon+'.'+status,' '),
+		     m('span',message.content)
+		    )
+	}):null
+		)
+    }
+    
+}
+
 m.mount(document.body,test);
 
+// var initElement = document.getElementsByTagName("html")[0];
+// var json = mapDOM(initElement, true);
+// console.log(json);
 
+// // Test with a string.
+// // initElement = "<div><span>text</span>Text2</div>";
+// // json = mapDOM(initElement, true);
+// // console.log(json);
+
+// function mapDOM(element, json) {
+//     var treeObject = {};
+
+//     // If string convert to document Node
+//     if (typeof element === "string") {
+//         if (window.DOMParser) {
+//               parser = new DOMParser();
+//               docNode = parser.parseFromString(element,"text/xml");
+//         } else { // Microsoft strikes again
+//               docNode = new ActiveXObject("Microsoft.XMLDOM");
+//               docNode.async = false;
+//               docNode.loadXML(element); 
+//         } 
+//         element = docNode.firstChild;
+//     }
+
+//     //Recursively loop through DOM elements and assign properties to object
+//     function treeHTML(element, object) {
+//         object["type"] = element.nodeName;
+//         var nodeList = element.childNodes;
+//         if (nodeList != null) {
+//             if (nodeList.length) {
+//                 object["content"] = [];
+//                 for (var i = 0; i < nodeList.length; i++) {
+//                     if (nodeList[i].nodeType == 3) {
+//                         object["content"].push(nodeList[i].nodeValue);
+//                     } else {
+//                         object["content"].push({});
+//                         treeHTML(nodeList[i], object["content"][object["content"].length -1]);
+//                     }
+//                 }
+//             }
+//         }
+//         if (element.attributes != null) {
+//             if (element.attributes.length) {
+//                 object["attributes"] = {};
+//                 for (var i = 0; i < element.attributes.length; i++) {
+//                     object["attributes"][element.attributes[i].nodeName] = element.attributes[i].nodeValue;
+//                 }
+//             }
+//         }
+//     }
+//     treeHTML(element, treeObject);
+
+//     return (json) ? JSON.stringify(treeObject) : treeObject;
+// }
 
 
 

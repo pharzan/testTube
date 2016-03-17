@@ -5,13 +5,14 @@
     {
 	"action":"click",
 	"tag":"#info > div:nth-child(1) > div",
+	"des":"click on the info panel",
 	"callback":""
     },
     {
 	"action":"waitForVisibility",
 	"tag":"#info > div.infotab.infobg.ml20.p5",
-	"dec":"see if infotab box is visible",
-	"callback":"console.log('videoEnded')"
+	"des":"see if infotab box is visible",
+	"callback":""
     },
     
     {"action":"done"}

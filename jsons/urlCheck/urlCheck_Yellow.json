@@ -14,7 +14,7 @@
      "arg0":"currentUrl",
      "arg1":"voKido/yellow",
      "expect":"true",
-     "des":"Check to see if url contains voKido/green ",
+     "des":"Check to see if url contains voKido/yellow ",
      "callback":""},
  
     {"action":"wait",

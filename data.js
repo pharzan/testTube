@@ -83,6 +83,7 @@ var config = [
     },
 ];
 
+// product full tests::
 var productsTestSet_Red =[
     {
         loopCount: 0,
@@ -169,6 +170,73 @@ var productsTestSet_Green =[
 
 ];
 
+// small steps:
+var urlCheckRed=[
+    {
+        loopCount: 0,
+        url: 'http://dev.fev1/',
+        testFile: 'jsons/urlCheck/urlCheck_Red.json'
+    },
+    {
+	status:'testSetComplete'
+    }
+
+];
+
+var urlCheckGreen=[
+    {
+        loopCount: 0,
+        url: 'http://dev.fev1/',
+        testFile: 'jsons/urlCheck/urlCheck_Green.json'
+    },
+    {
+	status:'testSetComplete'
+    }
+
+];
+
+var urlCheckYellow=[
+    {
+        loopCount: 0,
+        url: 'http://dev.fev1/',
+        testFile: 'jsons/urlCheck/urlCheck_Yellow.json'
+    },
+    {
+	status:'testSetComplete'
+    }
+
+];
+
+//language change:
+
+var azeriSelect=[
+
+    {
+        loopCount: 0,
+        url: 'http://dev.fev1/',
+        testFile: 'jsons/lang/azeri.json'
+    },
+     {
+	status:'testSetComplete'
+    }
+
+];
+
+var urlCheckAZ=[
+
+    {
+        loopCount: 0,
+        url: 'http://dev.fev1/',
+        testFile: 'jsons/urlCheck/urlCheck_az.json'
+    },
+     {
+	status:'testSetComplete'
+    }
+
+];
+
+//full cycle::
+
 var leftPlayCycle=[
     {
         loopCount: 0,
@@ -207,6 +275,93 @@ var rightPlayCycle=[
         loopCount: 0,
         url: 'http://dev.fev1/',
         testFile: 'jsons/playCycleActions/03_clickNext.json'
+	
+    },
+    
+     {
+	status:'testSetComplete'
+    }
+];
+
+var timerOutPlayCycle=[
+    {
+        loopCount: 0,
+        url: 'http://dev.fev1/',
+        testFile: 'jsons/timeOutWait.json'
+    },
+    
+     {
+	status:'testSetComplete'
+    }
+];
+
+var subtitlesDisabled=[
+    {
+        loopCount: 0,
+        url: 'http://dev.fev1/',
+        testFile: 'jsons/leftCycle_2.json'
+    },
+    {
+	status:'testSetComplete'
+    }
+];
+
+// small steps for cylce::
+
+var selectSubtitles=[
+    {
+        loopCount: 0,
+        url: 'http://dev.fev1/',
+        testFile: 'jsons/playCycleActions/01_waitForSubtitleButtons.json'
+    },
+    
+     {
+	status:'testSetComplete'
+    }
+];
+
+var selectLeft=[
+    
+    {
+        loopCount: 0,
+        url: 'http://dev.fev1/',
+        testFile: 'jsons/playCycleActions/02_leftOptionClick.json'
+    },
+     {
+	status:'testSetComplete'
+    }
+];
+
+var selectRight=[
+    
+    {
+        loopCount: 0,
+        url: 'http://dev.fev1/',
+        testFile: 'jsons/playCycleActions/02_rightOptionClick.json'
+    },
+     {
+	status:'testSetComplete'
+    }
+];
+
+var clickNext=[
+    {
+        loopCount: 0,
+        url: 'http://dev.fev1/',
+        testFile: 'jsons/playCycleActions/03_clickNext.json'
+	
+    },
+    
+     {
+	status:'testSetComplete'
+    }
+];
+
+var correctAnswerClick=[
+ {
+        loopCount: 0,
+        url: 'http://dev.fev1/',
+        testFile: 'jsons/correctAnswerClick.json'
 	
     },
     
@@ -272,6 +427,30 @@ var rightPlayAndVideoPlaybackCycle=[
     }
 ];
 
+var checkTitleBarComponents=[
+    {
+        loopCount: 0,
+        url: 'http://dev.fev1/',
+        testFile: 'jsons/checkTitleBarComponents.json'
+    },
+     {
+	status:'testSetComplete'
+    }
+];
+//-----------------------------------------------------------
+
+var panelClick=[
+    {
+        loopCount: 0,
+        url: 'http://dev.fev1/',
+        testFile: 'jsons/infopanelClick.json'
+    },
+    {
+	status:'testSetComplete'
+    }
+];
+
+//-----------------------------------------------------------
 var rightPlayClickOnInfoPanel=[
     
     {
@@ -448,6 +627,18 @@ var networkTimerCheck=[
     }
 ]
 
+var networkAnswerCheck=[
+
+    {  loopCount: 0,
+        url: 'http://dev.fev1/',
+        testFile: 'jsons/network_answerCheck.json'
+    },
+    
+    {
+	status:'testSetComplete'
+    }
+]
+
 module.exports = {
     //Karisik
     config: config,
@@ -459,10 +650,16 @@ module.exports = {
     rightPlayCycle:rightPlayCycle,
     leftPlayAndVideoPlaybackCycle:leftPlayAndVideoPlaybackCycle,
     rightPlayAndVideoPlaybackCycle:rightPlayAndVideoPlaybackCycle,
+    timerOutPlayCycle:timerOutPlayCycle,
+    subtitlesDisabled:subtitlesDisabled,
     //Products tests
     productsTestSet_Yellow:productsTestSet_Yellow,
     productsTestSet_Red:productsTestSet_Red,
     productsTestSet_Green:productsTestSet_Green,
+    //small steps::
+    urlCheckRed:urlCheckRed,
+    urlCheckGreen:urlCheckGreen,
+    urlCheckYellow:urlCheckYellow,
     //HISTORY::::
     
     urlHistory:urlHistory,
@@ -475,7 +672,21 @@ module.exports = {
     //Compare TestTubes:
     compareTestTubes:compareTestTubes,
     compareTestTubesFalse:compareTestTubesFalse,
-
     //
-    networkTimerCheck:networkTimerCheck
+    networkTimerCheck:networkTimerCheck,
+    networkAnswerCheck:networkAnswerCheck,
+
+    //small steps:
+    selectSubtitles:selectSubtitles,
+    selectLeft:selectLeft,
+    slectRight:selectRight,
+    clickNext:clickNext,
+    correctAnswerClick:correctAnswerClick,
+    panelClick:panelClick,
+    checkTitleBarComponents:checkTitleBarComponents,
+
+    // lang:
+    azeriSelect:azeriSelect,
+    urlCheckAZ:urlCheckAZ
+
 };

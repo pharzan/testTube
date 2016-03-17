@@ -9,7 +9,9 @@ var fs = require('fs'),
         networkBeaker: [],
         networkResponses: [],
 	urlHistorySize:7,
-	urlHistory:[]
+	urlHistory:[],
+	messagePool:[]
+	
     };
 
 PubSub.subscribe('testStepsComplete', function() {
@@ -18,9 +20,9 @@ PubSub.subscribe('testStepsComplete', function() {
 
 function sendKeys(element,key,page, callback) {
     return new Promise(function(resolve, reject) {
+
 	var e = page.evaluate(function(element,key) {
 	    var input = document.querySelector(element); // Get the element where you want to press.
-	    
 	    var myEvent=new Event('change');
 	    input.value=key;
 	    input.dispatchEvent(myEvent);
@@ -54,18 +56,32 @@ function onPlaybackStart(page, callback) {
 function onPlaybackEnded(page, callback) {
 
     return new Promise(function(resolve, reject) {
-
-        var video = page.evaluate(function() {
-            return document.querySelector('#game_player > div.video_container > video');
-        });
-
-        video.addEventListener('ended', myHandler, false);
-
+	var state=false;
+	var interval=setInterval(function(){
+            page.evaluate(function() {
+		
+            var video= document.querySelector('#game_player > div.video_container > video');
+	    video.addEventListener('ended', myHandler, false);
+	    
+	
         function myHandler(e) {
             video.removeEventListener('ended', myHandler);
-            return resolve('done');
+            state=true;
         }
-    });
+		return state;
+	    
+        },function(err,result){
+	    
+	    
+	    if(result){
+		clearInterval(interval);
+		return resolve('done')
+	    }	
+	})
+	},250)
+
+        
+	})
 }
 
 function log(type, message, report) {
@@ -86,6 +102,9 @@ function log(type, message, report) {
             break;
         case 'blink':
             msg = '\x1b[5m WINK \033[37m\033[49m ';
+            break;
+        case 'next':
+            msg = '\033[1m NEXT \033[0m\033[37m\033[49m ';
             break;
 
         case 'fail':
@@ -109,6 +128,7 @@ function log(type, message, report) {
             break;
 
     }
+    Global.messagePool.push({status:msg,content:message})
     console.log(msg + message);
 }
 
@@ -192,20 +212,25 @@ function getUrlContent(page){
      the new url is set to current url,
      */
     return new Promise(function(resolve, reject) {
-	
-        if (page.url != null && typeof(page.url) != 'undefined') {
+	page.get('url',function(err,url){
+	    if (url != null && typeof(url) != 'undefined') {
             
-            log('pass', 'TestTube:: ' + page.url);
+            log('pass', 'TestTube:: ' + url);
 	    
 	    Global.oldTestTube = Global.testTube;
-            Global.testTube = page.url;
-            resolve('done');
+            Global.testTube = url;
+
+            return resolve('done');
 
         } else {
 	    
-            log('fail', 'Element ' + page.url + ' content not found');
-            resolve('error');
+            log('fail', 'Element ' + url + ' content not found');
+            return resolve('error');
         }
+
+	});
+	
+        
     });
 
 };
@@ -413,28 +438,34 @@ function searchAndClickFromBeaker(page,searchTexts) {
     return new Promise(function(resolve) {
 	
 	
-	if(typeof(searchTexts) == 'undefined')
-	    searchTexts=Global.networkBeaker;
-	
-	
-        var e = page.evaluate(function() {
-            return document.getElementsByTagName('div');
-        });
+	console.log('!!#!##!# BEFORE::::'+Global.networkBeaker)
+        page.evaluate(function(searchTexts) {
+	    
+	// if(typeof(searchTexts) == 'undefined')
+	//     searchTexts=Global.networkBeaker;
+	    
 
-        var found;
-        var BreakException = {};
+	    
+             var e= document.getElementsByTagName('div');
+	     var found;
+             var BreakException = {};
+	     
         try {
             searchTexts.map(function(searchText) {
-		console.log(searchText)
+	
                 for (var i = 0; i < e.length; i++) {
+		    //console.log(e[i].textContent==searchText)
 		    
+		    //console.log(e[i].textContent)
+		     console.log(searchText)
                     if (e[i].textContent == searchText) {
-                        log('pass', 'Found Text in one of the :' + e[i].textContent);
+			console.log('HOOORAY')
+                        // log('pass', 'Found Text in one of the :' + e[i].textContent);
 
                         found = e[i];
                         found.click();
-                        log('info', 'Search and Click ' + e[i].className);
-			return resolve('done')
+                        // log('info', 'Search and Click ' + e[i].className);
+			return resolve('done');
                         break;
                         throw BreakException;
                     }
@@ -445,6 +476,9 @@ function searchAndClickFromBeaker(page,searchTexts) {
             if (e !== BreakException) throw e;
             return resolve('done');
         }
+        },Global.networkBeaker,function(){return });
+
+        
     });
 };
 

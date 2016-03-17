@@ -10,11 +10,6 @@ var port = 8000,
     stepPromise, networkResponses = [],
     testTube, networkBeaker,
     networkArraySize = 2;
-    //historySet = require('./testSets/historySet.js');
-
-
-
-//server.listen(port);
 
 var http = require('http'),
     fs = require('fs'),
@@ -46,42 +41,52 @@ io.on('connection', function(socket) {
     });
     socket.on('i am client', console.log);
 });
+
 app.listen(3000);
 
 var globalData = {};
 
 function networkTap(){
-    globalData.page.onResourceReceived = function(response, networkRequest) {
-
+    return new Promise(function(resolve){
+	globalData.page.onResourceReceived = function(response, networkRequest) {
+	
         if (response.stage == 'end') {
             if (response.url.indexOf('question_service') != -1 && response.bodySize != 0) {
+		
                 response.body = JSON.parse(response.body);
                 if (networkResponses.length >= networkArraySize) {
                     // networkResponses.pop();
                     networkResponses.shift();
                     // test.Global.networkResponses.pop();
                     test.engineGlobal.networkResponses.shift();
-
-
                 }
                 networkResponses.push(response.body);
                 test.engineGlobal.networkResponses.push(response.body);
-                //console.log('netResp' + test.Global.networkResponses);
+                
+		
             }
         }
-    };
+    }
+	return resolve('done');
+				 })
 };
 
 function startBrowser(url) {
     return new Promise(function(resolve) {
         slimerjs.create({
-            path: require('slimerjs').path
+            path: require('slimerjs').path,
+	    encoding:'UTF-8'
         }, function(err, sl) {
             return sl.createPage(function(err, page) {
                 return new Promise(function(resolve, reject) {
+		    console.log(sl)
+		    sl.get('encoding',function(err,val){
+			console.log(val)
+		    })
+		    sl.outputEncoding = "utf-8";
+		    globalData.page=page;
+		    networkTap();
                     page.open(url, function(err, status) {
-			
-			globalData.page=page;
 			
 			if (status == "success") {
                             console.log('Success: page opened');
@@ -130,15 +135,17 @@ function run(testSteps) {
                         return test.focusClass(step.tag, page);
                     case 'sendKeys':
                         return test.sendKeys(step.tag, step.key, page);
-                    case 'getElementContent':
-                        return testTube = test.getElementContent(step.tag, page);
-                    case 'getNetworkContent':
+                case 'getElementContent':
+		    globalData.testTubeKey=step.tag;
+                    return testTube = test.getElementContent(step.tag, page);
+                case 'getNetworkContent':
+		    globalData.beakerKey=step.key;
                         return networkBeaker = test.getNetworkContent(networkResponses, step.key);
                     case 'getUrlContent':
                         return testTube = test.getUrlContent(page);
                     case 'compareTestTubeBeaker':
                         return test.compareTestTubeBeaker();
-                    case 'waitPlaybackEnd':
+                case 'waitPlaybackEnd':
                         return test.onPlaybackEnded(page, step.callback);
                     case 'waitPlaybackStart':
                         return test.onPlaybackStart(page, step.callback);
@@ -163,32 +170,36 @@ function run(testSteps) {
 		    return test.wait(step.key);
                     case 'historyBack':
                      return new Promise(function(resolve) {
-                            return wait(50).then(function() {
-                                 if(page.canGoBack)
-                                 page.goBack();
-			     else{
-				 test.log('fail','can\'t GO back in history');
-				 
-			     }
-                                wait(100).then(function() {
-                                    return resolve('done');
-                                });
-                            });
+                         return wait(50).then(function() {
+			     page.get('canGoBack',function(err,canGoBack){
+                                 if(canGoBack)
+                                     page.goBack();
+				 else{
+				     test.log('fail','can\'t GO back in history');
+				     
+				 }
+                                 wait(100).then(function() {
+                                     return resolve('done');
+                                 });
+                             });
+			 });
                         });
 		    break;
                     case 'historyForward':
                      return new Promise(function(resolve) {
                          return wait(50).then(function() {
-			     if(page.canGoForward)
-                                 page.goForward();
-			     else{
-				 test.log('fail','can\'t GO forward in history');
-			     }
+			     page.get('canGoBack',function(err,canGoForward){
+				 if(canGoForward)
+                                     page.goForward();
+				 else{
+				     test.log('fail','can\'t GO forward in history');
+				 }
 				 
-                                wait(50).then(function() {
-                                    return resolve('done');
-                                });
-                            });
+                                 wait(50).then(function() {
+                                     return resolve('done');
+                                 });
+                             });
+			 })
                         });
 		    break;
                 };
@@ -204,7 +215,7 @@ function run(testSteps) {
                         return resolve('done');
                     }
                     if (typeof step.des !== 'undefined'){
-			console.log('here',step.des);
+			
 			globalData.currentStepDescription=step.des;
                         test.log('des', step.des);
 		    }
@@ -229,7 +240,7 @@ function start() {
 	    PubSub.publish('nextSet');
 	}else
 	{testSteps= test.load(testSet[jsonFileCounter].testFile);
-    	test.log('info','Next testFile--------------------------------------------------------' );
+    	test.log('next','Next testFile--------------------------------------------------------' );
 	 run(testSteps);}
     });
     
@@ -239,7 +250,7 @@ function start() {
 	//set current testSet
 	testSet=testSets[testSetCounter];
 	jsonFileCounter=-1;
-    	test.log('info','Next Set of TestFiles-----------------------------------------------');
+    	test.log('next','Next Set of TestFiles-----------------------------------------------');
 	
 	
 	if(typeof testSet === 'undefined'){
@@ -252,12 +263,102 @@ function start() {
 
 
 var testSets = [
+
+    jsons.networkAnswerCheck,
+    
     jsons.networkTimerCheck,
     jsons.leftPlayCycle,
     jsons.checkViewsIncrease,
     jsons.rightPlayCycle,
+
+    jsons.timerOutPlayCycle,
+
+    //Timeout then check url to see if changed
+    jsons.selectSubtitles,
+    jsons.getUrlContent,
+    jsons.clickNext,
+    jsons.getUrlContent,
+    jsons.compareTestTubesFail,
+
+    //play then check url to see if changed
+    jsons.selectSubtitles,
+    jsons.getUrlContent,
+    jsons.selectLeft,
+    jsons.clickNext,
+    jsons.getUrlContent,
+    jsons.compareTestTubesFail,
+
+    //play with subtitles and check if subtitles is shown
+    jsons.subtitlesDisabled,
+    
+    // //check infopanel functionality:---------------------
+    jsons.selectSubtitles,
+    jsons.panelClick,
+    jsons.selectLeft,
+    jsons.clickNext,
+    
+    //history checks----------------------
+    
     jsons.rightPlayCycle,
-    jsons.rightPlayCycle    
+    jsons.urlHistory,
+    jsons.leftPlayCycle,
+    jsons.urlHistory,
+
+    jsons.rightPlayCycle,
+    jsons.getUrlContent,
+    jsons.rightPlayCycle,
+    jsons.getUrlContent,
+    jsons.compareTestTubesFalse,
+
+    jsons.rightPlayCycle,
+    jsons.getUrlContent,
+    jsons.goBack,
+    jsons.goForward,
+    jsons.goBack,
+    jsons.goForward,
+    jsons.goBack,
+    jsons.goForward,
+    jsons.getUrlContent,
+    jsons.compareTestTubes,
+
+    //play > get url > go back, go back > get url > see if the urls aren't the same
+        jsons.rightPlayCycle,
+        jsons.getUrlContent,
+        jsons.goBack,
+        jsons.goBack,
+        jsons.getUrlContent,
+    jsons.compareTestTubesFalse,
+	
+    
+    //correctAnswer Cycle
+    jsons.selectSubtitles,
+
+    jsons.correctAnswerClick,
+    
+    //titlebar Components check
+    jsons.checkTitleBarComponents,
+
+    //products tests
+    jsons.productsTestSet_Red,
+    jsons.rightPlayCycle,
+    jsons.urlCheckRed,
+
+    jsons.productsTestSet_Green,
+    jsons.rightPlayCycle,
+    jsons.urlCheckGreen,
+
+    jsons.productsTestSet_Yellow,
+    jsons.rightPlayCycle,
+    jsons.urlCheckYellow,
+
+    jsons.azeriSelect,
+    jsons.urlCheckAZ,
+    jsons.rightPlayCycle,
+    jsons.urlCheckAZ,
+    jsons.rightPlayCycle,
+
+    
+
 ];
 
 var page;
@@ -271,17 +372,20 @@ function sendData() {
 	testTube:test.engineGlobal.testTube,
 	oldTestTube:test.engineGlobal.oldTestTube,
 	beaker:test.engineGlobal.networkBeaker,
-	stepDescription:globalData.currentStepDescription
-	
+	stepDescription:globalData.currentStepDescription,
+	beakerKey:globalData.beakerKey,
+	testTubeKey:globalData.testTubeKey,
+	messagePool:test.engineGlobal.messagePool
     });
     // console.log(globalData.currentStepDescription)
 }
 
 // Send current time every 10 secs
-setInterval(sendData, 1);
+setInterval(sendData, 50);
 
 var url='http://dev.fev1/';
-startBrowser(url).then(function() {
+
+    startBrowser(url).then(function() {
     page=globalData.page;
     console.log('browser Started');
     
@@ -291,7 +395,22 @@ startBrowser(url).then(function() {
     });
     
     test.urlWatcher.start(globalData.page,250);
-    networkTap();
-    start();
     
+    setTimeout(function(){
+	start();},1000)
+
+	page.onConsoleMessage = function(msg, lineNum, sourceId) {
+	    
+  console.log('SLIMER CONSOLE: ' + msg );
+};
+//     setTimeout(function(){
+// 	page.evaluate(function(){
+// 	    console.log("!!!!!!!!!!!!!"+document.body.children);
+// 	    return document.body.children[0];
+// 	},function(err,val){
+// 	    console.log("^^^^^^^^",val)
+// 	});
+	
+//     },1000)
+
 });
