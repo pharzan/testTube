@@ -1,4 +1,5 @@
 var fs = require('fs'),
+    dbService=require('./dbService.js'),
     PubSub = require('./pubsub.js'),
 
     Global = {
@@ -495,14 +496,30 @@ function wait(t) {
 }
 
 function load(file) {
-    var content = fs.readFileSync('./' + file, 'utf8', function(err, data) {
+    
+    //var testSteps,content;
+    // dbService.load('steps',{name:'checkTestTubes.json'}).then(function(steps){
+	
+    // 	// testSteps = JSON.parse(steps.content);
+    // 	// console.log('!387!!!',steps);
+    // 	console.log("!!!!&&&&&&!",steps[0].content)
+    // 	return resolve(steps[0].content);
+    // });
+    
+    // dbService.load('sets',{}).then(function(sets){
+	
+    // 	content=sets.content;
+	
+    // });
+       var content = fs.readFileSync('./' + file, 'utf8', function(err, data) {
         return data;
     });
     var testSteps = JSON.parse(content);
     log('warn', testSteps[0].description);
     return testSteps;
 
-};
+    
+    };
 
 function _getValues(obj, key) {
     //return an array of values that match on a certain key

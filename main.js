@@ -3,6 +3,7 @@ var port = 8000,
     //slimerjs=require('node-phantom'),
     test = require('./engine.js'),
     PubSub = require('./pubsub.js'),
+    Parse = require('parse/node').Parse,
     // server = http.createServer(),
     jsons = require('./data.js'),
     jsonFileCounter = 0,
@@ -10,9 +11,9 @@ var port = 8000,
     loopCounter = 0,
     stepPromise, networkResponses = [],
     testTube, networkBeaker,
-    networkArraySize = 2;
-
-var http = require('http'),
+    networkArraySize = 2,
+    dbService=require('./dbService.js'),
+    http = require('http'),
     fs = require('fs'),
 
     // NEVER use a Sync function except at start-up!
@@ -234,7 +235,6 @@ function start() {
     var testSteps = test.load(testSet[jsonFileCounter].testFile);
     
     run(testSteps);
-
     p2 = PubSub.subscribe('testStepsComplete', function() {
 	jsonFileCounter++;
 	if(typeof testSet[jsonFileCounter]!=='undefined' && testSet[jsonFileCounter].status=='testSetComplete'){
@@ -395,15 +395,13 @@ var url='http://dev.fev1/';
     });
     
     test.urlWatcher.start(globalData.page,250);
-	page.get('encoding',function(err,val){
-	    console.log(val)
-	})
-    setTimeout(function(){
-	start();},1000)
+	
+	setTimeout(function(){
+	    start();},1000)
 	
 	page.onConsoleMessage = function(msg, lineNum, sourceId) {
 	    
-  console.log('SLIMER CONSOLE: ' + msg );
+	    console.log('SLIMER CONSOLE: ' + msg );
 };
 //     setTimeout(function(){
 // 	page.evaluate(function(){
@@ -415,4 +413,7 @@ var url='http://dev.fev1/';
 	
 //     },1000)
 
-});
+    });
+
+
+
