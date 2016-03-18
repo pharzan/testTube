@@ -189,7 +189,7 @@ function getElementContent(element, page) {
 		return false;
 	    }
         }, element,function(err,result){
-	    console.log('!!##!',result);
+	    //console.log('!!!!!!##!',result);
 	    if (!result){
 		log('fail', 'Element ' + element + ' content not found');
             resolve('error');
@@ -436,47 +436,46 @@ function searchAndClickFromBeaker(page,searchTexts) {
      and it will then click.
      */
     return new Promise(function(resolve) {
-	
-	
-	console.log('!!#!##!# BEFORE::::'+Global.networkBeaker)
-        page.evaluate(function(searchTexts) {
+	var found;
+	var beakers=[];
+	Global.networkBeaker.map(function(beaker){
+	    beakers.push(encodeURI(beaker));
+	});
+        page.evaluate(function(beakerContent) {
 	    
-	// if(typeof(searchTexts) == 'undefined')
-	//     searchTexts=Global.networkBeaker;
-	    
-
-	    
+	    var textContents=[];
              var e= document.getElementsByTagName('div');
 	     var found;
              var BreakException = {};
-	     
-        try {
-            searchTexts.map(function(searchText) {
-	
-                for (var i = 0; i < e.length; i++) {
-		    //console.log(e[i].textContent==searchText)
-		    
-		    //console.log(e[i].textContent)
-		     console.log(searchText)
-                    if (e[i].textContent == searchText) {
-			console.log('HOOORAY')
-                        // log('pass', 'Found Text in one of the :' + e[i].textContent);
-
-                        found = e[i];
-                        found.click();
-                        // log('info', 'Search and Click ' + e[i].className);
-			return resolve('done');
-                        break;
-                        throw BreakException;
-                    }
-
-                }
-            });
+	 
+            try {
+		beakerContent.map(function(beaker){	
+		    for (var i = 0; i < e.length; i++) {
+			textContents.push(e[i].textContent);
+			
+			if(e[i].textContent==beaker){
+			    found=e[i];
+			    
+			}
+			
+		    };
+		})
+		if (typeof found!=='undefined'){
+		    found.click();
+		    return true;}
+		else
+		    return false;
         } catch (e) {
             if (e !== BreakException) throw e;
             return resolve('done');
         }
-        },Global.networkBeaker,function(){return });
+        },beakers,function(err,val){
+	    if(true){
+		
+		resolve('done');}
+	    else
+	    
+	    return });
 
         
     });

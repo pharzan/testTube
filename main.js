@@ -1,5 +1,6 @@
 var port = 8000,
     slimerjs = require('node-phantom-simple'),
+    //slimerjs=require('node-phantom'),
     test = require('./engine.js'),
     PubSub = require('./pubsub.js'),
     // server = http.createServer(),
@@ -74,14 +75,14 @@ function networkTap(){
 function startBrowser(url) {
     return new Promise(function(resolve) {
         slimerjs.create({
-            path: require('slimerjs').path,
-	    encoding:'UTF-8'
+            path: require('slimerjs').path
+	    
         }, function(err, sl) {
             return sl.createPage(function(err, page) {
                 return new Promise(function(resolve, reject) {
-		    console.log(sl)
+		    
 		    sl.get('encoding',function(err,val){
-			console.log(val)
+			// console.log(val)
 		    })
 		    sl.outputEncoding = "utf-8";
 		    globalData.page=page;
@@ -264,98 +265,97 @@ function start() {
 
 var testSets = [
 
-    jsons.networkAnswerCheck,
+    // jsons.networkAnswerCheck,
     
-    jsons.networkTimerCheck,
-    jsons.leftPlayCycle,
-    jsons.checkViewsIncrease,
-    jsons.rightPlayCycle,
+    // jsons.networkTimerCheck,
+    // jsons.leftPlayCycle,
+    // jsons.checkViewsIncrease,
+    // jsons.rightPlayCycle,
 
-    jsons.timerOutPlayCycle,
+    // jsons.timerOutPlayCycle,
 
-    //Timeout then check url to see if changed
-    jsons.selectSubtitles,
-    jsons.getUrlContent,
-    jsons.clickNext,
-    jsons.getUrlContent,
-    jsons.compareTestTubesFail,
+    // //Timeout then check url to see if changed
+    // jsons.selectSubtitles,
+    // jsons.getUrlContent,
+    // jsons.clickNext,
+    // jsons.getUrlContent,
+    // jsons.compareTestTubesFail,
 
-    //play then check url to see if changed
-    jsons.selectSubtitles,
-    jsons.getUrlContent,
-    jsons.selectLeft,
-    jsons.clickNext,
-    jsons.getUrlContent,
-    jsons.compareTestTubesFail,
+    // //play then check url to see if changed
+    // jsons.selectSubtitles,
+    // jsons.getUrlContent,
+    // jsons.selectLeft,
+    // jsons.clickNext,
+    // jsons.getUrlContent,
+    // jsons.compareTestTubesFail,
 
-    //play with subtitles and check if subtitles is shown
-    jsons.subtitlesDisabled,
+    // //play with subtitles and check if subtitles is shown
+    // jsons.subtitlesDisabled,
     
-    // //check infopanel functionality:---------------------
-    jsons.selectSubtitles,
-    jsons.panelClick,
-    jsons.selectLeft,
-    jsons.clickNext,
+    // // //check infopanel functionality:---------------------
+    // jsons.selectSubtitles,
+    // jsons.panelClick,
+    // jsons.selectLeft,
+    // jsons.clickNext,
     
-    //history checks----------------------
+    // //history checks----------------------
     
-    jsons.rightPlayCycle,
-    jsons.urlHistory,
-    jsons.leftPlayCycle,
-    jsons.urlHistory,
+    // jsons.rightPlayCycle,
+    // jsons.urlHistory,
+    // jsons.leftPlayCycle,
+    // jsons.urlHistory,
 
-    jsons.rightPlayCycle,
-    jsons.getUrlContent,
-    jsons.rightPlayCycle,
-    jsons.getUrlContent,
-    jsons.compareTestTubesFalse,
+    // jsons.rightPlayCycle,
+    // jsons.getUrlContent,
+    // jsons.rightPlayCycle,
+    // jsons.getUrlContent,
+    // jsons.compareTestTubesFalse,
 
-    jsons.rightPlayCycle,
-    jsons.getUrlContent,
-    jsons.goBack,
-    jsons.goForward,
-    jsons.goBack,
-    jsons.goForward,
-    jsons.goBack,
-    jsons.goForward,
-    jsons.getUrlContent,
-    jsons.compareTestTubes,
+    // jsons.rightPlayCycle,
+    // jsons.getUrlContent,
+    // jsons.goBack,
+    // jsons.goForward,
+    // jsons.goBack,
+    // jsons.goForward,
+    // jsons.goBack,
+    // jsons.goForward,
+    // jsons.getUrlContent,
+    // jsons.compareTestTubes,
 
-    //play > get url > go back, go back > get url > see if the urls aren't the same
-        jsons.rightPlayCycle,
-        jsons.getUrlContent,
-        jsons.goBack,
-        jsons.goBack,
-        jsons.getUrlContent,
-    jsons.compareTestTubesFalse,
+    // //play > get url > go back, go back > get url > see if the urls aren't the same
+    //     jsons.rightPlayCycle,
+    //     jsons.getUrlContent,
+    //     jsons.goBack,
+    //     jsons.goBack,
+    //     jsons.getUrlContent,
+    // jsons.compareTestTubesFalse,
 	
     
-    //correctAnswer Cycle
+    // //correctAnswer Cycle
     jsons.selectSubtitles,
-
     jsons.correctAnswerClick,
     
-    //titlebar Components check
-    jsons.checkTitleBarComponents,
+    // //titlebar Components check
+    // jsons.checkTitleBarComponents,
 
-    //products tests
-    jsons.productsTestSet_Red,
-    jsons.rightPlayCycle,
-    jsons.urlCheckRed,
+    // //products tests
+    // jsons.productsTestSet_Red,
+    // jsons.rightPlayCycle,
+    // jsons.urlCheckRed,
 
-    jsons.productsTestSet_Green,
-    jsons.rightPlayCycle,
-    jsons.urlCheckGreen,
+    // jsons.productsTestSet_Green,
+    // jsons.rightPlayCycle,
+    // jsons.urlCheckGreen,
 
-    jsons.productsTestSet_Yellow,
-    jsons.rightPlayCycle,
-    jsons.urlCheckYellow,
+    // jsons.productsTestSet_Yellow,
+    // jsons.rightPlayCycle,
+    // jsons.urlCheckYellow,
 
-    jsons.azeriSelect,
-    jsons.urlCheckAZ,
-    jsons.rightPlayCycle,
-    jsons.urlCheckAZ,
-    jsons.rightPlayCycle,
+    // jsons.azeriSelect,
+    // jsons.urlCheckAZ,
+    // jsons.rightPlayCycle,
+    // jsons.urlCheckAZ,
+    // jsons.rightPlayCycle,
 
     
 
@@ -395,10 +395,12 @@ var url='http://dev.fev1/';
     });
     
     test.urlWatcher.start(globalData.page,250);
-    
+	page.get('encoding',function(err,val){
+	    console.log(val)
+	})
     setTimeout(function(){
 	start();},1000)
-
+	
 	page.onConsoleMessage = function(msg, lineNum, sourceId) {
 	    
   console.log('SLIMER CONSOLE: ' + msg );
