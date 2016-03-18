@@ -508,16 +508,16 @@ function load(file) {
     
     // dbService.load('sets',{}).then(function(sets){
 	
-    // 	content=sets.content;
+    // 	//content=sets.content;
 	
     // });
-       var content = fs.readFileSync('./' + file, 'utf8', function(err, data) {
+    var content = fs.readFileSync('./' + file, 'utf8', function(err, data) {
         return data;
     });
+    
     var testSteps = JSON.parse(content);
     log('warn', testSteps[0].description);
     return testSteps;
-
     
     };
 

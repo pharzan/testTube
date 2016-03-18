@@ -235,6 +235,7 @@ function start() {
     var testSteps = test.load(testSet[jsonFileCounter].testFile);
     
     run(testSteps);
+    
     p2 = PubSub.subscribe('testStepsComplete', function() {
 	jsonFileCounter++;
 	if(typeof testSet[jsonFileCounter]!=='undefined' && testSet[jsonFileCounter].status=='testSetComplete'){
@@ -332,8 +333,44 @@ var testSets = [
 	
     
     // //correctAnswer Cycle
+    // jsons.selectSubtitles,
+    // jsons.correctAnswerClick,
+    // //incorrectAnswer Cycle
+    // jsons.selectSubtitles,
+    // jsons.incorrectAnswerClick,
+
+    //check session number success change after correct Answer
+    
+    // jsons.selectSubtitles,
+    // jsons.getSuccessFromSessions,
+    // jsons.correctAnswerClick,
+    // jsons.getSuccessFromSessions,
+    // jsons.compareTestTubesFalse
+
+    //check session number success change after incorrect 
+    
+    // jsons.selectSubtitles,
+    // jsons.getSuccessFromSessions,
+    // jsons.incorrectAnswerClick,
+    // jsons.getSuccessFromSessions,
+    // jsons.compareTestTubes
+
+    //check session number fail correct after incorrect
+
+    // jsons.selectSubtitles,
+    // jsons.getFailFromSessions,
+    // jsons.incorrectAnswerClick,
+    // jsons.getFailFromSessions,
+    // jsons.compareTestTubesFalse
+
+    //check session number fail correct after incorrect
+
     jsons.selectSubtitles,
-    jsons.correctAnswerClick,
+    jsons.getSuccessFromSessions,
+    jsons.incorrectAnswerClick,
+    jsons.getSuccessFromSessions,
+    jsons.compareTestTubes
+
     
     // //titlebar Components check
     // jsons.checkTitleBarComponents,
@@ -356,9 +393,6 @@ var testSets = [
     // jsons.rightPlayCycle,
     // jsons.urlCheckAZ,
     // jsons.rightPlayCycle,
-
-    
-
 ];
 
 var page;
@@ -400,7 +434,6 @@ var url='http://dev.fev1/';
 	    start();},1000)
 	
 	page.onConsoleMessage = function(msg, lineNum, sourceId) {
-	    
 	    console.log('SLIMER CONSOLE: ' + msg );
 };
 //     setTimeout(function(){

@@ -369,6 +369,18 @@ var correctAnswerClick=[
 	status:'testSetComplete'
     }
 ];
+var incorrectAnswerClick=[
+ {
+        loopCount: 0,
+        url: 'http://dev.fev1/',
+        testFile: 'jsons/incorrectAnswerClick.json'
+	
+    },
+    
+     {
+	status:'testSetComplete'
+    }
+];
 
 var leftPlayAndVideoPlaybackCycle=[
     
@@ -437,6 +449,31 @@ var checkTitleBarComponents=[
 	status:'testSetComplete'
     }
 ];
+//----------------------------------------------------------
+var getSuccessFromSessions=[
+     {
+        loopCount: 0,
+        url: 'http://dev.fev1/',
+        testFile: 'jsons/getSessionCorrect.json'
+    },
+     {
+	status:'testSetComplete'
+    }
+
+];
+
+var getFailFromSessions=[
+     {
+        loopCount: 0,
+        url: 'http://dev.fev1/',
+        testFile: 'jsons/getSessionFail.json'
+    },
+     {
+	status:'testSetComplete'
+    }
+
+];
+
 //-----------------------------------------------------------
 
 var panelClick=[
@@ -682,9 +719,12 @@ module.exports = {
     slectRight:selectRight,
     clickNext:clickNext,
     correctAnswerClick:correctAnswerClick,
+    incorrectAnswerClick:incorrectAnswerClick,
     panelClick:panelClick,
+    // titlebar:
     checkTitleBarComponents:checkTitleBarComponents,
-
+    getSuccessFromSessions:getSuccessFromSessions,
+    getFailFromSessions:getFailFromSessions,
     // lang:
     azeriSelect:azeriSelect,
     urlCheckAZ:urlCheckAZ
