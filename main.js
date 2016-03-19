@@ -345,23 +345,25 @@ var testSets = [
     // jsons.getSuccessFromSessions,
     // jsons.correctAnswerClick,
     // jsons.getSuccessFromSessions,
-    // jsons.compareTestTubesFalse
+    // jsons.compareTestTubesFalse,
 
     //check session number success change after incorrect 
     
-    // jsons.selectSubtitles,
-    // jsons.getSuccessFromSessions,
-    // jsons.incorrectAnswerClick,
-    // jsons.getSuccessFromSessions,
-    // jsons.compareTestTubes
+    jsons.selectSubtitles,
+    jsons.getSuccessFromSessions,
+    jsons.incorrectAnswerClick,
+    jsons.getSuccessFromSessions,
+    jsons.compareTestTubes,
+    jsons.clickNext,
 
     //check session number fail correct after incorrect
 
-    // jsons.selectSubtitles,
-    // jsons.getFailFromSessions,
-    // jsons.incorrectAnswerClick,
-    // jsons.getFailFromSessions,
-    // jsons.compareTestTubesFalse
+    jsons.selectSubtitles,
+    jsons.getFailFromSessions,
+    jsons.incorrectAnswerClick,
+    jsons.getFailFromSessions,
+    jsons.compareTestTubesFalse,
+    jsons.clickNext,
 
     //check session number fail correct after incorrect
 
@@ -369,7 +371,9 @@ var testSets = [
     jsons.getSuccessFromSessions,
     jsons.incorrectAnswerClick,
     jsons.getSuccessFromSessions,
-    jsons.compareTestTubes
+    jsons.compareTestTubes,
+    jsons.clickNext,
+    
 
     
     // //titlebar Components check
