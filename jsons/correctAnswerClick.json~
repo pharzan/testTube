@@ -1,0 +1,16 @@
+[
+    {
+	"description":"find and click on the right answer"
+    },
+
+    {"action":"getNetworkContent",
+     "key":"answer",
+     "des":"fill the beaker with answer keys from the network responses",
+     "callback":""},
+           
+    {"action":"searchAndClickFromBeaker",
+     "des":"search the ui element divs for the beaker content (network responses) and click on the found one",
+     "callback":""},
+
+     {"action":"done"}
+]

@@ -1,0 +1,21 @@
+[
+    {
+	"description":"gets the success value from the views"
+    },
+    
+   
+    {"action":"wait",
+     "des":"this wait is for the server ajax call if any",
+     "key":"100",
+     "callback":"console.log('hi')"},
+
+ 
+    {"action":"getElementContent",
+     "tag":"#score_boxes > div:nth-child(1) > div.score_box.first > div.fail",
+     "des":"get the views text",
+     "callback":""},
+
+        
+    {"action":"done"}
+
+]
