@@ -6,8 +6,8 @@ var port = 8000,
     Parse = require('parse/node').Parse,
     // server = http.createServer(),
     jsons = require('./data.js'),
-    jsonFileCounter = 0,
-    testSetCounter = 0,
+    
+    BROWSER,
     loopCounter = 0,
     stepPromise, networkResponses = [],
     testTube, networkBeaker,
@@ -47,7 +47,8 @@ io.on('connection', function(socket) {
 app.listen(3000);
 
 var globalData = {};
-
+globalData.jsonFileCounter = 0,
+globalData.testSetCounter = 0;
 function networkTap(){
     return new Promise(function(resolve){
 	globalData.page.onResourceReceived = function(response, networkRequest) {
@@ -100,6 +101,7 @@ function startBrowser(url) {
                     });
 
                 }).then(function() {
+		    BROWSER=sl;
                     return resolve('done');
 
                 });
@@ -205,8 +207,7 @@ function run(testSteps) {
                         });
 		    break;
                 };
-            };
-	   
+            };   
             if (typeof(stepPromise) == 'undefined') {
                 stepPromise = stepSwitchCheck(step, page);
             } else {
@@ -231,27 +232,29 @@ function run(testSteps) {
 };
 
 function start() {
-    var testSet = testSets[testSetCounter];
-    var testSteps = test.load(testSet[jsonFileCounter].testFile);
+    var testSet = globalData.testSets[globalData.testSetCounter];
+    
+    var testSteps = test.load(globalData.testSet[globalData.jsonFileCounter].testFile);
     
     run(testSteps);
     
     p2 = PubSub.subscribe('testStepsComplete', function() {
-	jsonFileCounter++;
-	if(typeof testSet[jsonFileCounter]!=='undefined' && testSet[jsonFileCounter].status=='testSetComplete'){
+	globalData.jsonFileCounter++;
+	console.log("****************************",typeof testSet[globalData.jsonFileCounter])
+	if(typeof testSet[globalData.jsonFileCounter]!=='undefined' && testSet[globalData.jsonFileCounter].status=='testSetComplete'){
 	    PubSub.publish('nextSet');
 	}else
-	{testSteps= test.load(testSet[jsonFileCounter].testFile);
+	{testSteps= test.load(globalData.testSet[globalData.jsonFileCounter].testFile);
     	test.log('next','Next testFile--------------------------------------------------------' );
 	 run(testSteps);}
     });
     
     p3 = PubSub.subscribe('nextSet', function() {
 	
-	testSetCounter++;
+	globalData.testSetCounter++;
 	//set current testSet
-	testSet=testSets[testSetCounter];
-	jsonFileCounter=-1;
+	testSet=testSet[globalData.testSetCounter];
+	globalData.jsonFileCounter=-1;
     	test.log('next','Next Set of TestFiles-----------------------------------------------');
 	
 	
@@ -263,8 +266,7 @@ function start() {
     });
 };
 
-
-var testSets = [
+globalData.testSets = [
 
     // jsons.networkAnswerCheck,
     
@@ -349,32 +351,30 @@ var testSets = [
 
     //check session number success change after incorrect 
     
-    jsons.selectSubtitles,
-    jsons.getSuccessFromSessions,
-    jsons.incorrectAnswerClick,
-    jsons.getSuccessFromSessions,
-    jsons.compareTestTubes,
-    jsons.clickNext,
+    // jsons.selectSubtitles,
+    // jsons.getSuccessFromSessions,
+    // jsons.incorrectAnswerClick,
+    // jsons.getSuccessFromSessions,
+    // jsons.compareTestTubes,
+    // jsons.clickNext,
 
     //check session number fail correct after incorrect
 
-    jsons.selectSubtitles,
-    jsons.getFailFromSessions,
-    jsons.incorrectAnswerClick,
-    jsons.getFailFromSessions,
-    jsons.compareTestTubesFalse,
-    jsons.clickNext,
+    // jsons.selectSubtitles,
+    // jsons.getFailFromSessions,
+    // jsons.incorrectAnswerClick,
+    // jsons.getFailFromSessions,
+    // jsons.compareTestTubesFalse,
+    // jsons.clickNext,
 
     //check session number fail correct after incorrect
 
-    jsons.selectSubtitles,
-    jsons.getSuccessFromSessions,
-    jsons.incorrectAnswerClick,
-    jsons.getSuccessFromSessions,
-    jsons.compareTestTubes,
-    jsons.clickNext,
-    
-
+    // jsons.selectSubtitles,
+    // jsons.getSuccessFromSessions,
+    // jsons.incorrectAnswerClick,
+    // jsons.getSuccessFromSessions,
+    // jsons.compareTestTubes,
+    // jsons.clickNext,
     
     // //titlebar Components check
     // jsons.checkTitleBarComponents,
@@ -392,7 +392,7 @@ var testSets = [
     // jsons.rightPlayCycle,
     // jsons.urlCheckYellow,
 
-    // jsons.azeriSelect,
+     jsons.azeriSelect,
     // jsons.urlCheckAZ,
     // jsons.rightPlayCycle,
     // jsons.urlCheckAZ,
@@ -418,28 +418,41 @@ function sendData() {
     // console.log(globalData.currentStepDescription)
 }
 
+function reloadBrowser(){
+    PubSub.clearAllSubscriptions();
+}
+
+function exit(){
+    BROWSER.exit();
+    
+
+};
+
 // Send current time every 10 secs
 setInterval(sendData, 50);
 
 var url='http://dev.fev1/';
+
 dbService.server();
+
 startBrowser(url).then(function() {
     page=globalData.page;
     console.log('browser Started');
     
     globalData.page.set('viewportSize', {
-        width: 1200,
-        height: 750
+        width: 1000,
+        height: 700
     });
+    
     
     test.urlWatcher.start(globalData.page,250);
 	
-	setTimeout(function(){
-	    start();},1000)
+	//setTimeout(function(){
+	    //start();},1000)
 	
-	page.onConsoleMessage = function(msg, lineNum, sourceId) {
-	    console.log('SLIMER CONSOLE: ' + msg );
-};
+// 	page.onConsoleMessage = function(msg, lineNum, sourceId) {
+// 	    console.log('SLIMER CONSOLE: ' + msg );
+// };
 //     setTimeout(function(){
 // 	page.evaluate(function(){
 // 	    console.log("!!!!!!!!!!!!!"+document.body.children);
@@ -453,4 +466,13 @@ startBrowser(url).then(function() {
     });
 
 
+exports.run=run;
 
+exports.start=start;
+exports.startBrowser=startBrowser;
+exports.networkTap=networkTap;
+exports.globalData=globalData;
+exports.reloadBrowser=reloadBrowser;
+exports.globalData=globalData;
+
+exports.exit=exit;

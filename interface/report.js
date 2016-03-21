@@ -1,18 +1,18 @@
 var socket = io('http://127.0.0.1:3000');
 var time = 'hi';
 
-socket.on('welcome', function(data) {
-    //addMessage(data.message);
+// socket.on('welcome', function(data) {
+//     //addMessage(data.message);
 
-    // // Respond with a message including this clients' id sent from the server
-    // socket.emit('i am client', {
-    //     data: 'foo!',
-    //     id: data.id
-    // });
-});
+//     // // Respond with a message including this clients' id sent from the server
+//     // socket.emit('i am client', {
+//     //     data: 'foo!',
+//     //     id: data.id
+//     // });
+// });
 var Globals = {};
-Globals.selected={};
-Globals.selected.name='nothing selected yet';
+Globals.selected = {};
+Globals.selected.name = 'nothing selected yet';
 socket.on('time', function(data) {
     //console.log(data.time);
     m.startComputation();
@@ -22,21 +22,9 @@ socket.on('time', function(data) {
     //addMessage(data.time);
 
 });
+
 socket.on('error', console.error.bind(console));
 socket.on('message', console.log.bind(console));
-
-// function addMessage(message) {
-//     var text = document.createTextNode(message),
-//         el = document.createElement('li'),
-//         messages = document.getElementById('messages');
-//     m.startComputation();
-
-//     time=text;
-//     m.endComputation();
-
-//     //el.appendChild(text);
-//     //messages.appendChild(el);
-// }
 
 var test = {
     view: function() {
@@ -55,16 +43,16 @@ var test = {
 var header = {
     view: function() {
         return m('.header', m('span', {
-            onclick: function() {
-                m.route('/load')
-            }
-        }, 'Load'),m('span', {
-            onclick: function() {
-                m.route('/report')
-            }
-        }, 'Report')
+                onclick: function() {
+                    m.route('/load')
+                }
+            }, 'Load'), m('span', {
+                onclick: function() {
+                    m.route('/report')
+                }
+            }, 'Report')
 
-		);
+        );
     }
 
 };
@@ -223,173 +211,216 @@ var messages = {
 };
 
 var selectStepList = {
-    
-    controller:function(){
-	var self=this;
-	
-	var names=m.request({method: "GET",
-			     url: "http://127.0.0.1:8001/steps/?names",
-			     background:true,
-			    }).then(function(response){
-				console.log(response)
-				self.list=response;
-			    });
-	
-	this.onunload=function(){
-	    this.mappable=false;
-	    this.populated=false;
-	};
+
+    controller: function() {
+        var self = this;
+
+        var names = m.request({
+            method: "GET",
+            url: "http://127.0.0.1:8001/steps/?names",
+            background: true
+        }).then(function(response) {
+            console.log(response);
+            self.list = response;
+        });
+
+        this.onunload = function() {
+            this.mappable = false;
+            this.populated = false;
+        };
     },
-    
+
     view: function(ctrl) {
-	var self=this;
-	
-	(typeof ctrl.list==='undefined')?ctrl.mappable=false:ctrl.mappable=true;
-        return m('select',
-		 {config:function(selectElement,isinit){
-		     if(isinit)
-			 return;
-		     self.selectElement=selectElement;
-		     
-		 },
-		  onchange:function(e){
-		      if(typeof self.selected==='undefined'){
-			  self.selected={};
-		      }
-		      self.selected.name=e.target.value;
-		      m.request({method: "GET",
-		       url: "http://127.0.0.1:8001/step/?"+self.selected.name,
-		       background:false
-				}).then(function(response){
-				    
-				    
-				    Globals.selectedStep=response;
-				    console.log('SelectedStep',Globals.selectedStep);
-		      });
-		  }
-		  
-		 },
-		 ctrl.mappable?ctrl.list.map(function(name,i){
-		     //console.log(name)
-		     if(i==ctrl.list.length-1){
-			 ctrl.populated=true;
-		     }
-		     if (ctrl.populated)
-			 return;
-		     
-		     self.selectElement.options[self.selectElement.options.length] = new Option(i+') ' +name, name);
-		     
-		     
-		 }):null);
+        var self = this;
+
+        (typeof ctrl.list === 'undefined') ? ctrl.mappable = false: ctrl.mappable = true;
+        return m('select', {
+                config: function(selectElement, isinit) {
+                    if (isinit)
+                        return;
+                    self.selectElement = selectElement;
+
+                },
+                onchange: function(e) {
+                    if (typeof self.selected === 'undefined') {
+                        self.selected = {};
+                    }
+                    self.selected.name = e.target.value;
+                    m.request({
+                        method: "GET",
+                        url: "http://127.0.0.1:8001/step/?" + self.selected.name,
+                        background: false
+                    }).then(function(response) {
+			//selectedStep:::
+			self.selected=response;
+                        Globals.selected = response;
+                        console.log('SelectedStep', Globals.selectedStep);
+			self.infoShowable=true;
+                    });
+                }
+
+        },
+		 
+            ctrl.mappable ? ctrl.list.map(function(name, i) {
+                
+                if (i == ctrl.list.length - 1) {
+                    ctrl.populated = true;
+                }
+                if (ctrl.populated)
+                    return;
+                self.selectElement.options[self.selectElement.options.length] = new Option(i + ') ' + name, name);
+            }) : null);
     }
 };
 
 var selectSetList = {
-    
-    controller:function(){
-	var self=this;
-	
-	var names=m.request({method: "GET",
-			     url: "http://127.0.0.1:8001/sets/?names",
-			     background:true,
-			    }).then(function(response){
-				self.selected=response;
-				self.list=response;
-			    });
-	
-	this.onunload=function(){
-	    this.mappable=false;
-	    this.populated=false;
-	};
+
+    controller: function() {
+        var self = this;
+
+        var names = m.request({
+            method: "GET",
+            url: "http://127.0.0.1:8001/sets/?names",
+            background: true
+        }).then(function(response) {
+            self.selected = response;
+            self.list = response;
+        });
+
+        this.onunload = function() {
+            this.mappable = false;
+            this.populated = false;
+        };
     },
-    
+
     view: function(ctrl) {
-	var self=this;
-	
-	(typeof ctrl.list==='undefined')?ctrl.mappable=false:ctrl.mappable=true;
-        return m('select',
-		 {config:function(selectElement,isinit){
-		     if(isinit)
-			 return;
-		     self.selectElement=selectElement;
-		     
-		 },
-		  onchange:function(e){
-		      if(typeof self.selected==='undefined'){
-			  self.selected={};
-		      }
-		      console.log(self.selected)
-		      self.selected.name=e.target.value;
-		      m.request({method: "GET",
-		       url: "http://127.0.0.1:8001/set/?"+self.selected.name,
-		       background:false
-				}).then(function(response){
-				    
-				    self.selected=response;
-				    Globals.selectedSet=response;
-				    console.log('SelectedSet',Globals.selectedSet)
-		      });
-		  }
-		  
-		 },
-		 ctrl.mappable?ctrl.list.map(function(name,i){
-		     //console.log(name)
-		     if(i==ctrl.list.length-1){
-			 ctrl.populated=true;
-		     }
-		     if (ctrl.populated)
-			 return;
-		     
-		     self.selectElement.options[self.selectElement.options.length] = new Option(i+') ' +name, name);
-		     
-		     
-		 }):null);
+        var self = this;
+
+        (typeof ctrl.list === 'undefined') ? ctrl.mappable = false: ctrl.mappable = true;
+        return m('',m('select', {
+                config: function(selectElement, isinit) {
+                    if (isinit)
+                        return;
+                    self.selectElement = selectElement;
+
+                },
+                onchange: function(e) {
+                    if (typeof self.selected === 'undefined') {
+                        self.selected = {};
+                    }
+                    
+                    self.selected.name = e.target.value;
+                    m.request({
+                        method: "GET",
+                        url: "http://127.0.0.1:8001/set/?" + self.selected.name,
+                        background: false
+                    }).then(function(response) {
+                        self.selected = response;
+                        Globals.selectedSet = response;
+			
+                        console.log('SelectedSet', Globals.selectedSet);
+			self.infoShowable=true;
+                    });
+                }
+
+            },
+            ctrl.mappable ? ctrl.list.map(function(name, i) {
+               
+                if (i == ctrl.list.length - 1) {
+                    ctrl.populated = true;
+                }
+                if (ctrl.populated)
+                    return;
+
+                self.selectElement.options[self.selectElement.options.length] = new Option(i + ') ' + name, name);
+		
+
+            }) : null));
     }
 };
 
-var selectedInfo ={
-    
-    actions:[],
+var actionButtons = {
+
+    actions: [],
+    view: function() {
+
+        var self = this;
+        return m('',
+            m('button', {
+                onclick: function() {
+
+                    m.request({
+                        method: "GET",
+                        url: "http://127.0.0.1:8001/play/?set",
+                        background: true
+                    });
+                }
+            }, 'PLAY Set!'),
+		 
+		 m('button',{
+		     onclick: function() {
+
+			 m.request({
+                             method: "GET",
+                             url: "http://127.0.0.1:8001/play/?steps",
+                             background: true
+			 });
+                     }
+		 },'PLAY Steps')
+
+
+		);
+
+    }
+};
+
+var setList={
+    view:function(){
+	//console.log(Globals.selectedSet,selectSetList.selected)
+	return m('ul',selectSetList.selected.content.map(function(set){
+	    return m('li',set.testFile)
+	})
+		)
+    }
+};
+
+var stepList={
     view:function(){
 	
-	var self=this;
-	
-	return m('',
-		 m('button',{onclick:function(){
-	    
-	    this.actions=[];
-	    Globals.selected.data.content.map(function(content){
-		
-		self.actions.push(content.action);
-		
-		self.list=new List();
-	    });
-	    
-	}},'show'),(typeof this.list!=='undefined')?m.component(this.list,self.actions):null);
-
+	return m('ul',selectStepList.selected.content.map(function(step){
+	    return step.action?m('li',step.action,m('span.des'," >>> "+step.des)):m('.des',step.description);
+	})
+		);
     }
-};
+}
 
-var List=function (){
-    
-    var view=function(ctrl,actions){
-	
-	return m('ul',actions.map(function(action){
-	    return m('li',action);
-	}));
+var List = function() {
+
+    var view = function(ctrl, actions) {
+
+        return m('ul', actions.map(function(action) {
+            return m('li', {
+                key: Math.random()
+            }, action);
+        }));
     };
-    return{view:view};
+    return {
+        view: view
+    };
 };
 
-var load={
-    view:function(){
-	
-	return [m.component(header),
+var load = {
+    view: function() {
+
+        return [m.component(header),
+		m.component(actionButtons),
 		m.component(selectStepList),
-		m.component(selectSetList),
-		m.component(selectedInfo)
-		//m('',Globals.selected.name)
-	       ];
+		selectStepList.infoShowable?m.component(stepList):null,
+            m.component(selectSetList),
+		selectSetList.infoShowable?m.component(setList):null,
+		
+            //m('',Globals.selected.name)
+        ];
 
     }
 };
@@ -397,7 +428,7 @@ var load={
 m.route.mode = 'pathname';
 
 m.route(document.body, '/', {
-    '/':test,
+    '/': test,
     '/report': test,
     '/load': load
 });

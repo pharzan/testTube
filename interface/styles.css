@@ -26,3 +26,11 @@ body{font-family: 'Dosis', sans-serif;}
     background:black;
     color:white
 }
+.des{
+    color:red;
+    font-weight: bold;
+    
+}
+span.des{
+    color:gray;
+}

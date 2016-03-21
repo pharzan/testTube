@@ -15,9 +15,9 @@ var fs = require('fs'),
 	
     };
 
-PubSub.subscribe('testStepsComplete', function() {
-    //_reset();
-});
+// PubSub.subscribe('testStepsComplete', function() {
+//     //_reset();
+// });
 
 function sendKeys(element,key,page, callback) {
     return new Promise(function(resolve, reject) {
@@ -161,7 +161,7 @@ function waitForVisibility(selector, page, timeOut) {
 	    
             if (new Date().getTime() - startTime > timeOut * 1000) {
                 log('fail', 'waitForVisibility: ' + selector + ' element Timed OUT');
-                window.clearInterval(interval);
+                clearInterval(interval);
                 return resolve('timeOut');
             }
 	    
@@ -511,6 +511,7 @@ function load(file) {
     // 	//content=sets.content;
 	
     // });
+    
     var content = fs.readFileSync('./' + file, 'utf8', function(err, data) {
         return data;
     });
