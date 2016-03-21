@@ -415,16 +415,55 @@ var List = function() {
 };
 
 var build={
-    data:[],
-    view:function(){
+    content:[],
+    data:{},
+    controller:function(){
+	this.actions=['waitForVisibility','click']
+    },
+    view:function(ctrl){
 	var self=this;
 	
 	return [m.component(header),
 		m('',
-		  m('lable','Action'),m('input',{
+		  m('lable','steps name'),m('input',{
+		      onchange:function(e){
+			  self.stepsName=this.value;
+		      }}),
+		  m('lable','steps Description'),m('input',{
+		      onchange:function(e){
+			  self.stepsDescription=this.value;
+		      }})
+
+		 ),
+		  m('lable','Category'),m('input',{
+		      onchange:function(e){
+			  self.category=this.value;
+		      }})
+
+		 ,
+		m('',
+		  
+		  m('lable','Action'),m('select',{
+		
+		      config: function(selectElement, isinit) {
+                    if (isinit)
+                        return;
+			  ctrl.actions.map(function(name, i) {
+                
+			      if (i == ctrl.actions.length) {
+				  ctrl.populated = true;
+			      }
+			      if (ctrl.populated)
+				  return;
+			      selectElement.options[i] = new Option('('+i + ') ' + name, name);
+			  }); 
+
+                },
 		      onchange:function(e){	  
 			  self.action=this.value;
+			
 		      }
+		      
 		  }),
 		  m('lable','selector'),m('input',{
 		      onchange:function(e){
@@ -435,30 +474,52 @@ var build={
 			  self.description=this.value;
 		      }
 		  })
-		 ),this.data.map(function(d,i){
+		 ),this.content.map(function(d,i){
 		     return m('',JSON.stringify(d),
 			      m('button',{onclick:function(){
-				  console.log(i)
-				  self.data.splice(i,1);
-				  console.log(self.data)
+				  self.content.splice(i,1);
 		     }},'remove'));
 		 }
 		     
 				),
-		m('button',{onclick:this.makeData.bind(self)},'add'),
-		m('button','done')
+		m('button',{onclick:this.makeStep.bind(self)},'add'),
+		m('button',{onclick:this.makeData.bind(self)},'build/Save')
 	       ];
     },
 
-    makeData:function() {
+    makeStep:function() {
 	var self=this;
-        this.data.push({
+        this.content.push({
 	    action:self.action,
 	    tag:self.selector,
 	    des:self.description
-	})
+	});
+    },
+    makeData:function(){
+	var self=this;
+	self.content.push({action:'done'})
+	self.content.unshift({description:self.stepsDescription})
 	
-	
+	self.data={
+	    name:self.stepsName,
+	    content:self.content,
+	    dataStore:'steps',
+	    categoery:self.category,
+	    infos:{
+		time:new Date()
+	    }
+	};
+	 m.request({
+            method: "POST",
+             url: "http://dev.testtube:8001/steps/?save",
+	     dataType: 'application/json',
+             background: true,
+	     data:JSON.stringify(self.data)
+        }).then(function(response) {
+            console.log("!!!!",response);
+            
+        });
+	console.log(self.data)
     }
 };
 

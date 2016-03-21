@@ -32,9 +32,9 @@ function load(dbName, query) {
 }
 
 function save(dbName, data) {
-
+    
     var d = db[dbName];
-
+    
     d.insert(data, function(err, newDoc) { // Callback is optional
         // newDoc is the newly inserted document, including its _id
         // newDoc has no key called notToBeSaved since its value was undefined
@@ -70,15 +70,16 @@ function server() {
 
         var responseHeaders = {
             "access-control-allow-origin": "*",
-            "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
 
-            'Access-Control-Allow-Headers': 'X-Requested-With,content-type',
+            "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS, XMODIFY",
+            'Access-Control-Allow-Headers': 'Origin, X-Requested-With, X-HTTP-Method-Override, content-type, Accept, Key, Host',
+            'Access-Control-Allow-Headers': ' X-Requested-With, X-HTTP-Method-Override, content-type, Accept, Key,DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type',
             'Access-Control-Allow-Credentials': true,
-            "Content-Type": "text/plain"
+            "Content-Type": "application/json"
         };
 
         response.writeHead(200, responseHeaders);
-
+	
         if (request.method === "OPTIONS") {
             // Add headers to response and send
             response.writeHead(200, responseHeaders);
@@ -113,7 +114,6 @@ function server() {
                     //console.log('NAMES',steps.length);
                     var names = [];
 
-
                     steps.map(function(step) {
                         // console.log('!!!!',step.name);
                         names.push(step.name)
@@ -125,11 +125,35 @@ function server() {
 
                 });
             }
+	    if (search === '?save'){
+		
+		
+
+		
+		request.on('data', function(chunk) {
+		    console.log("Received body data:");
+		   // console.log(JSON.parse(chunk.toString()));
+		    var data=JSON.parse(chunk.toString());
+		    var d=JSON.parse(data)
+		    //console.log(d.dataStore)
+		    save(d.dataStore,d);
+		    response.writeHead(200, responseHeaders);
+		    
+		    response.write(JSON.stringify({status:"OK"}));
+		    response.end();
+		});
+		
+		request.on('end', function() {
+		    // empty 200 OK response for now
+		    response.writeHead(200, "OK", {'Content-Type': 'text/html'});
+		    response.end();
+		});
+	    }
 
 
             // response.writeHead(200, {"Content-Type": "text/plain"});
             // response.end(answer);
-            console.log("string sent");
+            
         } else if (path == '/step/') {
             var query = {
                 name: search.replace('?', '')
@@ -168,6 +192,7 @@ function server() {
                     response.end();
                 });
             }
+	    
         } else if (path == '/set/') {
             query = {
                 name: search.replace('?', '')
