@@ -6,13 +6,13 @@ var port = 8000,
     Parse = require('parse/node').Parse,
     // server = http.createServer(),
     jsons = require('./data.js'),
-    
+
     BROWSER,
     loopCounter = 0,
     stepPromise, networkResponses = [],
     testTube, networkBeaker,
     networkArraySize = 2,
-    dbService=require('./dbService.js'),
+    dbService = require('./dbService.js'),
     http = require('http'),
     fs = require('fs'),
 
@@ -49,49 +49,50 @@ app.listen(3000);
 var globalData = {};
 globalData.jsonFileCounter = 0,
 globalData.testSetCounter = 0;
-function networkTap(){
-    return new Promise(function(resolve){
-	globalData.page.onResourceReceived = function(response, networkRequest) {
-	
-        if (response.stage == 'end') {
-            if (response.url.indexOf('question_service') != -1 && response.bodySize != 0) {
-		
-                response.body = JSON.parse(response.body);
-                if (networkResponses.length >= networkArraySize) {
-                    // networkResponses.pop();
-                    networkResponses.shift();
-                    // test.Global.networkResponses.pop();
-                    test.engineGlobal.networkResponses.shift();
+
+function networkTap() {
+    return new Promise(function(resolve) {
+        globalData.page.onResourceReceived = function(response, networkRequest) {
+
+            if (response.stage == 'end') {
+                if (response.url.indexOf('question_service') != -1 && response.bodySize != 0) {
+
+                    response.body = JSON.parse(response.body);
+                    if (networkResponses.length >= networkArraySize) {
+                        // networkResponses.pop();
+                        networkResponses.shift();
+                        // test.Global.networkResponses.pop();
+                        test.engineGlobal.networkResponses.shift();
+                    }
+                    networkResponses.push(response.body);
+                    test.engineGlobal.networkResponses.push(response.body);
+
+
                 }
-                networkResponses.push(response.body);
-                test.engineGlobal.networkResponses.push(response.body);
-                
-		
             }
         }
-    }
-	return resolve('done');
-				 })
+        return resolve('done');
+    })
 };
 
 function startBrowser(url) {
     return new Promise(function(resolve) {
         slimerjs.create({
             path: require('slimerjs').path
-	    
+
         }, function(err, sl) {
             return sl.createPage(function(err, page) {
                 return new Promise(function(resolve, reject) {
-		    
-		    sl.get('encoding',function(err,val){
-			// console.log(val)
-		    })
-		    sl.outputEncoding = "utf-8";
-		    globalData.page=page;
-		    networkTap();
+
+                    sl.get('encoding', function(err, val) {
+                        // console.log(val)
+                    })
+                    sl.outputEncoding = "utf-8";
+                    globalData.page = page;
+                    networkTap();
                     page.open(url, function(err, status) {
-			
-			if (status == "success") {
+
+                        if (status == "success") {
                             console.log('Success: page opened');
                             return resolve('done');
                         } else {
@@ -101,7 +102,7 @@ function startBrowser(url) {
                     });
 
                 }).then(function() {
-		    BROWSER=sl;
+                    BROWSER = sl;
                     return resolve('done');
 
                 });
@@ -126,30 +127,30 @@ function wait(t) {
 
 function run(testSteps) {
     return new Promise(function(resolve) {
-	
+
         testSteps.map(function(step) {
             function stepSwitchCheck(step, page) {
-		
+
                 switch (step.action) {
-                case 'waitForVisibility':
+                    case 'waitForVisibility':
                         return test.waitForVisibility(step.tag, page);
-		    case 'click':
+                    case 'click':
                         return test.clickClass(step.tag, page);
                     case 'focus':
                         return test.focusClass(step.tag, page);
                     case 'sendKeys':
                         return test.sendKeys(step.tag, step.key, page);
-                case 'getElementContent':
-		    globalData.testTubeKey=step.tag;
-                    return testTube = test.getElementContent(step.tag, page);
-                case 'getNetworkContent':
-		    globalData.beakerKey=step.key;
+                    case 'getElementContent':
+                        globalData.testTubeKey = step.tag;
+                        return testTube = test.getElementContent(step.tag, page);
+                    case 'getNetworkContent':
+                        globalData.beakerKey = step.key;
                         return networkBeaker = test.getNetworkContent(networkResponses, step.key);
                     case 'getUrlContent':
                         return testTube = test.getUrlContent(page);
                     case 'compareTestTubeBeaker':
                         return test.compareTestTubeBeaker();
-                case 'waitPlaybackEnd':
+                    case 'waitPlaybackEnd':
                         return test.onPlaybackEnded(page, step.callback);
                     case 'waitPlaybackStart':
                         return test.onPlaybackStart(page, step.callback);
@@ -170,58 +171,58 @@ function run(testSteps) {
                                 });
                             });
                         });
-                    break;
-		    return test.wait(step.key);
+                        break;
+                        return test.wait(step.key);
                     case 'historyBack':
-                     return new Promise(function(resolve) {
-                         return wait(50).then(function() {
-			     page.get('canGoBack',function(err,canGoBack){
-                                 if(canGoBack)
-                                     page.goBack();
-				 else{
-				     test.log('fail','can\'t GO back in history');
-				     
-				 }
-                                 wait(100).then(function() {
-                                     return resolve('done');
-                                 });
-                             });
-			 });
+                        return new Promise(function(resolve) {
+                            return wait(50).then(function() {
+                                page.get('canGoBack', function(err, canGoBack) {
+                                    if (canGoBack)
+                                        page.goBack();
+                                    else {
+                                        test.log('fail', 'can\'t GO back in history');
+
+                                    }
+                                    wait(100).then(function() {
+                                        return resolve('done');
+                                    });
+                                });
+                            });
                         });
-		    break;
+                        break;
                     case 'historyForward':
-                     return new Promise(function(resolve) {
-                         return wait(50).then(function() {
-			     page.get('canGoBack',function(err,canGoForward){
-				 if(canGoForward)
-                                     page.goForward();
-				 else{
-				     test.log('fail','can\'t GO forward in history');
-				 }
-				 
-                                 wait(50).then(function() {
-                                     return resolve('done');
-                                 });
-                             });
-			 })
+                        return new Promise(function(resolve) {
+                            return wait(50).then(function() {
+                                page.get('canGoBack', function(err, canGoForward) {
+                                    if (canGoForward)
+                                        page.goForward();
+                                    else {
+                                        test.log('fail', 'can\'t GO forward in history');
+                                    }
+
+                                    wait(50).then(function() {
+                                        return resolve('done');
+                                    });
+                                });
+                            })
                         });
-		    break;
+                        break;
                 };
-            };   
+            };
             if (typeof(stepPromise) == 'undefined') {
                 stepPromise = stepSwitchCheck(step, page);
             } else {
                 stepPromise = stepPromise.then(function(msg) {
                     if (step.action == 'done') {
-			
+
                         PubSub.publish('testStepsComplete');
                         return resolve('done');
                     }
-                    if (typeof step.des !== 'undefined'){
-			
-			globalData.currentStepDescription=step.des;
+                    if (typeof step.des !== 'undefined') {
+
+                        globalData.currentStepDescription = step.des;
                         test.log('des', step.des);
-		    }
+                    }
                     return wait(10).then(function() {
                         return stepSwitchCheck(step, page);
                     });
@@ -233,43 +234,44 @@ function run(testSteps) {
 
 function start() {
     var testSet = globalData.testSets[globalData.testSetCounter];
-    
+
     var testSteps = test.load(globalData.testSet[globalData.jsonFileCounter].testFile);
-    
+
     run(testSteps);
-    
+
     p2 = PubSub.subscribe('testStepsComplete', function() {
-	globalData.jsonFileCounter++;
-	console.log("****************************",typeof testSet[globalData.jsonFileCounter])
-	if(typeof testSet[globalData.jsonFileCounter]!=='undefined' && testSet[globalData.jsonFileCounter].status=='testSetComplete'){
-	    PubSub.publish('nextSet');
-	}else
-	{testSteps= test.load(globalData.testSet[globalData.jsonFileCounter].testFile);
-    	test.log('next','Next testFile--------------------------------------------------------' );
-	 run(testSteps);}
+        globalData.jsonFileCounter++;
+        console.log("****************************", typeof testSet[globalData.jsonFileCounter])
+        if (typeof testSet[globalData.jsonFileCounter] !== 'undefined' && testSet[globalData.jsonFileCounter].status == 'testSetComplete') {
+            PubSub.publish('nextSet');
+        } else {
+            testSteps = test.load(globalData.testSet[globalData.jsonFileCounter].testFile);
+            test.log('next', 'Next testFile--------------------------------------------------------');
+            run(testSteps);
+        }
     });
-    
+
     p3 = PubSub.subscribe('nextSet', function() {
-	
-	globalData.testSetCounter++;
-	//set current testSet
-	testSet=testSet[globalData.testSetCounter];
-	globalData.jsonFileCounter=-1;
-    	test.log('next','Next Set of TestFiles-----------------------------------------------');
-	
-	
-	if(typeof testSet === 'undefined'){
-	    test.log('blink','ALL DONE');
-	}else{
-	    PubSub.publish('testStepsComplete');
-	}
+
+        globalData.testSetCounter++;
+        //set current testSet
+        testSet = testSet[globalData.testSetCounter];
+        globalData.jsonFileCounter = -1;
+        test.log('next', 'Next Set of TestFiles-----------------------------------------------');
+
+
+        if (typeof testSet === 'undefined') {
+            test.log('blink', 'ALL DONE');
+        } else {
+            PubSub.publish('testStepsComplete');
+        }
     });
 };
 
 globalData.testSets = [
 
     // jsons.networkAnswerCheck,
-    
+
     // jsons.networkTimerCheck,
     // jsons.leftPlayCycle,
     // jsons.checkViewsIncrease,
@@ -294,15 +296,15 @@ globalData.testSets = [
 
     // //play with subtitles and check if subtitles is shown
     // jsons.subtitlesDisabled,
-    
+
     // // //check infopanel functionality:---------------------
     // jsons.selectSubtitles,
     // jsons.panelClick,
     // jsons.selectLeft,
     // jsons.clickNext,
-    
+
     // //history checks----------------------
-    
+
     // jsons.rightPlayCycle,
     // jsons.urlHistory,
     // jsons.leftPlayCycle,
@@ -332,8 +334,8 @@ globalData.testSets = [
     //     jsons.goBack,
     //     jsons.getUrlContent,
     // jsons.compareTestTubesFalse,
-	
-    
+
+
     // //correctAnswer Cycle
     // jsons.selectSubtitles,
     // jsons.correctAnswerClick,
@@ -342,7 +344,7 @@ globalData.testSets = [
     // jsons.incorrectAnswerClick,
 
     //check session number success change after correct Answer
-    
+
     // jsons.selectSubtitles,
     // jsons.getSuccessFromSessions,
     // jsons.correctAnswerClick,
@@ -350,7 +352,7 @@ globalData.testSets = [
     // jsons.compareTestTubesFalse,
 
     //check session number success change after incorrect 
-    
+
     // jsons.selectSubtitles,
     // jsons.getSuccessFromSessions,
     // jsons.incorrectAnswerClick,
@@ -375,7 +377,7 @@ globalData.testSets = [
     // jsons.getSuccessFromSessions,
     // jsons.compareTestTubes,
     // jsons.clickNext,
-    
+
     // //titlebar Components check
     // jsons.checkTitleBarComponents,
 
@@ -392,7 +394,7 @@ globalData.testSets = [
     // jsons.rightPlayCycle,
     // jsons.urlCheckYellow,
 
-     jsons.azeriSelect,
+    jsons.azeriSelect,
     // jsons.urlCheckAZ,
     // jsons.rightPlayCycle,
     // jsons.urlCheckAZ,
@@ -404,75 +406,73 @@ var page;
 function sendData() {
     io.emit('time', {
         time: new Date().toJSON(),
-	data:globalData,
-	currentUrl:test.engineGlobal.currentUrl,
-	oldUrl:test.engineGlobal.oldUrl,
-	testTube:test.engineGlobal.testTube,
-	oldTestTube:test.engineGlobal.oldTestTube,
-	beaker:test.engineGlobal.networkBeaker,
-	stepDescription:globalData.currentStepDescription,
-	beakerKey:globalData.beakerKey,
-	testTubeKey:globalData.testTubeKey,
-	messagePool:test.engineGlobal.messagePool
+        data: globalData,
+        currentUrl: test.engineGlobal.currentUrl,
+        oldUrl: test.engineGlobal.oldUrl,
+        testTube: test.engineGlobal.testTube,
+        oldTestTube: test.engineGlobal.oldTestTube,
+        beaker: test.engineGlobal.networkBeaker,
+        stepDescription: globalData.currentStepDescription,
+        beakerKey: globalData.beakerKey,
+        testTubeKey: globalData.testTubeKey,
+        messagePool: test.engineGlobal.messagePool
     });
     // console.log(globalData.currentStepDescription)
 }
 
-function reloadBrowser(){
+function reloadBrowser() {
     PubSub.clearAllSubscriptions();
 }
 
-function exit(){
+function exit() {
     BROWSER.exit();
-    
-
 };
 
 // Send current time every 10 secs
 setInterval(sendData, 50);
 
-var url='http://dev.fev1/';
+var url = 'http://dev.fev1/';
 
 dbService.server();
 
 startBrowser(url).then(function() {
-    page=globalData.page;
+    page = globalData.page;
     console.log('browser Started');
-    
+
     globalData.page.set('viewportSize', {
         width: 1000,
         height: 700
     });
-    
-    
-    test.urlWatcher.start(globalData.page,250);
-	
-	//setTimeout(function(){
-	    //start();},1000)
-	
-// 	page.onConsoleMessage = function(msg, lineNum, sourceId) {
-// 	    console.log('SLIMER CONSOLE: ' + msg );
-// };
-//     setTimeout(function(){
-// 	page.evaluate(function(){
-// 	    console.log("!!!!!!!!!!!!!"+document.body.children);
-// 	    return document.body.children[0];
-// 	},function(err,val){
-// 	    console.log("^^^^^^^^",val)
-// 	});
-	
-//     },1000)
-
-    });
 
 
-exports.run=run;
+    test.urlWatcher.start(globalData.page, 250);
 
-exports.start=start;
-exports.startBrowser=startBrowser;
-exports.networkTap=networkTap;
-exports.globalData=globalData;
-exports.reloadBrowser=reloadBrowser;
-exports.globalData=globalData;
+    //setTimeout(function(){
+    //start();},1000)
 
-exports.exit=exit;
+    // 	page.onConsoleMessage = function(msg, lineNum, sourceId) {
+    // 	    console.log('SLIMER CONSOLE: ' + msg );
+    // };
+    //     setTimeout(function(){
+    // 	page.evaluate(function(){
+    // 	    console.log("!!!!!!!!!!!!!"+document.body.children);
+    // 	    return document.body.children[0];
+    // 	},function(err,val){
+    // 	    console.log("^^^^^^^^",val)
+    // 	});
+
+    //     },1000)
+
+});
+
+
+exports.run = run;
+
+exports.start = start;
+exports.startBrowser = startBrowser;
+exports.networkTap = networkTap;
+exports.globalData = globalData;
+exports.reloadBrowser = reloadBrowser;
+exports.globalData = globalData;
+
+exports.exit = exit;

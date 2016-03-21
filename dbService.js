@@ -2,7 +2,7 @@ var Datastore = require('nedb'),
     http = require('http'),
     fs = require('fs'),
     url = require('url'),
-    main=require('./main.js'),
+    main = require('./main.js'),
     db = {};
 var Global = {
     steps: ''
@@ -19,7 +19,7 @@ function load(dbName, query) {
     var d = db[dbName];
     return new Promise(function(resolve) {
 
-	
+
         d.find(query, function(err, steps) {
             if (steps.length == 0)
                 return resolve('empty');
@@ -76,23 +76,23 @@ function server() {
             'Access-Control-Allow-Credentials': true,
             "Content-Type": "text/plain"
         };
-	
+
         response.writeHead(200, responseHeaders);
 
         if (request.method === "OPTIONS") {
             // Add headers to response and send
-	    response.writeHead(200, responseHeaders);
+            response.writeHead(200, responseHeaders);
             response.end();
         }
 
         var path = url.parse(request.url).pathname;
         var search = url.parse(request.url).search;
-        
+
         var answer;
-	
-	console.log('path',path);
-	console.log('search',search);
-	
+
+        console.log('path', path);
+        console.log('search', search);
+
         if (path == "/steps/") {
 
             // console.log("request recieved",search);
@@ -131,12 +131,14 @@ function server() {
             // response.end(answer);
             console.log("string sent");
         } else if (path == '/step/') {
-            var query = {name: search.replace('?', '')};
-	    
+            var query = {
+                name: search.replace('?', '')
+            };
+
             load('steps', query).then(function(res) {
                 Global.steps = res[0];
                 console.log('sent step, GLOBAL step set to', Global.steps = res[0].content);
-		main.globalData.steps=main.globalData.testSteps;
+                main.globalData.steps = main.globalData.testSteps;
                 response.write(JSON.stringify(res[0]));
                 response.end();
             });
@@ -155,7 +157,7 @@ function server() {
                 });
             }
             if (search === '?all') {
-                var names=[];
+                var names = [];
                 var query = {};
                 load('sets', query).then(function(res) {
                     res.map(function(r) {
@@ -167,51 +169,53 @@ function server() {
                 });
             }
         } else if (path == '/set/') {
-            query = {name: search.replace('?', '')};
-	    console.log('query:::',query);
+            query = {
+                name: search.replace('?', '')
+            };
+            console.log('query:::', query);
             load('sets', query).then(function(res) {
-                
+
                 console.log('sent step, GLOBAL step set to', Global.set = res[0].content);
-		main.globalData.testSet=res[0].content;
+                main.globalData.testSet = res[0].content;
                 response.write(JSON.stringify(res[0]));
                 response.end();
             });
-        } else if(path=='/play/'){
-	    if(search ==='?set'){
-		console.log('going for a set play')
-		main.reloadBrowser();
-		// console.log(Global.step);
-		// main.run(Global.steps);
-		main.start();
-		response.writeHead(200, responseHeaders);
-		response.end();}
-	    else if(search ==='?steps'){
-		console.log('going for a step play')
-		main.reloadBrowser();
-		// console.log(Global.step);
-		main.run(Global.steps);
-		
-		//main.start();
-		response.writeHead(200, responseHeaders);
-		response.end();
-	    }else if(search=== '?close'){
-		main.globalData.page.close();
-		main.exit()
-	    	response.writeHead(200, responseHeaders);
-		response.end();
-	    }else if(search.indexOf('?start')!=-1){
-		
-		var navigationUrl=search.split(',')[1];
-		console.log('navigate to:',navigationUrl);
-		main.startBrowser(navigationUrl);
-		response.writeHead(200, responseHeaders);
-		response.end();
-		
-	    }
+        } else if (path == '/play/') {
+            if (search === '?set') {
+                console.log('going for a set play')
+                main.reloadBrowser();
+                // console.log(Global.step);
+                // main.run(Global.steps);
+                main.start();
+                response.writeHead(200, responseHeaders);
+                response.end();
+            } else if (search === '?steps') {
+                console.log('going for a step play')
+                main.reloadBrowser();
+                // console.log(Global.step);
+                main.run(Global.steps);
 
-	    //main.startBrowser(url)
-    
-	}else {
+                //main.start();
+                response.writeHead(200, responseHeaders);
+                response.end();
+            } else if (search === '?close') {
+                main.globalData.page.close();
+                main.exit()
+                response.writeHead(200, responseHeaders);
+                response.end();
+            } else if (search.indexOf('?start') != -1) {
+
+                var navigationUrl = search.split(',')[1];
+                console.log('navigate to:', navigationUrl);
+                main.startBrowser(navigationUrl);
+                response.writeHead(200, responseHeaders);
+                response.end();
+
+            }
+
+            //main.startBrowser(url)
+
+        } else {
             fs.readFile('./index.html', function(err, file) {
                 if (err) {
                     // write an error response or nothing here  

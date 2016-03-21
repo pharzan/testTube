@@ -42,15 +42,22 @@ var test = {
 
 var header = {
     view: function() {
-        return m('.header', m('span', {
-                onclick: function() {
-                    m.route('/load')
-                }
-            }, 'Load'), m('span', {
-                onclick: function() {
-                    m.route('/report')
-                }
-            }, 'Report')
+        return m('.header',
+		 m('span', {
+                     onclick: function() {
+			 m.route('/load')
+                     }
+		 }, 'Load'),
+		 m('span', {
+                     onclick: function() {
+			 m.route('/report')
+                     }
+		 }, 'Report'),
+		 m('span', {
+                     onclick: function() {
+			 m.route('/build')
+                     }
+		 }, 'New')
 
         );
     }
@@ -258,7 +265,6 @@ var selectStepList = {
 			self.infoShowable=true;
                     });
                 }
-
         },
 		 
             ctrl.mappable ? ctrl.list.map(function(name, i) {
@@ -386,9 +392,8 @@ var setList={
 
 var stepList={
     view:function(){
-	
-	return m('ul',selectStepList.selected.content.map(function(step){
-	    return step.action?m('li',step.action,m('span.des'," >>> "+step.des)):m('.des',step.description);
+	return m('ul',selectStepList.selected.content.map(function(step,i){
+	    return step.action?m('li','Action: '+i+') '+step.action,m('span.des'," >>> "+step.des)):m('.des',step.description);
 	})
 		);
     }
@@ -409,9 +414,56 @@ var List = function() {
     };
 };
 
+var build={
+    data:[],
+    view:function(){
+	var self=this;
+	
+	return [m.component(header),
+		m('',
+		  m('lable','Action'),m('input',{
+		      onchange:function(e){	  
+			  self.action=this.value;
+		      }
+		  }),
+		  m('lable','selector'),m('input',{
+		      onchange:function(e){
+			  self.selector=this.value;
+		      }}),
+		  m('lable','description'),m('input',{
+		      onchange:function(){
+			  self.description=this.value;
+		      }
+		  })
+		 ),this.data.map(function(d,i){
+		     return m('',JSON.stringify(d),
+			      m('button',{onclick:function(){
+				  console.log(i)
+				  self.data.splice(i,1);
+				  console.log(self.data)
+		     }},'remove'));
+		 }
+		     
+				),
+		m('button',{onclick:this.makeData.bind(self)},'add'),
+		m('button','done')
+	       ];
+    },
+
+    makeData:function() {
+	var self=this;
+        this.data.push({
+	    action:self.action,
+	    tag:self.selector,
+	    des:self.description
+	})
+	
+	
+    }
+};
+
 var load = {
     view: function() {
-
         return [m.component(header),
 		m.component(actionButtons),
 		m.component(selectStepList),
@@ -425,12 +477,15 @@ var load = {
     }
 };
 
+
+
 m.route.mode = 'pathname';
 
 m.route(document.body, '/', {
     '/': test,
     '/report': test,
-    '/load': load
+    '/load': load,
+    '/':build
 });
 
 // var initElement = document.getElementsByTagName("html")[0];
@@ -488,3 +543,5 @@ m.route(document.body, '/', {
 
 //     return (json) ? JSON.stringify(treeObject) : treeObject;
 // }
+
+
