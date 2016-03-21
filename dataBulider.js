@@ -1,4 +1,5 @@
 var Datastore = require('nedb'),
+    jsons=require('./data.js'),
     fs = require('fs'),
     db = {};
 
@@ -18,7 +19,7 @@ function load(dbName, query) {
                 return resolve('empty');
 
             console.log('DATA SERVICES:: LOADED ', steps.map(function(st) {
-                return st.name
+                return st
             }));
             return resolve(steps);
 
@@ -48,7 +49,7 @@ function save(dbName, data) {
     var d = db[dbName];
     
     var exists=existsInDB(dbName,data.name).then(function(result){
-	console.log(result)
+	
 	if(!result){
 	    
 	    d.insert(data, function(err, newDoc) { // Callback is optional
@@ -154,6 +155,16 @@ function batchFileRead(){
     });
 }
 
+//console.log('!!!!',Object.keys(jsons));
+// Object.keys(jsons).map(function(key,i){
+//     var data={
+// 	name:key,
+// 	content:jsons[key]
+//     };
+//     save('sets',data);
+// })
+	   
 
 //batchFileRead();
-load('steps',{})
+//load('steps',{});
+//load('sets',{});

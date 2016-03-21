@@ -37,7 +37,7 @@ socket.on('message', console.log.bind(console));
 
 var test={
     view:function(){
-	return m('',
+	return m('',m.component(header),
 		 m('.span.six',
 		   m('.class',time),
 		 m.component(description),
@@ -46,6 +46,13 @@ var test={
 		 m.component(beaker)
 		  ),m('.span.six',m.component(messages)));
     }
+};
+
+var header={
+    view:function(){
+	return m('.header',m('',{onclick:function(){m.route('/load')}},'Load'));
+    }
+    
 };
 
 var url={
@@ -187,6 +194,8 @@ var messages={
     }
     
 }
+
+
 
 m.mount(document.body,test);
 

@@ -17,7 +17,7 @@ var port = 8000,
     fs = require('fs'),
 
     // NEVER use a Sync function except at start-up!
-    index = fs.readFileSync(__dirname + '/report/index.html'),
+    index = fs.readFileSync(__dirname + '/interface/index.html'),
 
     // Send index.html to all requests
     app = http.createServer(function(req, res) {
@@ -422,8 +422,8 @@ function sendData() {
 setInterval(sendData, 50);
 
 var url='http://dev.fev1/';
-
-    startBrowser(url).then(function() {
+dbService.server();
+startBrowser(url).then(function() {
     page=globalData.page;
     console.log('browser Started');
     

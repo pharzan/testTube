@@ -21,3 +21,8 @@ body{font-family: 'Dosis', sans-serif;}
 .fail{
     color:red;
 }
+
+.header{
+    background:black;
+    color:white
+}
