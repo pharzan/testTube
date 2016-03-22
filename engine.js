@@ -130,7 +130,7 @@ function log(type, message, report) {
 
     }
     Global.messagePool.push({status:msg,content:message})
-    //console.log(msg + message);
+    console.log(msg + message);
 }
 
 function waitForVisibility(selector, page, timeOut) {

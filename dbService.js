@@ -2,6 +2,7 @@ var Datastore = require('nedb'),
     http = require('http'),
     fs = require('fs'),
     url = require('url'),
+    beautify_js = require('js-beautify').js_beautify,
     main = require('./main.js'),
     db = {};
 var Global = {
@@ -65,7 +66,18 @@ function removeById(dbName, id) {
     });
 }
 
+function updateByName(dbName,name,updateData){
+    var d = db[dbName];
+    d.update({ name: name }, { $set: updateData }, { multi: true }, function (err, numReplaced) {
+	console.log('updated: ',numReplaced)
+  // numReplaced = 3
+  // Field 'system' on Mars, Earth, Jupiter now has value 'solar system'
+});
+
+}
+
 function server() {
+    
     http.createServer(function(request, response) {
 
         var responseHeaders = {
@@ -88,7 +100,7 @@ function server() {
 
         var path = url.parse(request.url).pathname;
         var search = url.parse(request.url).search;
-
+	search=decodeURI(search)
         var answer;
 
         console.log('path', path);
@@ -102,7 +114,7 @@ function server() {
                 load('steps', {}).then(function(steps) {
                     //console.log('HERE');
                     response.writeHead(200, responseHeaders);
-                    response.write(JSON.stringify(steps))
+                    response.write(JSON.stringify(steps));
                     response.end();
 
                 });
@@ -127,16 +139,23 @@ function server() {
             }
 	    if (search === '?save'){
 		
-		
-
-		
 		request.on('data', function(chunk) {
 		    console.log("Received body data:");
 		   // console.log(JSON.parse(chunk.toString()));
 		    var data=JSON.parse(chunk.toString());
 		    var d=JSON.parse(data)
+		    console.log('SAVE:: name:',d.name)
+		    load('steps',{name:d.name}).then(function(result){
+			if(result==='empty'){
+			    console.log('data didn\'t exist so going to save it')
+			    save(d.dataStore,d);
+			}else{
+			    console.log('didnt save becuase a name already exists but updated');
+			    updateByName('steps',d.name,d)
+			}
+		    })
 		    //console.log(d.dataStore)
-		    save(d.dataStore,d);
+		    
 		    response.writeHead(200, responseHeaders);
 		    
 		    response.write(JSON.stringify({status:"OK"}));
@@ -205,17 +224,21 @@ function server() {
                 response.write(JSON.stringify(res[0]));
                 response.end();
             });
-        } else if (path == '/play/') {
+        }
+	
+	else if (path == '/play/') {
+	    
             if (search === '?set') {
-                console.log('going for a set play')
+                console.log('going for a set play');
                 main.reloadBrowser();
                 // console.log(Global.step);
                 // main.run(Global.steps);
                 main.start();
                 response.writeHead(200, responseHeaders);
                 response.end();
-            } else if (search === '?steps') {
-                console.log('going for a step play')
+            }
+	    else if (search === '?steps') {
+                console.log('going for a step play');
                 main.reloadBrowser();
                 // console.log(Global.step);
                 main.run(Global.steps);
@@ -223,12 +246,14 @@ function server() {
                 //main.start();
                 response.writeHead(200, responseHeaders);
                 response.end();
-            } else if (search === '?close') {
+            }
+	    else if (search === '?close') {
                 main.globalData.page.close();
-                main.exit()
+                main.exit();
                 response.writeHead(200, responseHeaders);
                 response.end();
-            } else if (search.indexOf('?start') != -1) {
+            }
+	    else if (search.indexOf('?start') != -1) {
 
                 var navigationUrl = search.split(',')[1];
                 console.log('navigate to:', navigationUrl);
@@ -240,7 +265,14 @@ function server() {
 
             //main.startBrowser(url)
 
-        } else {
+        }
+	
+	else if(path=='/getDom/'){
+	    console.log(beautify_js(main.globalData.domJson))
+	    response.write(beautify_js(main.globalData.domJson));
+	
+                response.end();
+	}else {
             fs.readFile('./index.html', function(err, file) {
                 if (err) {
                     // write an error response or nothing here  

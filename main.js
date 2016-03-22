@@ -6,7 +6,7 @@ var port = 8000,
     Parse = require('parse/node').Parse,
     // server = http.createServer(),
     jsons = require('./data.js'),
-
+    beautify_js = require('js-beautify').js_beautify,
     BROWSER,
     loopCounter = 0,
     stepPromise, networkResponses = [],
@@ -75,6 +75,8 @@ function networkTap() {
     })
 };
 
+
+
 function startBrowser(url) {
     return new Promise(function(resolve) {
         slimerjs.create({
@@ -84,15 +86,67 @@ function startBrowser(url) {
             return sl.createPage(function(err, page) {
                 return new Promise(function(resolve, reject) {
 
-                    sl.get('encoding', function(err, val) {
-                        // console.log(val)
-                    })
+                    
                     sl.outputEncoding = "utf-8";
                     globalData.page = page;
                     networkTap();
                     page.open(url, function(err, status) {
+			page.evaluate(function(){
+			    var initElement = document.getElementsByTagName("html")[0];
+			    var json = mapDOM(initElement, true);
+			    console.log(json);
+			    function mapDOM(element, json) {
+				var treeObject = {};
 
+				// If string convert to document Node
+				if (typeof element === "string") {
+				    if (window.DOMParser) {
+					parser = new DOMParser();
+					docNode = parser.parseFromString(element,"text/xml");
+				    } else { // Microsoft strikes again
+					docNode = new ActiveXObject("Microsoft.XMLDOM");
+					docNode.async = false;
+					docNode.loadXML(element); 
+				    } 
+				    element = docNode.firstChild;
+				}
+
+				//Recursively loop through DOM elements and assign properties to object
+				function treeHTML(element, object) {
+				    object["type"] = element.nodeName;
+				    var nodeList = element.childNodes;
+				    if (nodeList != null) {
+					if (nodeList.length) {
+					    object["content"] = [];
+					    for (var i = 0; i < nodeList.length; i++) {
+						if (nodeList[i].nodeType == 3) {
+						    object["content"].push(nodeList[i].nodeValue);
+						} else {
+						    object["content"].push({});
+						    treeHTML(nodeList[i], object["content"][object["content"].length -1]);
+						}
+					    }
+					}
+				    }
+				    if (element.attributes != null) {
+					if (element.attributes.length) {
+					    object["attributes"] = {};
+					    for (var i = 0; i < element.attributes.length; i++) {
+						object["attributes"][element.attributes[i].nodeName] = element.attributes[i].nodeValue;
+					    }
+					}
+				    }
+				}
+				treeHTML(element, treeObject);
+				
+				return (json) ? JSON.stringify(treeObject) : treeObject;
+			    }
+			    return json;
+			},function(err,json){
+			    globalData.domJson=json;
+			});
                         if (status == "success") {
+			    
                             console.log('Success: page opened');
                             return resolve('done');
                         } else {
@@ -438,12 +492,11 @@ dbService.server();
 startBrowser(url).then(function() {
     page = globalData.page;
     console.log('browser Started');
-
+    
     globalData.page.set('viewportSize', {
         width: 1000,
         height: 700
     });
-
 
     test.urlWatcher.start(globalData.page, 250);
 
@@ -462,9 +515,12 @@ startBrowser(url).then(function() {
     // 	});
 
     //     },1000)
+    
+	
 
+    
 });
-
+// setTimeout(function(){console.log(beautify_js(globalData.domJson))},5000);
 
 exports.run = run;
 

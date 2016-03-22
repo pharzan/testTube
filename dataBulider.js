@@ -166,5 +166,6 @@ function batchFileRead(){
 	   
 
 //batchFileRead();
-//load('steps',{});
+load('steps',{});
+removeById('steps','yF7MXt8KSz3Sj6au')
 //load('sets',{});

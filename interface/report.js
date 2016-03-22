@@ -11,8 +11,8 @@ var time = 'hi';
 //     // });
 // });
 var Globals = {};
-Globals.selected = {};
-Globals.selected.name = 'nothing selected yet';
+var _Globals = {};
+//Globals.selected.name = 'nothing selected yet';
 socket.on('time', function(data) {
     //console.log(data.time);
     m.startComputation();
@@ -43,21 +43,21 @@ var test = {
 var header = {
     view: function() {
         return m('.header',
-		 m('span', {
-                     onclick: function() {
-			 m.route('/load')
-                     }
-		 }, 'Load'),
-		 m('span', {
-                     onclick: function() {
-			 m.route('/report')
-                     }
-		 }, 'Report'),
-		 m('span', {
-                     onclick: function() {
-			 m.route('/build')
-                     }
-		 }, 'New')
+            m('span', {
+                onclick: function() {
+                    m.route('/load')
+                }
+            }, 'Load'),
+            m('span', {
+                onclick: function() {
+                    m.route('/report')
+                }
+            }, 'Report'),
+            m('span', {
+                onclick: function() {
+                    m.route('/build')
+                }
+            }, 'New')
 
         );
     }
@@ -221,7 +221,7 @@ var selectStepList = {
 
     controller: function() {
         var self = this;
-
+	this.populated=false;
         var names = m.request({
             method: "GET",
             url: "http://127.0.0.1:8001/steps/?names",
@@ -248,7 +248,8 @@ var selectStepList = {
                     self.selectElement = selectElement;
 
                 },
-                onchange: function(e) {
+            oninput: function(e) {
+		
                     if (typeof self.selected === 'undefined') {
                         self.selected = {};
                     }
@@ -258,17 +259,18 @@ var selectStepList = {
                         url: "http://127.0.0.1:8001/step/?" + self.selected.name,
                         background: false
                     }).then(function(response) {
-			//selectedStep:::
-			self.selected=response;
-                        Globals.selected = response;
-                        console.log('SelectedStep', Globals.selectedStep);
-			self.infoShowable=true;
+                        //selectedStep:::
+                        self.selected = response;
+                        _Globals.selectedStep = response;
+                        console.log('SelectedStep', _Globals.selectedStep);
+                        self.infoShowable = true;
+		
                     });
                 }
-        },
-		 
+            },
+
             ctrl.mappable ? ctrl.list.map(function(name, i) {
-                
+
                 if (i == ctrl.list.length - 1) {
                     ctrl.populated = true;
                 }
@@ -303,18 +305,18 @@ var selectSetList = {
         var self = this;
 
         (typeof ctrl.list === 'undefined') ? ctrl.mappable = false: ctrl.mappable = true;
-        return m('',m('select', {
+        return m('', m('select', {
                 config: function(selectElement, isinit) {
                     if (isinit)
                         return;
                     self.selectElement = selectElement;
 
                 },
-                onchange: function(e) {
+                oninput: function(e) {
                     if (typeof self.selected === 'undefined') {
                         self.selected = {};
                     }
-                    
+
                     self.selected.name = e.target.value;
                     m.request({
                         method: "GET",
@@ -322,16 +324,16 @@ var selectSetList = {
                         background: false
                     }).then(function(response) {
                         self.selected = response;
-                        Globals.selectedSet = response;
-			
-                        console.log('SelectedSet', Globals.selectedSet);
-			self.infoShowable=true;
+                        _Globals.selectedSet = response;
+
+                        console.log('SelectedSet', _Globals.selectedSet);
+                        self.infoShowable = true;
                     });
                 }
 
             },
             ctrl.mappable ? ctrl.list.map(function(name, i) {
-               
+
                 if (i == ctrl.list.length - 1) {
                     ctrl.populated = true;
                 }
@@ -339,7 +341,7 @@ var selectSetList = {
                     return;
 
                 self.selectElement.options[self.selectElement.options.length] = new Option(i + ') ' + name, name);
-		
+
 
             }) : null));
     }
@@ -362,40 +364,38 @@ var actionButtons = {
                     });
                 }
             }, 'PLAY Set!'),
-		 
-		 m('button',{
-		     onclick: function() {
 
-			 m.request({
-                             method: "GET",
-                             url: "http://127.0.0.1:8001/play/?steps",
-                             background: true
-			 });
-                     }
-		 },'PLAY Steps')
+            m('button', {
+                onclick: function() {
+
+                    m.request({
+                        method: "GET",
+                        url: "http://127.0.0.1:8001/play/?steps",
+                        background: true
+                    });
+                }
+            }, 'PLAY Steps')
 
 
-		);
+        );
 
     }
 };
 
-var setList={
-    view:function(){
-	//console.log(Globals.selectedSet,selectSetList.selected)
-	return m('ul',selectSetList.selected.content.map(function(set){
-	    return m('li',set.testFile)
-	})
-		)
+var setList = {
+    view: function() {
+        //console.log(Globals.selectedSet,selectSetList.selected)
+        return m('ul', selectSetList.selected.content.map(function(set) {
+            return m('li', set.testFile)
+        }))
     }
 };
 
-var stepList={
-    view:function(){
-	return m('ul',selectStepList.selected.content.map(function(step,i){
-	    return step.action?m('li','Action: '+i+') '+step.action,m('span.des'," >>> "+step.des)):m('.des',step.description);
-	})
-		);
+var stepList = {
+    view: function() {
+        return m('ul', _Globals.selectedStep.content.map(function(step, i) {
+            return step.action ? m('li', 'Action: ' + i + ') ' + step.action, m('span.des', " >>> " + step.des)) : m('.des', step.description);
+        }));
     }
 }
 
@@ -414,130 +414,206 @@ var List = function() {
     };
 };
 
-var build={
-    content:[],
-    data:{},
-    controller:function(){
-	this.actions=['waitForVisibility','click']
+var build = {
+    content: [],
+    data: {},
+    controller: function() {
+        this.actions = ['waitForVisibility', 'click'];
     },
-    view:function(ctrl){
-	var self=this;
-	
-	return [m.component(header),
+    fetchFlag: false,
+    view: function(ctrl) {
+        var self = this;
+        //console.log(_Globals.selectedStep)
+        return [m.component(header),
+		m.component(selectStepList),
+		m('button', {
+                    onclick: function() {
+			console.log(_Globals.selectedStep.name);
+			self.fetchFlag = true;
+                    }
+		}, 'fetch'),
+		m('button', {
+                    onclick: function() {
+			console.log(_Globals.selectedStep.name);
+			self.fetchFlag = false;
+                    }
+		}, 'edit'),
 		m('',
-		  m('lable','steps name'),m('input',{
-		      onchange:function(e){
-			  self.stepsName=this.value;
-		      }}),
-		  m('lable','steps Description'),m('input',{
-		      onchange:function(e){
-			  self.stepsDescription=this.value;
-		      }})
+                  m('lable', 'steps name'),
+		  m('input', {
+                      oninput: m.withAttr("value", function(e) {
+		
+                          self.stepsName=this.value
+                      }),
+                      onpropertychange:function(){
+			  console.log('CHANGED')
+		      },
+                      config: function(element, isisnt) {
+                          if (self.fetchFlag)
+                              element.value = _Globals.selectedStep.name;
+                      }
+
+                  }),
+
+                  m('lable', 'steps Description'), m('input', {
+                      oninput: function(e) {
+                          self.stepsDescription = this.value;
+                      },
+                      config: function(element, isisnt) {
+                          if (self.fetchFlag) {
+                              element.value = _Globals.selectedStep.content[0].description;
+                              self.content = _Globals.selectedStep.content;
+			      
+                          }
+                      }
+                  })
 
 		 ),
-		  m('lable','Category'),m('input',{
-		      onchange:function(e){
-			  self.category=this.value;
-		      }})
+		m('lable', 'Category'), m('input', {
+                    oninput: function(e) {
+			self.category = this.value;
+                    },
+                    config: function(element, isisnt) {
+			if (self.fetchFlag)
+                            element.value = _Globals.selectedStep.categoery;
+                    }
 
-		 ,
+		})
+
+		,
 		m('',
+
+                  m('lable', 'Action'), m('select', {
+
+                      config: function(selectElement, isinit) {
+                          if (isinit)
+                              return;
+
+
+                          ctrl.actions.map(function(name, i) {
+
+                              if (i == ctrl.actions.length) {
+                                  ctrl.populated = true;
+                              }
+                              if (ctrl.populated)
+                                  return;
+                              selectElement.options[i] = new Option('(' + i + ') ' + name, name);
+                          });
+
+                      },
+                      oninput: function(e) {
+                          self.action = this.value;
+
+                      }
+
+                  }),
+                  m('lable', 'selector'), m('input', {
+                      oninput: function(e) {
+                          self.selector = this.value;
+                      }
+                  }),
+                  m('lable', 'description'), m('input', {
+                      oninput: function() {
+                          self.description = this.value;
+                      }
+                  }),
+		  m('lable', 'add to row:'), m('input', {
+                      oninput: function() {
+                          self.rowNumber = this.value;
+                      }
+                  })
+		 ),
+		m('', this.content.map(function(d, i) {
+                     return m('', m('button', {
+                         onclick: function() {
+                             self.content.splice(i, 1);
+                         }
+                     }, 'remove'),m('button',{
+			 onclick:function(){
+			     console.log(d,i,self.content[i])
+			     self.stepEditor.value=JSON.stringify(d);
+			     
+			 }
+		     },'Edit'),i+") " ,JSON.stringify(d)
+
+			     );
+                 }
+						     
+						    ),
+		m('button', {
+                    onclick: this.makeStep.bind(self)
+		}, 'add'),
+		m('button', {
 		  
-		  m('lable','Action'),m('select',{
-		
-		      config: function(selectElement, isinit) {
-                    if (isinit)
-                        return;
-			  ctrl.actions.map(function(name, i) {
-                
-			      if (i == ctrl.actions.length) {
-				  ctrl.populated = true;
-			      }
-			      if (ctrl.populated)
-				  return;
-			      selectElement.options[i] = new Option('('+i + ') ' + name, name);
-			  }); 
-
-                },
-		      onchange:function(e){	  
-			  self.action=this.value;
-			
-		      }
-		      
-		  }),
-		  m('lable','selector'),m('input',{
-		      onchange:function(e){
-			  self.selector=this.value;
-		      }}),
-		  m('lable','description'),m('input',{
-		      onchange:function(){
-			  self.description=this.value;
-		      }
-		  })
-		 ),this.content.map(function(d,i){
-		     return m('',JSON.stringify(d),
-			      m('button',{onclick:function(){
-				  self.content.splice(i,1);
-		     }},'remove'));
-		 }
-		     
-				),
-		m('button',{onclick:this.makeStep.bind(self)},'add'),
-		m('button',{onclick:this.makeData.bind(self)},'build/Save')
-	       ];
+                    onclick: this.makeData.bind(self)
+		}, 'build/Save'))
+               ];
     },
 
-    makeStep:function() {
-	var self=this;
-        this.content.push({
-	    action:self.action,
-	    tag:self.selector,
-	    des:self.description
-	});
-    },
-    makeData:function(){
-	var self=this;
-	self.content.push({action:'done'})
-	self.content.unshift({description:self.stepsDescription})
-	
-	self.data={
-	    name:self.stepsName,
-	    content:self.content,
-	    dataStore:'steps',
-	    categoery:self.category,
-	    infos:{
-		time:new Date()
-	    }
-	};
-	 m.request({
-            method: "POST",
-             url: "http://dev.testtube:8001/steps/?save",
-	     dataType: 'application/json',
-             background: true,
-	     data:JSON.stringify(self.data)
-        }).then(function(response) {
-            console.log("!!!!",response);
-            
+    makeStep: function() {
+        var self = this;
+	var row=Number(this.rowNumber);
+	console.log(!isNaN(row))
+	if(!isNaN(row)){
+	    this.content.splice(row, 0, {
+            action: self.action,
+            tag: self.selector,
+            des: self.description
         });
-	console.log(self.data)
+	}else{
+        this.content.push({
+            action: self.action,
+            tag: self.selector,
+            des: self.description
+        });
+	}
+    },
+    makeData: function() {
+        var self = this;
+        self.content.push({
+            action: 'done'
+        })
+        self.content.unshift({
+            description: self.stepsDescription
+        })
+	console.log(typeof self.content,self.stepsDescription)
+        self.data = {
+            name: self.stepsName,
+            content: self.content,
+            dataStore: 'steps',
+            categoery: self.category,
+            infos: {
+                time: new Date()
+            }
+        };
+        m.request({
+            method: "POST",
+            url: "http://dev.testtube:8001/steps/?save",
+            dataType: 'application/json',
+            background: true,
+            data: JSON.stringify(self.data)
+        }).then(function(response) {
+            console.log("!!!!", response);
+
+        });
+        console.log(self.data)
     }
 };
 
 var load = {
     view: function() {
         return [m.component(header),
-		m.component(actionButtons),
-		m.component(selectStepList),
-		selectStepList.infoShowable?m.component(stepList):null,
+            m.component(actionButtons),
+            m.component(selectStepList),
+            selectStepList.infoShowable ? m.component(stepList) : null,
             m.component(selectSetList),
-		selectSetList.infoShowable?m.component(setList):null,
-		
+            selectSetList.infoShowable ? m.component(setList) : null,
+
             //m('',Globals.selected.name)
         ];
 
     }
 };
-
 
 
 m.route.mode = 'pathname';
@@ -546,63 +622,61 @@ m.route(document.body, '/', {
     '/': test,
     '/report': test,
     '/load': load,
-    '/':build
+    '/': build
 });
 
-// var initElement = document.getElementsByTagName("html")[0];
-// var json = mapDOM(initElement, true);
+var initElement = document.getElementsByTagName("html")[0];
+var json = mapDOM(initElement, true);
+console.log(json);
+
+// Test with a string.
+// initElement = "<div><span>text</span>Text2</div>";
+// json = mapDOM(initElement, true);
 // console.log(json);
 
-// // Test with a string.
-// // initElement = "<div><span>text</span>Text2</div>";
-// // json = mapDOM(initElement, true);
-// // console.log(json);
+function mapDOM(element, json) {
+    var treeObject = {};
 
-// function mapDOM(element, json) {
-//     var treeObject = {};
+    // If string convert to document Node
+    if (typeof element === "string") {
+        if (window.DOMParser) {
+            parser = new DOMParser();
+            docNode = parser.parseFromString(element, "text/xml");
+        } else { // Microsoft strikes again
+            docNode = new ActiveXObject("Microsoft.XMLDOM");
+            docNode.async = false;
+            docNode.loadXML(element);
+        }
+        element = docNode.firstChild;
+    }
 
-//     // If string convert to document Node
-//     if (typeof element === "string") {
-//         if (window.DOMParser) {
-//               parser = new DOMParser();
-//               docNode = parser.parseFromString(element,"text/xml");
-//         } else { // Microsoft strikes again
-//               docNode = new ActiveXObject("Microsoft.XMLDOM");
-//               docNode.async = false;
-//               docNode.loadXML(element); 
-//         } 
-//         element = docNode.firstChild;
-//     }
+    //Recursively loop through DOM elements and assign properties to object
+    function treeHTML(element, object) {
+        object["type"] = element.nodeName;
+        var nodeList = element.childNodes;
+        if (nodeList != null) {
+            if (nodeList.length) {
+                object["content"] = [];
+                for (var i = 0; i < nodeList.length; i++) {
+                    if (nodeList[i].nodeType == 3) {
+                        object["content"].push(nodeList[i].nodeValue);
+                    } else {
+                        object["content"].push({});
+                        treeHTML(nodeList[i], object["content"][object["content"].length - 1]);
+                    }
+                }
+            }
+        }
+        if (element.attributes != null) {
+            if (element.attributes.length) {
+                object["attributes"] = {};
+                for (var i = 0; i < element.attributes.length; i++) {
+                    object["attributes"][element.attributes[i].nodeName] = element.attributes[i].nodeValue;
+                }
+            }
+        }
+    }
+    treeHTML(element, treeObject);
 
-//     //Recursively loop through DOM elements and assign properties to object
-//     function treeHTML(element, object) {
-//         object["type"] = element.nodeName;
-//         var nodeList = element.childNodes;
-//         if (nodeList != null) {
-//             if (nodeList.length) {
-//                 object["content"] = [];
-//                 for (var i = 0; i < nodeList.length; i++) {
-//                     if (nodeList[i].nodeType == 3) {
-//                         object["content"].push(nodeList[i].nodeValue);
-//                     } else {
-//                         object["content"].push({});
-//                         treeHTML(nodeList[i], object["content"][object["content"].length -1]);
-//                     }
-//                 }
-//             }
-//         }
-//         if (element.attributes != null) {
-//             if (element.attributes.length) {
-//                 object["attributes"] = {};
-//                 for (var i = 0; i < element.attributes.length; i++) {
-//                     object["attributes"][element.attributes[i].nodeName] = element.attributes[i].nodeValue;
-//                 }
-//             }
-//         }
-//     }
-//     treeHTML(element, treeObject);
-
-//     return (json) ? JSON.stringify(treeObject) : treeObject;
-// }
-
-
+    return (json) ? JSON.stringify(treeObject) : treeObject;
+}
