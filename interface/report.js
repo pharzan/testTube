@@ -11,7 +11,7 @@ var time = 'hi';
 //     // });
 // });
 var Globals = {};
-var _Globals = {};
+var _Globals = {selectedStep:{name:'not set'}};
 //Globals.selected.name = 'nothing selected yet';
 socket.on('time', function(data) {
     //console.log(data.time);
@@ -417,18 +417,22 @@ var List = function() {
 var build = {
     content: [],
     data: {},
+    
     controller: function() {
         this.actions = ['waitForVisibility', 'click'];
     },
     fetchFlag: false,
     view: function(ctrl) {
+	
         var self = this;
         //console.log(_Globals.selectedStep)
+	
         return [m.component(header),
-		m.component(selectStepList),
+		m.component(selectStepList),m('button',{onclick:function(){console.log(self.stepsName)}},'aaa'),
 		m('button', {
                     onclick: function() {
 			console.log(_Globals.selectedStep.name);
+			self.stepsName=_Globals.selectedStep.name
 			self.fetchFlag = true;
                     }
 		}, 'fetch'),
@@ -441,15 +445,16 @@ var build = {
 		m('',
                   m('lable', 'steps name'),
 		  m('input', {
-                      oninput: m.withAttr("value", function(e) {
-		
-                          self.stepsName=this.value
-                      }),
-                      onpropertychange:function(){
-			  console.log('CHANGED')
-		      },
-                      config: function(element, isisnt) {
-                          if (self.fetchFlag)
+                      oninput: m.withAttr("value", function(e){
+			  console.log('a')
+			  self.stepsName=this.value}),
+		      value:self.stepsName,
+		     
+                      
+                      config: function(element, isinit) {
+			  if(isinit)
+			      return
+                          // if (self.fetchFlag)
                               element.value = _Globals.selectedStep.name;
                       }
 
