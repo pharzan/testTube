@@ -1,4 +1,5 @@
 var Datastore = require('nedb'),
+    PubSub = require('./pubsub.js'),
     http = require('http'),
     fs = require('fs'),
     url = require('url'),
@@ -6,7 +7,8 @@ var Datastore = require('nedb'),
     main = require('./main.js'),
     db = {};
 var Global = {
-    steps: ''
+    steps: '',
+    setCounter:0
 };
 var r = require('request');
 
@@ -77,6 +79,11 @@ function updateByName(dbName,name,updateData){
 }
 
 function server() {
+    var p2 = PubSub.subscribe('testStepsComplete', function() {
+        Global.setCounter++;
+        console.log('------TEST STEPS COMPLETE-----SetCounter::',Global.setCounter);
+        
+    });
     
     http.createServer(function(request, response) {
 
@@ -174,9 +181,9 @@ function server() {
 		    console.log("Received body data:");
 		   // console.log(JSON.parse(chunk.toString()));
 		    var data=JSON.parse(chunk.toString());
-		    var d=JSON.parse(data)
-		    console.log('delete:: id:',d.id)
-		    removeById('steps',d.id)
+		    var d=JSON.parse(data);
+		    console.log('delete:: id:',d.id);
+		    removeById('steps',d.id);
 		    //console.log(d.dataStore)
 		    
 		    response.writeHead(200, responseHeaders);

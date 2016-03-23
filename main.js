@@ -49,6 +49,7 @@ app.listen(3000);
 var globalData = {};
 globalData.jsonFileCounter = 0,
 globalData.testSetCounter = 0;
+globalData.setCounter=0;
 
 function networkTap() {
     return new Promise(function(resolve) {
@@ -84,65 +85,66 @@ function startBrowser(url) {
             return sl.createPage(function(err, page) {
                 return new Promise(function(resolve, reject) {
 
-                    
+
                     sl.outputEncoding = "utf-8";
                     globalData.page = page;
                     networkTap();
                     page.open(url, function(err, status) {
-			page.evaluate(function(){
-			    var initElement = document.getElementsByTagName("html")[0];
-			    var json = mapDOM(initElement, true);
-			    console.log(json);
-			    function mapDOM(element, json) {
-				var treeObject = {};
+                        page.evaluate(function() {
+                            var initElement = document.getElementsByTagName("html")[0];
+                            var json = mapDOM(initElement, true);
+                            console.log(json);
 
-				// If string convert to document Node
-				if (typeof element === "string") {
-				    if (window.DOMParser) {
-					parser = new DOMParser();
-					docNode = parser.parseFromString(element,"text/xml");
-				    } else { // Microsoft strikes again
-					docNode = new ActiveXObject("Microsoft.XMLDOM");
-					docNode.async = false;
-					docNode.loadXML(element); 
-				    } 
-				    element = docNode.firstChild;
-				}
+                            function mapDOM(element, json) {
+                                var treeObject = {};
 
-				//Recursively loop through DOM elements and assign properties to object
-				function treeHTML(element, object) {
-				    object["type"] = element.nodeName;
-				    var nodeList = element.childNodes;
-				    if (nodeList != null) {
-					if (nodeList.length) {
-					    object["content"] = [];
-					    for (var i = 0; i < nodeList.length; i++) {
-						if (nodeList[i].nodeType == 3) {
-						    object["content"].push(nodeList[i].nodeValue);
-						} else {
-						    object["content"].push({});
-						    treeHTML(nodeList[i], object["content"][object["content"].length -1]);
-						}
-					    }
-					}
-				    }
-				    if (element.attributes != null) {
-					if (element.attributes.length) {
-					    object["attributes"] = {};
-					    for (var i = 0; i < element.attributes.length; i++) {
-						object["attributes"][element.attributes[i].nodeName] = element.attributes[i].nodeValue;
-					    }
-					}
-				    }
-				}
-				treeHTML(element, treeObject);
-				
-				return (json) ? JSON.stringify(treeObject) : treeObject;
-			    }
-			    return json;
-			},function(err,json){
-			    globalData.domJson=json;
-			});
+                                // If string convert to document Node
+                                if (typeof element === "string") {
+                                    if (window.DOMParser) {
+                                        parser = new DOMParser();
+                                        docNode = parser.parseFromString(element, "text/xml");
+                                    } else { // Microsoft strikes again
+                                        docNode = new ActiveXObject("Microsoft.XMLDOM");
+                                        docNode.async = false;
+                                        docNode.loadXML(element);
+                                    }
+                                    element = docNode.firstChild;
+                                }
+
+                                //Recursively loop through DOM elements and assign properties to object
+                                function treeHTML(element, object) {
+                                    object["type"] = element.nodeName;
+                                    var nodeList = element.childNodes;
+                                    if (nodeList != null) {
+                                        if (nodeList.length) {
+                                            object["content"] = [];
+                                            for (var i = 0; i < nodeList.length; i++) {
+                                                if (nodeList[i].nodeType == 3) {
+                                                    object["content"].push(nodeList[i].nodeValue);
+                                                } else {
+                                                    object["content"].push({});
+                                                    treeHTML(nodeList[i], object["content"][object["content"].length - 1]);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (element.attributes != null) {
+                                        if (element.attributes.length) {
+                                            object["attributes"] = {};
+                                            for (var i = 0; i < element.attributes.length; i++) {
+                                                object["attributes"][element.attributes[i].nodeName] = element.attributes[i].nodeValue;
+                                            }
+                                        }
+                                    }
+                                }
+                                treeHTML(element, treeObject);
+
+                                return (json) ? JSON.stringify(treeObject) : treeObject;
+                            }
+                            return json;
+                        }, function(err, json) {
+                            globalData.domJson = json;
+                        });
                         if (status == "success") {
                             console.log('Success: page opened');
                             return resolve('done');
@@ -181,24 +183,21 @@ function run(testSteps) {
 
         testSteps.map(function(step) {
             function stepSwitchCheck(step, page) {
-
                 switch (step.action) {
                     case 'waitForVisibility':
                         return test.waitForVisibility(step.tag, page);
                     case 'click':
                         return test.clickClass(step.tag, page);
                     case 'focus':
-                    return test.focusClass(step.tag, page);
-		    //*!!
+                        return test.focusClass(step.tag, page);
                     case 'sendKeys':
-                    return test.sendKeys(step.tag, step.key, page);
-		    
+                        return test.sendKeys(step.tag, step.key, page);
                     case 'getElementContent':
                         globalData.testTubeKey = step.tag;
-                    return testTube = test.getElementContent(step.tag, page);
+                        return testTube = test.getElementContent(step.tag, page);
                     case 'getNetworkContent':
                         globalData.beakerKey = step.key;
-                    return networkBeaker = test.getNetworkContent(networkResponses, step.key);
+                        return networkBeaker = test.getNetworkContent(networkResponses, step.key);
                     case 'getUrlContent':
                         return testTube = test.getUrlContent(page);
                     case 'compareTestTubeBeaker':
@@ -224,7 +223,7 @@ function run(testSteps) {
                                 });
                             });
                         });
-                    break;
+                        break;
                         return test.wait(step.key);
                     case 'historyBack':
                         return new Promise(function(resolve) {
@@ -242,7 +241,7 @@ function run(testSteps) {
                                 });
                             });
                         });
-                    break;
+                        break;
                     case 'historyForward':
                         return new Promise(function(resolve) {
                             return wait(50).then(function() {
@@ -259,24 +258,23 @@ function run(testSteps) {
                                 });
                             })
                         });
-                    break;
-		case 'navigateUrl':
-		    page.openUrl(step.key);
-		    break;
+                        break;
+                    case 'navigateUrl':
+                        page.openUrl(step.key);
+                        break;
                 };
             };
-	    
-            if (typeof(stepPromise) == 'undefined') {
+
+            if (typeof(stepPromise) == 'undefined') 
                 stepPromise = stepSwitchCheck(step, page);
-            } else {
+	    else {
                 stepPromise = stepPromise.then(function(msg) {
                     if (step.action == 'done') {
-
+			console.log('here')
                         PubSub.publish('testStepsComplete');
                         return resolve('done');
                     }
                     if (typeof step.des !== 'undefined') {
-
                         globalData.currentStepDescription = step.des;
                         test.log('des', step.des);
                     }
@@ -290,8 +288,8 @@ function run(testSteps) {
 };
 
 function start() {
+    
     var testSet = globalData.testSets[globalData.testSetCounter];
-
     var testSteps = test.load(globalData.testSet[globalData.jsonFileCounter].testFile);
 
     run(testSteps);
@@ -478,7 +476,7 @@ function sendData() {
 }
 
 function reloadBrowser() {
-    PubSub.clearAllSubscriptions();
+    //PubSub.clearAllSubscriptions();
 }
 
 function exit() {
@@ -495,13 +493,15 @@ dbService.server();
 startBrowser(url).then(function() {
     page = globalData.page;
     console.log('browser Started');
-    
+
     globalData.page.set('viewportSize', {
         width: 1000,
         height: 700
     });
-    
+
     test.urlWatcher.start(globalData.page, 250);
+    
+    
 
     //setTimeout(function(){
     //start();},1000)
@@ -518,10 +518,10 @@ startBrowser(url).then(function() {
     // 	});
 
     //     },1000)
-    
-	
 
-    
+
+
+
 });
 // setTimeout(function(){console.log(beautify_js(globalData.domJson))},5000);
 

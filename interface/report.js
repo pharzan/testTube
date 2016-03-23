@@ -1,18 +1,10 @@
 var socket = io('http://127.0.0.1:3000');
 var time = 'hi';
 
-// socket.on('welcome', function(data) {
-//     //addMessage(data.message);
-
-//     // // Respond with a message including this clients' id sent from the server
-//     // socket.emit('i am client', {
-//     //     data: 'foo!',
-//     //     id: data.id
-//     // });
-// });
 var Globals = {};
 var _Globals = {selectedStep:{name:'not set'},
-		build:false
+		build:false,
+		set:{content:[]}
 	       };
 //Globals.selected.name = 'nothing selected yet';
 socket.on('time', function(data) {
@@ -435,9 +427,9 @@ var actionButtons = {
 
 var setList = {
     view: function() {
-        //console.log(Globals.selectedSet,selectSetList.selected)
-        return m('ul', selectSetList.selected.content.map(function(set) {
-            return m('li', set.testFile)
+        
+        return m('ul', _Globals.set.map(function(set) {
+            return m('li', set);
         }))
     }
 };
@@ -449,7 +441,7 @@ var stepList = {
             return step.action ? m('li', 'Action: ' + i + ') ' + step.action, m('span.des', " >>> " + step.des)) : m('.des', step.description);
         }));
     }
-}
+};
 
 var List = function() {
 
@@ -517,7 +509,7 @@ var build = {
 						  oninput: function() {
 						      build.description = this.value;
 						  }
-						    }));345
+						    }));
 					   
 				    }};
 	var compareForm={view:function(){return m('span',
@@ -575,6 +567,11 @@ var build = {
         var self = this;
         return [m.component(header),m.component(dialog),
 		m.component(selectStepList),
+		m('button',{
+		    onclick: function() {
+			_Globals.set.content.push(_Globals.selectedStep.name);
+			console.log(_Globals.set.content)
+                    }},'Add to set'),
 		m('button', {
                     onclick: function() {
 			console.log(_Globals.selectedStep.name);
@@ -620,7 +617,6 @@ var build = {
 			    }
 			    
 			},1);
-			
 			self.fetchFlag = false;
 			
                     }
@@ -713,7 +709,9 @@ var build = {
 		}, 'add'),
 		m('button', {
                     onclick: this.makeData.bind(self)
-		}, 'build/Save'))
+		}, 'build/Save'),
+		     m.component(set)
+		    )
                ];
     },
 
@@ -742,6 +740,7 @@ var build = {
             });
 	}
     },
+    
     makeData: function() {
         var self = this;
 	
@@ -776,6 +775,7 @@ var build = {
         });
         console.log(self.data)
     },
+    
     delete:function(_id){
 	console.log('Will now make delete request',_id);
 	m.request({
@@ -791,7 +791,16 @@ var build = {
         });
     }
 };
+var set={
+    view:function(){
+	return m('',m('ul',_Globals.set.content.map(function(setName,i){
+	    return [m('li',m('button',{onclick:function(){
+		_Globals.set.content.splice(i, 1);
+	    }},'remove'),m('span',{},setName))];
+	})),(_Globals.set.content.length!==0)?m('',m('button','Build set')):null)
+    }
 
+}
 var load = {
     view: function() {
         return [m.component(header),
