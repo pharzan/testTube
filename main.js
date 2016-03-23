@@ -75,8 +75,6 @@ function networkTap() {
     })
 };
 
-
-
 function startBrowser(url) {
     return new Promise(function(resolve) {
         slimerjs.create({
@@ -146,7 +144,6 @@ function startBrowser(url) {
 			    globalData.domJson=json;
 			});
                         if (status == "success") {
-			    
                             console.log('Success: page opened');
                             return resolve('done');
                         } else {
@@ -191,15 +188,17 @@ function run(testSteps) {
                     case 'click':
                         return test.clickClass(step.tag, page);
                     case 'focus':
-                        return test.focusClass(step.tag, page);
+                    return test.focusClass(step.tag, page);
+		    //*!!
                     case 'sendKeys':
-                        return test.sendKeys(step.tag, step.key, page);
+                    return test.sendKeys(step.tag, step.key, page);
+		    
                     case 'getElementContent':
                         globalData.testTubeKey = step.tag;
-                        return testTube = test.getElementContent(step.tag, page);
+                    return testTube = test.getElementContent(step.tag, page);
                     case 'getNetworkContent':
                         globalData.beakerKey = step.key;
-                        return networkBeaker = test.getNetworkContent(networkResponses, step.key);
+                    return networkBeaker = test.getNetworkContent(networkResponses, step.key);
                     case 'getUrlContent':
                         return testTube = test.getUrlContent(page);
                     case 'compareTestTubeBeaker':
@@ -225,7 +224,7 @@ function run(testSteps) {
                                 });
                             });
                         });
-                        break;
+                    break;
                         return test.wait(step.key);
                     case 'historyBack':
                         return new Promise(function(resolve) {
@@ -243,7 +242,7 @@ function run(testSteps) {
                                 });
                             });
                         });
-                        break;
+                    break;
                     case 'historyForward':
                         return new Promise(function(resolve) {
                             return wait(50).then(function() {
@@ -260,9 +259,13 @@ function run(testSteps) {
                                 });
                             })
                         });
-                        break;
+                    break;
+		case 'navigateUrl':
+		    page.openUrl(step.key);
+		    break;
                 };
             };
+	    
             if (typeof(stepPromise) == 'undefined') {
                 stepPromise = stepSwitchCheck(step, page);
             } else {
@@ -497,7 +500,7 @@ startBrowser(url).then(function() {
         width: 1000,
         height: 700
     });
-
+    
     test.urlWatcher.start(globalData.page, 250);
 
     //setTimeout(function(){

@@ -27,12 +27,16 @@ function sendKeys(element,key,page, callback) {
 	    var myEvent=new Event('change');
 	    input.value=key;
 	    input.dispatchEvent(myEvent);
-	    return document.querySelector(element);
-	}, element,key);
+	    return true;
+	}, element,key,function(err,result){
+	    console.log("!!!!SEND KEYS",result);
+	if(result)
+	     return resolve('done');
+    });
 	//e.value=key
 	// page.sendEvent('keypress', key, null, null,null);
 	// e.dispatchEvent(myEvent);
-	 return resolve('done');
+	
 	
     });
 }
@@ -304,21 +308,30 @@ function clickClass(selector, page) {
 
 function focusClass(element, page) {
     return new Promise(function(resolve, reject) {
-        var e = page.evaluate(function(element) {
-            return document.querySelector(element);
-        }, element);
-
-	
-        if (e != null && typeof(e) != 'undefined') {
+        page.evaluate(function(element) {
+            var e= document.querySelector(element);
+	            if (e != null && typeof(e) != 'undefined') {
             if (e.offsetParent !== null) {
                 e.focus();
-                log('pass', 'focusClass: ' + element + ' focused');
-                return resolve('done');
+                
+                return true;
             }
         } else {
-            log('fail', 'focusClass Something went wrong ' + element + 'element Not Found! ');
-            return resolve('fail');
+            
+            return false
         }
+
+        }, element,function(err,result){
+	    if(result){
+		log('pass', 'focusClass: ' + element + ' focused');
+		return resolve('done')
+	    }else{
+		log('fail', 'focusClass Something went wrong ' + element + 'element Not Found! ');
+		return resolve('fail')
+	    }
+	});
+
+	
     });
 
 

@@ -100,7 +100,7 @@ function server() {
 
         var path = url.parse(request.url).pathname;
         var search = url.parse(request.url).search;
-	search=decodeURI(search)
+	search=decodeURI(search);
         var answer;
 
         console.log('path', path);
@@ -168,12 +168,36 @@ function server() {
 		    response.end();
 		});
 	    }
+	    if (search === '?delete'){
+		
+		request.on('data', function(chunk) {
+		    console.log("Received body data:");
+		   // console.log(JSON.parse(chunk.toString()));
+		    var data=JSON.parse(chunk.toString());
+		    var d=JSON.parse(data)
+		    console.log('delete:: id:',d.id)
+		    removeById('steps',d.id)
+		    //console.log(d.dataStore)
+		    
+		    response.writeHead(200, responseHeaders);
+		    
+		    response.write(JSON.stringify({status:"OK"}));
+		    response.end();
+		});
+		
+		request.on('end', function() {
+		    // empty 200 OK response for now
+		    response.writeHead(200, "OK", {'Content-Type': 'text/html'});
+		    response.end();
+		});
+	    }
 
 
             // response.writeHead(200, {"Content-Type": "text/plain"});
             // response.end(answer);
             
-        } else if (path == '/step/') {
+        }
+	else if (path == '/step/') {
             var query = {
                 name: search.replace('?', '')
             };
@@ -186,7 +210,8 @@ function server() {
                 response.end();
             });
 
-        } else if (path == '/sets/') {
+        }
+	else if (path == '/sets/') {
             if (search === '?names') {
                 var names = [];
                 var query = {};
@@ -212,7 +237,8 @@ function server() {
                 });
             }
 	    
-        } else if (path == '/set/') {
+        }
+	else if (path == '/set/') {
             query = {
                 name: search.replace('?', '')
             };
@@ -272,7 +298,8 @@ function server() {
 	    response.write(beautify_js(main.globalData.domJson));
 	
                 response.end();
-	}else {
+	}
+	else {
             fs.readFile('./index.html', function(err, file) {
                 if (err) {
                     // write an error response or nothing here  
