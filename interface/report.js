@@ -708,13 +708,14 @@ var build = {
 		m.component(selectStepList),
 		m('button',{
 		    onclick: function() {
-			_Globals.set.content.push(_Globals.selectedStep.name);
+			_Globals.set.content.push(_Globals.selectedSteps.name);
 			console.log(_Globals.set.content)
                     }},'Add to set'),
 		m('button', {
                     onclick: function() {
-			console.log(_Globals.selectedStep.name);
+			console.log(_Globals.selectedStep.name,_Globals);
 			self.stepsName=_Globals.selectedStep.name;
+			self.content=_Globals.selectedStep.content;
 			self.fetchFlag = true;
                     }
 		}, 'fetch'),
