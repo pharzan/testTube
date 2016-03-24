@@ -283,7 +283,7 @@ var selectStepList = {
             background: true
         }).then(function(response) {
             console.log(response);
-            self.list = response;
+            self.list = response.sort();
         });
 
         this.onunload = function() {
@@ -448,7 +448,9 @@ var setList = {
 
 var stepList = {
     view: function() {
+	
         return m('ul',
+		 
 		 _Globals.selectedStep.content.map(function(step, i) {
             return step.action ? m('li', 'Action: ' + i + ') ' + step.action, m('span.des', " >>> " + step.des)) : m('.des', step.description);
         }));

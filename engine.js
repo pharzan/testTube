@@ -188,7 +188,12 @@ function getElementContent(element, page) {
             var e = document.querySelector(element);
             if (e && e != null) {
 		if (e != null && typeof(e) != 'undefined') {
-		    var content = e.textContent;
+		    console.log(e.tagName)
+		    var content;
+		    if(e.tagName==='INPUT')
+			content=e.value;
+		    else
+			content = e.textContent;
                     return content;
 		}
 		return false;
@@ -202,7 +207,7 @@ function getElementContent(element, page) {
 		log('pass', 'TestTube:: ' + result);
 	
 		Global.oldTestTube = Global.testTube;
-            Global.testTube = result;
+		Global.testTube = result;
             resolve('done');
 	    }
 	    });

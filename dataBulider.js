@@ -17,10 +17,15 @@ function load(dbName, query) {
         d.find(query, function(err, steps) {
             if (steps.length == 0)
                 return resolve('empty');
+	    var data=[];
+	    steps.map(function(st) {
+                return data.push(st)
+            })
+	    for(var i=0;i<data.length;i++){
+		console.log('-------------------------------'+i+'\n\r',data[i] );
 
-            console.log('DATA SERVICES:: LOADED ', steps.map(function(st) {
-                return st
-            }));
+	    }
+	    
             return resolve(steps);
 
         });
@@ -166,6 +171,8 @@ function batchFileRead(){
 	   
 
 //batchFileRead();
-load('steps',{});
-removeById('steps','34lzqPOo7bFMtGdG')
+	   
+load('steps',{name:'GamePlay Profile menu Profile Button'});
+save('steps',data);
+//removeById('steps','LpLtIrILKwbIp9y0')
 //load('sets',{});
