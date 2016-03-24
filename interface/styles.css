@@ -1,4 +1,6 @@
-body{font-family: 'Dosis', sans-serif;}
+body{font-family: 'Dosis', sans-serif;
+     background:#eceff1;
+    }
 .historyBox{
     font-family: monospace;
     background:black;
@@ -12,7 +14,12 @@ body{font-family: 'Dosis', sans-serif;}
 .info{
     color:blue;
 }
-
+.removeBtn{
+    float:left;
+}
+.stepJsonList{
+    width:50%;
+}
 .seperate{
     color:orange;
 
@@ -34,7 +41,14 @@ body{font-family: 'Dosis', sans-serif;}
 span.des{
     color:gray;
 }
-
+.stepInputs{
+    width:30% !important;
+    float:left !important;
+    margin:5px !important;
+}
+.addBtn{
+    background:#00C853;
+}
 .app {
     height: 100%;
     margin: 0;

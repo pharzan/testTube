@@ -2,7 +2,9 @@ var socket = io('http://127.0.0.1:3000');
 var time = 'hi';
 
 var Globals = {};
-var _Globals = {selectedStep:{name:'not set'},
+var _Globals = {selectedStep:{name:'',
+			      categoery:'',
+			      content:[{description:''}]},
 		build:false,
 		set:{content:[]}
 	       };
@@ -37,6 +39,13 @@ var test = {
 
 var btn= require ( 'polythene/button/button');
 var dialog= require( 'polythene/dialog/dialog');
+var textfield =require( 'polythene/textfield/textfield');
+var fabtn = require( 'polythene/fab/fab');
+var card = require( 'polythene/card/card');
+
+var menu=require( 'polythene/menu/menu');
+var list=require( 'polythene/list/list');
+var listTile=require( 'polythene/list-tile/list-tile');
 
 const loadBtn = m.component(btn, {
     label: 'Load',
@@ -57,7 +66,6 @@ const reportBtn = m.component(btn, {
 	}
     }
 });;
-
 const buildBtn = m.component(btn, {
     label: 'Build',
     raised: true,
@@ -71,6 +79,10 @@ const buildBtn = m.component(btn, {
 	}
     }
 });;
+
+const SvgPlus='<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" width="24" height="24" viewBox="0 0 24.00 24.00" enable-background="new 0 0 24.00 24.00" xml:space="preserve"><path fill="#000000" fill-opacity="1" stroke-width="0.2" stroke-linejoin="round" d="M 18.9994,12.998L 12.9994,12.998L 12.9994,18.998L 10.9994,18.998L 10.9994,12.998L 4.99936,12.998L 4.99936,10.998L 10.9994,10.998L 10.9994,4.99805L 12.9994,4.99805L 12.9994,10.998L 18.9994,10.998L 18.9994,12.998 Z "></path></svg>';
+
+const SvgMinus='<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" width="24" height="24" viewBox="0 0 24.00 24.00" enable-background="new 0 0 24.00 24.00" xml:space="preserve"><path fill="#000000" fill-opacity="1" stroke-width="0.2" stroke-linejoin="round" d="M 18.9994,12.998L 12.9994,12.998L  10.9994,12.998L 4.99936,12.998L 4.99936,10.998L 10.9994,10.998L 12.9994,10.998L 18.9994,10.998L 18.9994,12.998 Z "></path></svg>';
 
 var header={
     controller:function(){
@@ -463,77 +475,204 @@ var build = {
     data: {},
     
     controller: function() {
-	var onlyTag={view:function(){return m('span',
-					      m('lable', 'selector'),
-					      m('input', {
-				oninput: function(e) {
-				    build.selector = this.value;
-				}
-			    }),
-					      m('lable', 'description'),
-					      m('input', {
-						  oninput: function() {
-						      build.description = this.value;
-						  }
-					      }));
-				    }};
-	var onlyKey={view:function(){return m('span',
-					      m('lable', 'Key'),
-					      m('input', {
-				oninput: function(e) {
-				    build.key = this.value;
-				}
-			    }),
-					      m('lable', 'description'),
-					      m('input', {
-						  oninput: function() {
-						      build.description = this.value;
-						  }
-					      }));
-				    }};
-	var tagAndKeyForm={view:function(){return m('span',
-					      m('lable', 'tag'),
-					      m('input', {
-				oninput: function(e) {
-				    build.tag = this.value;
-				}
-			    }),
-					      m('lable', 'Key'),
-					      m('input', {
-				oninput: function(e) {
-				    build.key = this.value;
-				}
-			    }),
-						    m('lable', 'description'),
-						    m('input', {
-						  oninput: function() {
-						      build.description = this.value;
-						  }
-						    }));
+	var onlyTag={view:function(){
+	    return m('', m.component(textfield, {
+		class:'stepInputs',
+		label: 'Selector',
+		floatingLabel: true,
+		dense:true,
+		fullWidth:false,
+		getState:function(e){
+		    // _Globals.selectedStep.categoery=e.value;
+		    build.selector = e.value;
+		}},self),m.component(textfield, {
+		    class:'stepInputs',
+		    label: 'Description',
+		    floatingLabel: true,
+		    dense:true,
+		    fullWidth:false,
+		    getState:function(e){
+			// _Globals.selectedStep.categoery=e.value;
+			build.description = e.value;
+		    }},self));
+	}};
+
+		// return
+				     // m('span',
+			    // 		      m('lable', 'selector'),
+			    // 		      m('input', {
+			    // 	oninput: function(e) {
+			    // 	    build.selector = this.value;
+			    // 	}
+			    // }),
+			    // 		      m('lable', 'description'),
+			    // 		      m('input', {
+			    // 			  oninput: function() {
+			    // 			      build.description = this.value;
+			    // 			  }
+			    // 		      }));		     
+				    
+	var onlyKey={view:function(){
+	    return m('', m.component(textfield, {
+		class:'stepInputs',
+		label: 'Key',
+		floatingLabel: true,
+		dense:true,
+		fullWidth:false,
+		getState:function(e){
+		    // _Globals.selectedStep.categoery=e.value;
+		    build.key = e.value;
+		}},self),m.component(textfield, {
+		    class:'stepInputs',
+		    label: 'Description',
+		    floatingLabel: true,
+		    dense:true,
+		    fullWidth:false,
+		    getState:function(e){
+			// _Globals.selectedStep.categoery=e.value;
+			build.description = e.value;
+		    }},self));
+	}};
+
+		// {view:function(){return m('span',
+		// 			      m('lable', 'Key'),
+		// 			      m('input', {
+		// 		oninput: function(e) {
+		// 		    build.key = this.value;
+		// 		}
+		// 	    }),
+		// 			      m('lable', 'description'),
+		// 			      m('input', {
+		// 				  oninput: function() {
+		// 				      build.description = this.value;
+		// 				  }
+		// 			      }));
+	// 		    }};
+	
+	var tagAndKeyForm={view:function(){
+	    return m('', m.component(textfield, {
+		class:'stepInputs',
+		label: 'Selector',
+		floatingLabel: true,
+		dense:true,
+		fullWidth:false,
+		getState:function(e){
+		    // _Globals.selectedStep.categoery=e.value;
+		    build.selector = e.value;
+		}},self),m.component(textfield, {
+		class:'stepInputs',
+		label: 'Key',
+		floatingLabel: true,
+		dense:true,
+		fullWidth:false,
+		getState:function(e){
+		    // _Globals.selectedStep.categoery=e.value;
+		    build.key = e.value;
+		}},self),m.component(textfield, {
+		    class:'stepInputs',
+		    label: 'Description',
+		    floatingLabel: true,
+		    dense:true,
+		    fullWidth:false,
+		    getState:function(e){
+			// _Globals.selectedStep.categoery=e.value;
+			build.description = e.value;
+		    }},self));
+	}};
+
+
+		// {view:function(){return m('span',
+		// 			      m('lable', 'tag'),
+		// 			      m('input', {
+		// 		oninput: function(e) {
+		// 		    build.tag = this.value;
+		// 		}
+		// 	    }),
+		// 			      m('lable', 'Key'),
+		// 			      m('input', {
+		// 		oninput: function(e) {
+		// 		    build.key = this.value;
+		// 		}
+		// 	    }),
+		// 				    m('lable', 'description'),
+		// 				    m('input', {
+		// 				  oninput: function() {
+		// 				      build.description = this.value;
+		// 				  }
+		// 				    }));
 					   
-				    }};
-	var compareForm={view:function(){return m('span',
-					      m('lable', 'Key'),
-					      m('input', {
-				oninput: function(e) {
-				    build.key = this.value;
-				}
-			    }),
-					      m('lable', 'description'),
-					      m('input', {
-						  oninput: function() {
-						      build.description = this.value;
-						  }
-					      }));
-				    }};
-	var expect={view:function(){return m('span',
-					      m('lable', 'Expected:(diff or string)'),
-					      m('input', {
-				oninput: function(e) {
-				    build.expect = this.value;
-				}}))}
+	// 		    }};
+	
+	var compareForm={view:function(){
+	    return m('', m.component(textfield, {
+		class:'stepInputs',
+		label: 'Key',
+		floatingLabel: true,
+		dense:true,
+		fullWidth:false,
+		getState:function(e){
+		    // _Globals.selectedStep.categoery=e.value;
+		    build.key = e.value;
+		}},self),m.component(textfield, {
+		    class:'stepInputs',
+		    label: 'Description',
+		    floatingLabel: true,
+		    dense:true,
+		    fullWidth:false,
+		    getState:function(e){
+			// _Globals.selectedStep.categoery=e.value;
+			build.description = e.value;
+		    }},self));
+	}};
+
+
+		// {view:function(){return m('span',
+			// 		      m('lable', 'Key'),
+			// 		      m('input', {
+			// 	oninput: function(e) {
+			// 	    build.key = this.value;
+			// 	}
+			//     }),
+			// 		      m('lable', 'description'),
+			// 		      m('input', {
+			// 			  oninput: function() {
+			// 			      build.description = this.value;
+			// 			  }
+			// 		      }));
+			// 	    }};
+	var expect={view:function(){
+	    return m('', m.component(textfield, {
+		class:'stepInputs',
+		label: 'Expected Value',
+		floatingLabel: true,
+		dense:true,
+		fullWidth:false,
+		getState:function(e){
+		    // _Globals.selectedStep.categoery=e.value;
+		    build.expect = e.value;
+		}},self),m.component(textfield, {
+		    class:'stepInputs',
+		    label: 'Description',
+		    floatingLabel: true,
+		    dense:true,
+		    fullWidth:false,
+		    getState:function(e){
+			// _Globals.selectedStep.categoery=e.value;
+			build.description = e.value;
+		    }},self));
+	}};
+
+
+
+		// {view:function(){return m('span',
+		   // 			      m('lable', 'Expected:(diff or string)'),
+		   // 			      m('input', {
+		   // 		oninput: function(e) {
+		   // 		    build.expect = this.value;
+		   // 		}}))}
 			    
-				    };
+	// 		    };
+	
 	var empty={view:function(){
 	    return m('');
 	}};
@@ -621,50 +760,95 @@ var build = {
 			
                     }
 		}, 'delete'),
-		m('',
-                  m('lable', 'steps name'),
-		  m('input', {
-                      oninput: m.withAttr("value", function(e){
-			  self.stepsName=this.value}),
-		      value:self.stepsName,
+		m('.form',
+                  // m('lable', 'steps name'),
+		  // m('input', {
+                  //     oninput: m.withAttr("value", function(e){
+		  // 	  self.stepsName=this.value}),
+		  //     value:self.stepsName,
 		     
                       
-                      config: function(element, isinit) {
-			  if(isinit)
-			      return
-                          // if (self.fetchFlag)
-                              element.value = _Globals.selectedStep.name;
-                      }
+                  //     config: function(element, isinit) {
+		  // 	  if(isinit)
+		  // 	      return
+                  //         // if (self.fetchFlag)
+                  //             element.value = _Globals.selectedStep.name;
+                  //     }
 
-                  }),
-                  m('lable', 'steps Description'),
-		  m('input', {
-                      oninput: function(e) {
-                          self.stepsDescription = this.value;
-                      },
-                      config: function(element, isisnt) {
-                          if (self.fetchFlag) {
-                              element.value = _Globals.selectedStep.content[0].description;
-                              self.content = _Globals.selectedStep.content;
+                  // }),
+		  m.component(textfield, {
+		      label: 'Step Name',
+		      floatingLabel: true,
+		      class:'stepInputs',
+		      help: 'Enter the name for the test steps',
+		      focusHelp: true,
+		      dense:true,
+		      required: true,
+		      fullWidth:false,
+		      validateAtStart:false,
+		      value:() => (_Globals.selectedStep.name),
+		      getState:function(e){
+		      	  self.stepsName=e.value;
+			  _Globals.selectedStep.name=e.value;
+		      }
+		  },self)),
+                  // m('lable', 'steps Description'),
+		 //  m('input', {
+                 //      oninput: function(e) {
+                 //          self.stepsDescription = this.value;
+                 //      },
+                 //      config: function(element, isisnt) {
+                 //          if (self.fetchFlag) {
+                 //              element.value = _Globals.selectedStep.content[0].description;
+                 //              self.content = _Globals.selectedStep.content;
 			      
-                          }
-                      }
-                  })
-		 ),
-		m('lable', 'Category'),
-		m('input', {
-                    oninput: function(e) {
-			self.category = this.value;
-                    },
-                    config: function(element, isisnt) {
-			if (self.fetchFlag)
-                            element.value = _Globals.selectedStep.categoery;
-                    }
+                 //          }
+                 //      }
+                 //  })
+		  // ),
+		m.component(textfield, {
+		    class:'stepInputs',
+		      label: 'Steps Description',
+		      floatingLabel: true,
+		      help: 'Input a description for all of the steps in the test',
+		      focusHelp: true,
+		      dense:true,
+		      required: true,
+		    fullWidth:false,
+		    validateAtStart:false,
+		    value:() => (_Globals.selectedStep.content[0].description),
+		    getState:function(e){
+			_Globals.selectedStep.content[0].description=e.value;
+			self.stepsDescription = e.value;
+			  
+		      }
+		},self),
+		// m('lable', 'Category'),
+		// m('input', {
+                //     oninput: function(e) {
+		// 	self.category = this.value;
+                //     },
+                //     config: function(element, isisnt) {
+		// 	if (self.fetchFlag)
+                //             element.value = _Globals.selectedStep.categoery;
+                //     }
 
-		}),
-		
+		// }),
+		m.component(textfield, {
+		    class:'stepInputs',
+		      label: 'Category',
+		      floatingLabel: true,
+		      dense:true,
+		      required: true,
+		    fullWidth:false,
+		    value:() => (_Globals.selectedStep.categoery),
+		    getState:function(e){
+			_Globals.selectedStep.categoery=e.value;
+			self.category = e.value;
+		      }
+		},self),
 		m('',
-                  m('lable', 'Action'),
+                  // m('lable', 'Action'),
 		  m('select', {
                       config: function(selectElement, isinit) {
                           if (isinit)
@@ -684,33 +868,70 @@ var build = {
                       }
                   }),
 		  m.component(ctrl.actionForms[self.action]),
-		  m('lable', 'add to row:'),
-		  m('input', {
-                      oninput: function() {
-                          self.rowNumber = this.value;
-                      }
-                  })
-		 ),m('', this.content.map(function(d, i) {
-                     return m('', m('button', {
-                         onclick: function() {
-                             self.content.splice(i, 1);
-                         }
-                     }, 'remove'),
-			      m('button',{
-				  onclick:function(){
-				      console.log(d,i,self.content[i])
-				      self.stepEditor.value=JSON.stringify(d);
+		   m.component(textfield, {
+		      label: 'Add to Row',
+		       floatingLabel: true,
+		       type:'number',
+		      class:'stepInputs',
+		      help: 'Enter the row number to insert in to',
+		      focusHelp: true,
+		      dense:true,
+		      fullWidth:false,
+		      validateAtStart:false,
+		      getState:function(e){
+		      	 self.rowNumber=e.value;
+		      }
+		   },self),
+		  
+		 // m('lable', 'add to row:'),
+		  // m('input', {
+                  //     oninput: function() {
+                  //         self.rowNumber = this.value;
+                  //     }
+                  // })
+		  
+		m.component(fabtn, {
+		    class:'addBtn',
+			 small:true,
+			 content:m.trust(SvgPlus),
+			 events:{
+			     onclick: this.makeStep.bind(self)
 			 }
-		     },'Edit'),i+") " ,JSON.stringify(d)
-			     );
-                 }),
-		m('button', {
-                    onclick: this.makeStep.bind(self)
-		}, 'add'),
-		m('button', {
-                    onclick: this.makeData.bind(self)
-		}, 'build/Save'),
-		     m.component(set)
+			 
+		}),
+		  m.component(btn, {
+		      label: 'Build&Save',
+		      raised: true,
+		      events: {
+			  onclick: self.makeData.bind(self)
+			  
+		      }
+		  },self)
+		 
+		 ),
+		// m('', this.content.map(function(d, i) {
+                //      return m('', m('button', {
+                //          onclick: function() {
+                //              self.content.splice(i, 1);
+                //          }
+                //      }, 'remove'),
+		// 	      m('button',{
+		// 		  onclick:function(){
+		// 		      console.log(d,i,self.content[i])
+		// 		      self.stepEditor.value=JSON.stringify(d);
+		// 	 }
+		//      },'Edit'),i+") " ,JSON.stringify(d)
+		// 	     );
+                //  }),
+		// m('button', {
+                //     onclick: this.makeStep.bind(self)
+		// }, 'add'),
+		// m('button', {
+                //     onclick: this.makeData.bind(self)
+		// }, 'build/Save'),
+		m('',
+		  m.component(testSteps,self),
+		  m.component(set)
 		    )
                ];
     },
@@ -719,17 +940,17 @@ var build = {
         var self = this;
 	var row=Number(this.rowNumber);
 	var key=self.key;
-	if(!isNaN(row)){
-	    this.content.splice(row, 0, {
-		action: self.action,
-		tag: self.selector,
-		key: self.key?self.key:null,
-		expect: self.expect?self.expect:null,
-		des: self.description
-            });
+	// if(!isNaN(row)){
+	//     this.content.splice(row, 0, {
+	// 	action: self.action,
+	// 	tag: self.selector,
+	// 	key: self.key?self.key:null,
+	// 	expect: self.expect?self.expect:null,
+	// 	des: self.description
+        //     });
 	    
-	}
-	else
+	// }
+	// else
 	{
             this.content.push({
 		action: self.action,
@@ -791,16 +1012,87 @@ var build = {
         });
     }
 };
-var set={
-    view:function(){
-	return m('',m('ul',_Globals.set.content.map(function(setName,i){
-	    return [m('li',m('button',{onclick:function(){
-		_Globals.set.content.splice(i, 1);
-	    }},'remove'),m('span',{},setName))];
-	})),(_Globals.set.content.length!==0)?m('',m('button','Build set')):null)
-    }
+// var set={
+//     view:function(){
+// 	return m('',m('ul',_Globals.set.content.map(function(setName,i){
+// 	    return [m('li',m('button',{onclick:function(){
+// 		_Globals.set.content.splice(i, 1);
+// 	    }},'remove'),m('span',{},setName))];
+// 	})),(_Globals.set.content.length!==0)?m('',m('button','Build set')):null)
+//     }
 
-}
+// };
+    var set={view:function(){return m('',_Globals.set.content.map(function(setName,i){
+	return  m.component(listTile, {
+            title: setName,
+	    compact:true
+        });
+    }));}
+	     
+			     // m.component(list, {
+//     header: {
+//         title: 'My header'
+//     },
+//     tiles: [
+//         m.component(listTile, {
+//             title: 'Ali Connors',
+//             subtitle: 'Brunch this weekend?',
+//             icon: {
+//                 type: 'large',
+//                 src: 'app/list-tile/avatars/1.png'
+//             }
+//         }),
+//         m.component(listTile, {
+//             title: 'Ali Connors',
+//             subtitle: 'Brunch this weekend?',
+//             icon: {
+//                 type: 'large',
+//                 src: 'app/list-tile/avatars/1.png'
+//             }
+//         })
+//     ]
+// })
+	    }
+
+var testSteps={view:function(ctrl,self){
+    
+    return m('', self.content.map(function(d, i) {
+	
+	
+	return m('',m.component(fabtn, {
+		    class:'removeBtn',
+			 small:true,
+			 content:m.trust(SvgMinus),
+			 events:{
+			     onclick: function(){
+				 self.content.splice(i, 1);
+			     }
+			 }
+			 
+	}),m.component(listTile, {
+	    class:'fab--mini',
+            title: JSON.stringify(d),
+	    subtitle:'i',
+	    
+	    compact:true
+        }));
+
+
+	// m('', m('button', {
+        //     onclick: function() {
+	// 	self.content.splice(i, 1);
+        //     }
+	// }, 'remove'),
+	// 	 m('button',{
+	// 	     onclick:function(){
+	// 		 console.log(d,i,self.content[i]);
+	// 		 self.stepEditor.value=JSON.stringify(d);
+	// 	     }
+	// 	 },'Edit'),i+") " ,JSON.stringify(d)
+	// 	);
+    }));
+}};;
+
 var load = {
     view: function() {
         return [m.component(header),
@@ -817,9 +1109,6 @@ var load = {
     }
 };
 
-var menu=require( 'polythene/menu/menu');
-var list=require( 'polythene/list/list');
-var listTile=require( 'polythene/list-tile/list-tile');
 const simpleContainer = {};
 simpleContainer.controller = () => {
     return {
