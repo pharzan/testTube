@@ -172,7 +172,7 @@ function batchFileRead(){
 
 //batchFileRead();
 	   
-load('steps',{name:'GamePlay Profile menu Profile Button'});
-save('steps',data);
+load('steps',{});
+//save('steps',data);
 //removeById('steps','LpLtIrILKwbIp9y0')
 //load('sets',{});

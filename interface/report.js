@@ -457,250 +457,30 @@ var stepList = {
     }
 };
 
-var List = function() {
+// var List = function() {
 
-    var view = function(ctrl, actions) {
+//     var view = function(ctrl, actions) {
 
-        return m('ul', actions.map(function(action) {
-            return m('li', {
-                key: Math.random()
-            }, action);
-        }));
-    };
-    return {
-        view: view
-    };
-};
+//         return m('ul', actions.map(function(action) {
+//             return m('li', {
+//                 key: Math.random()
+//             }, action);
+//         }));
+//     };
+//     return {
+//         view: view
+//     };
+// };
 
 var build = {
     content: [],
     data: {},
     
     controller: function() {
-	var onlyTag={view:function(){
-	    return m('', m.component(textfield, {
-		class:'stepInputs',
-		label: 'Selector',
-		floatingLabel: true,
-		dense:true,
-		fullWidth:false,
-		getState:function(e){
-		    // _Globals.selectedStep.categoery=e.value;
-		    build.selector = e.value;
-		}},self),m.component(textfield, {
-		    class:'stepInputs',
-		    label: 'Description',
-		    floatingLabel: true,
-		    dense:true,
-		    fullWidth:false,
-		    getState:function(e){
-			// _Globals.selectedStep.categoery=e.value;
-			build.description = e.value;
-		    }},self));
-	}};
-
-		// return
-				     // m('span',
-			    // 		      m('lable', 'selector'),
-			    // 		      m('input', {
-			    // 	oninput: function(e) {
-			    // 	    build.selector = this.value;
-			    // 	}
-			    // }),
-			    // 		      m('lable', 'description'),
-			    // 		      m('input', {
-			    // 			  oninput: function() {
-			    // 			      build.description = this.value;
-			    // 			  }
-			    // 		      }));		     
-				    
-	var onlyKey={view:function(){
-	    return m('', m.component(textfield, {
-		class:'stepInputs',
-		label: 'Key',
-		floatingLabel: true,
-		dense:true,
-		fullWidth:false,
-		getState:function(e){
-		    // _Globals.selectedStep.categoery=e.value;
-		    build.key = e.value;
-		}},self),m.component(textfield, {
-		    class:'stepInputs',
-		    label: 'Description',
-		    floatingLabel: true,
-		    dense:true,
-		    fullWidth:false,
-		    getState:function(e){
-			// _Globals.selectedStep.categoery=e.value;
-			build.description = e.value;
-		    }},self));
-	}};
-
-		// {view:function(){return m('span',
-		// 			      m('lable', 'Key'),
-		// 			      m('input', {
-		// 		oninput: function(e) {
-		// 		    build.key = this.value;
-		// 		}
-		// 	    }),
-		// 			      m('lable', 'description'),
-		// 			      m('input', {
-		// 				  oninput: function() {
-		// 				      build.description = this.value;
-		// 				  }
-		// 			      }));
-	// 		    }};
 	
-	var tagAndKeyForm={view:function(){
-	    return m('', m.component(textfield, {
-		class:'stepInputs',
-		label: 'Selector',
-		floatingLabel: true,
-		dense:true,
-		fullWidth:false,
-		getState:function(e){
-		    // _Globals.selectedStep.categoery=e.value;
-		    build.selector = e.value;
-		}},self),m.component(textfield, {
-		class:'stepInputs',
-		label: 'Key',
-		floatingLabel: true,
-		dense:true,
-		fullWidth:false,
-		getState:function(e){
-		    // _Globals.selectedStep.categoery=e.value;
-		    build.key = e.value;
-		}},self),m.component(textfield, {
-		    class:'stepInputs',
-		    label: 'Description',
-		    floatingLabel: true,
-		    dense:true,
-		    fullWidth:false,
-		    getState:function(e){
-			// _Globals.selectedStep.categoery=e.value;
-			build.description = e.value;
-		    }},self));
-	}};
-
-
-		// {view:function(){return m('span',
-		// 			      m('lable', 'tag'),
-		// 			      m('input', {
-		// 		oninput: function(e) {
-		// 		    build.tag = this.value;
-		// 		}
-		// 	    }),
-		// 			      m('lable', 'Key'),
-		// 			      m('input', {
-		// 		oninput: function(e) {
-		// 		    build.key = this.value;
-		// 		}
-		// 	    }),
-		// 				    m('lable', 'description'),
-		// 				    m('input', {
-		// 				  oninput: function() {
-		// 				      build.description = this.value;
-		// 				  }
-		// 				    }));
-					   
-	// 		    }};
-	
-	var compareForm={view:function(){
-	    return m('', m.component(textfield, {
-		class:'stepInputs',
-		label: 'Key',
-		floatingLabel: true,
-		dense:true,
-		fullWidth:false,
-		getState:function(e){
-		    // _Globals.selectedStep.categoery=e.value;
-		    build.key = e.value;
-		}},self),m.component(textfield, {
-		    class:'stepInputs',
-		    label: 'Description',
-		    floatingLabel: true,
-		    dense:true,
-		    fullWidth:false,
-		    getState:function(e){
-			// _Globals.selectedStep.categoery=e.value;
-			build.description = e.value;
-		    }},self));
-	}};
-
-
-		// {view:function(){return m('span',
-			// 		      m('lable', 'Key'),
-			// 		      m('input', {
-			// 	oninput: function(e) {
-			// 	    build.key = this.value;
-			// 	}
-			//     }),
-			// 		      m('lable', 'description'),
-			// 		      m('input', {
-			// 			  oninput: function() {
-			// 			      build.description = this.value;
-			// 			  }
-			// 		      }));
-			// 	    }};
-	var expect={view:function(){
-	    return m('', m.component(textfield, {
-		class:'stepInputs',
-		label: 'Expected Value',
-		floatingLabel: true,
-		dense:true,
-		fullWidth:false,
-		getState:function(e){
-		    // _Globals.selectedStep.categoery=e.value;
-		    build.expect = e.value;
-		}},self),m.component(textfield, {
-		    class:'stepInputs',
-		    label: 'Description',
-		    floatingLabel: true,
-		    dense:true,
-		    fullWidth:false,
-		    getState:function(e){
-			// _Globals.selectedStep.categoery=e.value;
-			build.description = e.value;
-		    }},self));
-	}};
-
-
-
-		// {view:function(){return m('span',
-		   // 			      m('lable', 'Expected:(diff or string)'),
-		   // 			      m('input', {
-		   // 		oninput: function(e) {
-		   // 		    build.expect = this.value;
-		   // 		}}))}
-			    
-	// 		    };
-	
-	var empty={view:function(){
-	    return m('');
-	}};
-        this.actionForms = {
-	    'navigateUrl':onlyKey,
-	    'waitForVisibility':onlyTag,
-	    'click':onlyTag,
-	    'focus':onlyTag,
-	    'sendKeys':tagAndKeyForm,
-	    'getElementContent':onlyTag,
-	    'getUrlContent':empty,
-	    'compareTestTubeBeaker':empty,
-	    'waitPlaybackStart':empty,
-	    'waitPlaybackEnd':empty,
-	    'searchAndClickFromBeaker':empty,
-	    'reload':empty,
-	    'historyBack':empty,
-	    'historyForward':empty,
-	    'getNetworkContent':onlyKey,
-	    'compareTestTubes':expect,
-	    'wait':onlyKey,
-	    'compare':compareForm
-	    		    
-			   };
-	this.actions=Object.keys(this.actionForms);
+        
     },
+    
     fetchFlag: false,
     deleteFlag:false,
     action:'waitForVisibility',
@@ -764,21 +544,6 @@ var build = {
                     }
 		}, 'delete'),
 		m('.form',
-                  // m('lable', 'steps name'),
-		  // m('input', {
-                  //     oninput: m.withAttr("value", function(e){
-		  // 	  self.stepsName=this.value}),
-		  //     value:self.stepsName,
-		     
-                      
-                  //     config: function(element, isinit) {
-		  // 	  if(isinit)
-		  // 	      return
-                  //         // if (self.fetchFlag)
-                  //             element.value = _Globals.selectedStep.name;
-                  //     }
-
-                  // }),
 		  m.component(textfield, {
 		      label: 'Step Name',
 		      floatingLabel: true,
@@ -795,20 +560,6 @@ var build = {
 			  _Globals.selectedStep.name=e.value;
 		      }
 		  },self)),
-                  // m('lable', 'steps Description'),
-		 //  m('input', {
-                 //      oninput: function(e) {
-                 //          self.stepsDescription = this.value;
-                 //      },
-                 //      config: function(element, isisnt) {
-                 //          if (self.fetchFlag) {
-                 //              element.value = _Globals.selectedStep.content[0].description;
-                 //              self.content = _Globals.selectedStep.content;
-			      
-                 //          }
-                 //      }
-                 //  })
-		  // ),
 		m.component(textfield, {
 		    class:'stepInputs',
 		      label: 'Steps Description',
@@ -826,17 +577,6 @@ var build = {
 			  
 		      }
 		},self),
-		// m('lable', 'Category'),
-		// m('input', {
-                //     oninput: function(e) {
-		// 	self.category = this.value;
-                //     },
-                //     config: function(element, isisnt) {
-		// 	if (self.fetchFlag)
-                //             element.value = _Globals.selectedStep.categoery;
-                //     }
-
-		// }),
 		m.component(textfield, {
 		    class:'stepInputs',
 		      label: 'Category',
@@ -851,26 +591,7 @@ var build = {
 		      }
 		},self),
 		m('',
-                  // m('lable', 'Action'),
-		  m('select', {
-                      config: function(selectElement, isinit) {
-                          if (isinit)
-                              return;
-                          ctrl.actions.map(function(name, i) {
-                              if (i == ctrl.actions.length) {
-                                  ctrl.populated = true;
-                              }
-                              if (ctrl.populated)
-                                  return;
-                              selectElement.options[i] = new Option('(' + i + ') ' + name, name);
-                          });
-                      },
-                      oninput: function(e) {
-                          self.action = this.value;
-			  
-                      }
-                  }),
-		  m.component(ctrl.actionForms[self.action]),
+		  m.component(actionsMenu,ctrl),
 		   m.component(textfield, {
 		      label: 'Add to Row',
 		       floatingLabel: true,
@@ -885,14 +606,6 @@ var build = {
 		      	 self.rowNumber=e.value;
 		      }
 		   },self),
-		  
-		 // m('lable', 'add to row:'),
-		  // m('input', {
-                  //     oninput: function() {
-                  //         self.rowNumber = this.value;
-                  //     }
-                  // })
-		  
 		m.component(fabtn, {
 		    class:'addBtn',
 			 small:true,
@@ -910,28 +623,7 @@ var build = {
 			  
 		      }
 		  },self)
-		 
 		 ),
-		// m('', this.content.map(function(d, i) {
-                //      return m('', m('button', {
-                //          onclick: function() {
-                //              self.content.splice(i, 1);
-                //          }
-                //      }, 'remove'),
-		// 	      m('button',{
-		// 		  onclick:function(){
-		// 		      console.log(d,i,self.content[i])
-		// 		      self.stepEditor.value=JSON.stringify(d);
-		// 	 }
-		//      },'Edit'),i+") " ,JSON.stringify(d)
-		// 	     );
-                //  }),
-		// m('button', {
-                //     onclick: this.makeStep.bind(self)
-		// }, 'add'),
-		// m('button', {
-                //     onclick: this.makeData.bind(self)
-		// }, 'build/Save'),
 		m('',
 		  m.component(testSteps,self),
 		  m.component(set)
@@ -1015,47 +707,186 @@ var build = {
         });
     }
 };
-// var set={
-//     view:function(){
-// 	return m('',m('ul',_Globals.set.content.map(function(setName,i){
-// 	    return [m('li',m('button',{onclick:function(){
-// 		_Globals.set.content.splice(i, 1);
-// 	    }},'remove'),m('span',{},setName))];
-// 	})),(_Globals.set.content.length!==0)?m('',m('button','Build set')):null)
-//     }
 
-// };
     var set={view:function(){return m('',_Globals.set.content.map(function(setName,i){
 	return  m.component(listTile, {
             title: setName,
 	    compact:true
         });
     }));}
-	     
-			     // m.component(list, {
-//     header: {
-//         title: 'My header'
-//     },
-//     tiles: [
-//         m.component(listTile, {
-//             title: 'Ali Connors',
-//             subtitle: 'Brunch this weekend?',
-//             icon: {
-//                 type: 'large',
-//                 src: 'app/list-tile/avatars/1.png'
-//             }
-//         }),
-//         m.component(listTile, {
-//             title: 'Ali Connors',
-//             subtitle: 'Brunch this weekend?',
-//             icon: {
-//                 type: 'large',
-//                 src: 'app/list-tile/avatars/1.png'
-//             }
-//         })
-//     ]
-// })
-	    }
+	    };
+
+var actionsMenu={
+    
+    controller:function(parent){
+	var onlyTag={view:function(){
+	    return m('', m.component(textfield, {
+		class:'stepInputs',
+		label: 'Selector',
+		floatingLabel: true,
+		dense:true,
+		fullWidth:false,
+		getState:function(e){
+		    build.selector = e.value;
+		}},self),m.component(textfield, {
+		    class:'stepInputs',
+		    label: 'Description',
+		    floatingLabel: true,
+		    dense:true,
+		    fullWidth:false,
+		    getState:function(e){
+			build.description = e.value;
+		    }},self));
+    }},
+
+    onlyKey={view:function(){
+	    return m('', m.component(textfield, {
+		class:'stepInputs',
+		label: 'Key',
+		floatingLabel: true,
+		dense:true,
+		fullWidth:false,
+		getState:function(e){
+		    // _Globals.selectedStep.categoery=e.value;
+		    build.key = e.value;
+		}},self),m.component(textfield, {
+		    class:'stepInputs',
+		    label: 'Description',
+		    floatingLabel: true,
+		    dense:true,
+		    fullWidth:false,
+		    getState:function(e){
+			// _Globals.selectedStep.categoery=e.value;
+			build.description = e.value;
+		    }},self));
+	}},
+
+    tagAndKeyForm={view:function(){
+	    return m('', m.component(textfield, {
+		class:'stepInputs',
+		label: 'Selector',
+		floatingLabel: true,
+		dense:true,
+		fullWidth:false,
+		getState:function(e){
+		    build.selector = e.value;
+		}},self),m.component(textfield, {
+		class:'stepInputs',
+		label: 'Key',
+		floatingLabel: true,
+		dense:true,
+		fullWidth:false,
+		getState:function(e){
+		    build.key = e.value;
+		}},self),m.component(textfield, {
+		    class:'stepInputs',
+		    label: 'Description',
+		    floatingLabel: true,
+		    dense:true,
+		    fullWidth:false,
+		    getState:function(e){
+			build.description = e.value;
+		    }},self));
+	}},
+
+    compareForm={view:function(){
+	    return m('', m.component(textfield, {
+		class:'stepInputs',
+		label: 'Key',
+		floatingLabel: true,
+		dense:true,
+		fullWidth:false,
+		getState:function(e){
+		    build.key = e.value;
+		}},self),m.component(textfield, {
+		    class:'stepInputs',
+		    label: 'Description',
+		    floatingLabel: true,
+		    dense:true,
+		    fullWidth:false,
+		    getState:function(e){
+			build.description = e.value;
+		    }},self));
+	}},
+	
+    expect={view:function(){
+	    return m('', m.component(textfield, {
+		class:'stepInputs',
+		label: 'Expected Value',
+		floatingLabel: true,
+		dense:true,
+		fullWidth:false,
+		getState:function(e){
+		    // _Globals.selectedStep.categoery=e.value;
+		    build.expect = e.value;
+		}},self),m.component(textfield, {
+		    class:'stepInputs',
+		    label: 'Description',
+		    floatingLabel: true,
+		    dense:true,
+		    fullWidth:false,
+		    getState:function(e){
+			// _Globals.selectedStep.categoery=e.value;
+			build.description = e.value;
+		    }},self));
+	}},
+
+    empty={view:function(){
+	    return m('');
+    }};
+	
+	this.actionForms = {
+	    'navigateUrl':onlyKey,
+	    'waitForVisibility':onlyTag,
+	    'click':onlyTag,
+	    'focus':onlyTag,
+	    'sendKeys':tagAndKeyForm,
+	    'getElementContent':onlyTag,
+	    'getUrlContent':empty,
+	    'compareTestTubeBeaker':empty,
+	    'waitPlaybackStart':empty,
+	    'waitPlaybackEnd':empty,
+	    'searchAndClickFromBeaker':empty,
+	    'reload':empty,
+	    'historyBack':empty,
+	    'historyForward':empty,
+	    'getNetworkContent':onlyKey,
+	    'compareTestTubes':expect,
+	    'wait':onlyKey,
+	    'compare':compareForm
+	    		    
+};
+	this.actions=Object.keys(this.actionForms);
+    },
+    a:{view:function(){
+	return m('','hello');
+    }},
+    view:function(ctrl){
+	var self=this;
+	return	  m('',m('select', {
+                      config: function(selectElement, isinit) {
+                          if (isinit)
+                              return;
+                          ctrl.actions.map(function(name, i) {
+                              if (i == ctrl.actions.length) {
+                                  ctrl.populated = true;
+                              }
+                              if (ctrl.populated)
+                                  return;
+                              selectElement.options[i] = new Option('(' + i + ') ' + name, name);
+                          });
+			  self.action=ctrl.actions[0];
+                      },
+                      oninput: function(e) {
+                          self.action = this.value;
+			  console.log(self.action)
+			  console.log(ctrl.actionForms[self.action])
+			  
+                      }
+	}
+			),m.component(ctrl.actionForms[self.action]?ctrl.actionForms[self.action]:this.a));
+				}
+		};
 
 var testSteps={view:function(ctrl,self){
     
@@ -1081,18 +912,6 @@ var testSteps={view:function(ctrl,self){
         }));
 
 
-	// m('', m('button', {
-        //     onclick: function() {
-	// 	self.content.splice(i, 1);
-        //     }
-	// }, 'remove'),
-	// 	 m('button',{
-	// 	     onclick:function(){
-	// 		 console.log(d,i,self.content[i]);
-	// 		 self.stepEditor.value=JSON.stringify(d);
-	// 	     }
-	// 	 },'Edit'),i+") " ,JSON.stringify(d)
-	// 	);
     }));
 }};;
 
@@ -1169,7 +988,7 @@ m.route(document.body, '/', {
 
 var initElement = document.getElementsByTagName("html")[0];
 var json = mapDOM(initElement, true);
-console.log(json);
+//console.log(json);
 
 // Test with a string.
 // initElement = "<div><span>text</span>Text2</div>";
