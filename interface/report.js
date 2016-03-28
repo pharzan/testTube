@@ -445,8 +445,11 @@ var actionButtons = {
 var setList = {
     view: function() {
         
-        return m('ul', _Globals.set.map(function(set) {
-            return m('li', set);
+        return m('ul', _Globals.set.content.map(function(set,i) {
+	    
+            return m('li',{onclick:function(){
+		_Globals.set.content.splice(i,1);
+	    }},set.name);
         }));
     }
 };
@@ -475,6 +478,7 @@ var build = {
     deleteFlag:false,
     action:'',
     view: function(ctrl) {
+	
         var self = this;
         return [m.component(header),
 		m.component(dialog),
@@ -485,9 +489,11 @@ var build = {
 		      label: 'Add to set',
 		      raised: true,
 		      events:{
-		      onclick: function() {
-			_Globals.set.content.push(_Globals.selectedStep.name);
-			console.log(_Globals.set.content)
+			  onclick: function() {
+			      var data={name:_Globals.selectedStep.name,
+					repetition:0};
+			_Globals.set.content.push(data);
+			      console.log(_Globals.set);
                       }}
 		  }),
 		  m('button', {
@@ -624,8 +630,9 @@ var build = {
 		 
 		   )),
 		m('',
-		  m.component(testSteps,self),
-		  m.component(set)
+		  m.component(testSteps,self),_Globals.set?m.component(setList):null
+		  //,
+		  //m.component(set)
 		    )
                ];
     },
@@ -923,7 +930,8 @@ var testSteps={view:function(ctrl,self){
 			 }
 		     }
 		     
-		 }),m.component(listTile, {
+		 }),
+		 m.component(listTile, {
 		     title: JSON.stringify(d),
 		     compact:true
 		 }));
@@ -940,7 +948,7 @@ var load = {
             m.component(selectStepList),
             selectStepList.infoShowable ? m.component(stepList) : null,
             m.component(selectSetList),
-            selectSetList.infoShowable ? m.component(setList) : null,
+            
 		
             //m('',Globals.selected.name)
         ];

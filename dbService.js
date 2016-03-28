@@ -22,7 +22,6 @@ function load(dbName, query) {
     var d = db[dbName];
     return new Promise(function(resolve) {
 
-
         d.find(query, function(err, steps) {
             if (steps.length == 0)
                 return resolve('empty');
@@ -267,22 +266,29 @@ function server() {
 		    console.log('data:',data);
 		    main.reloadBrowser();
 		    var setCounter=0;
-		    var steps=load('steps',{name:data[setCounter]}).then(function(res){
-			main.run(res[0].content);
+		    var steps=load('steps',{name:data[setCounter].name}).then(function(res){
+			console.log(data[setCounter].repetition)
+			for(var i=0;i<=data[setCounter].repetition;i++){
+			    main.run(res[0].content);}
 			response.writeHead(200, responseHeaders);
 			response.write(JSON.stringify({status:"OK"}));
 			response.end();
 		    });
 		    var p2 = PubSub.subscribe('testStepsComplete', function() {
 			setCounter++;
-			steps=load('steps',{name:data[setCounter]}).then(function(res){
-			    main.run(res[0].content);
-			});
-			console.log('------TEST STEPS COMPLETE-----SetCounter::',setCounter);
-			if(setCounter==data.length){
-			    
+			
+			if(setCounter==data.length){   
 			    PubSub.clearAllSubscriptions();
+			    console.log('--------------- SET DONE -------',setCounter)
+			    return;
+			}else{
+			    steps=load('steps',{name:data[setCounter].name}).then(function(res){
+				for(var i=0;i<=data[setCounter].repetition;i++){
+				    main.run(res[0].content);}
+			});
 			}
+			console.log('------TEST STEPS COMPLETE-----SetCounter::',setCounter);
+			
 			
 			
 		    });
