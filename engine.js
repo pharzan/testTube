@@ -21,11 +21,12 @@ var fs = require('fs'),
 
 function sendKeys(element,key,page, callback) {
     return new Promise(function(resolve, reject) {
-
+	page.sendEvent('keypress', key, null, null,null);
 	var e = page.evaluate(function(element,key) {
 	    var input = document.querySelector(element); // Get the element where you want to press.
 	    var myEvent=new Event('change');
-	    input.value=key;
+	    //input.value=key;
+	    
 	    input.dispatchEvent(myEvent);
 	    return true;
 	}, element,key,function(err,result){

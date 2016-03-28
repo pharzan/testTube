@@ -69,6 +69,16 @@ function save(dbName, data) {
 
 }
 
+function updateByName(name,updateData){
+    
+    db.steps.update({ name: name }, { $set: updateData }, { multi: true }, function (err, numReplaced) {
+	console.log('updated: ',numReplaced)
+  // numReplaced = 3
+  // Field 'system' on Mars, Earth, Jupiter now has value 'solar system'
+});
+
+}
+
 function remove(data) {
     db.steps.remove({
         name: 'checkTestTubes.json'
@@ -172,7 +182,7 @@ function batchFileRead(){
 
 //batchFileRead();
 	   
-load('steps',{});
+updateByName("",{categoery:"none"});
 //save('steps',data);
 //removeById('steps','LpLtIrILKwbIp9y0')
 //load('sets',{});

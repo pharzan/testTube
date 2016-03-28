@@ -179,8 +179,9 @@ function wait(t) {
 }
 
 function run(testSteps) {
+    test.engineGlobal.state='pending';
+    io.emit('state',{state:'pending'});
     return new Promise(function(resolve) {
-
         testSteps.map(function(step) {
             function stepSwitchCheck(step, page) {
                 switch (step.action) {
@@ -270,7 +271,8 @@ function run(testSteps) {
 	    else {
                 stepPromise = stepPromise.then(function(msg) {
                     if (step.action == 'done') {
-			console.log('here')
+			test.engineGlobal.state='done';
+			io.emit('state',{state:'done'});
                         PubSub.publish('testStepsComplete');
                         return resolve('done');
                     }
@@ -470,8 +472,10 @@ function sendData() {
         stepDescription: globalData.currentStepDescription,
         beakerKey: globalData.beakerKey,
         testTubeKey: globalData.testTubeKey,
-        messagePool: test.engineGlobal.messagePool
+        messagePool: test.engineGlobal.messagePool,
+	state:test.engineGlobal.state
     });
+    
     // console.log(globalData.currentStepDescription)
 }
 

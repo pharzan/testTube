@@ -79,11 +79,6 @@ function updateByName(dbName,name,updateData){
 }
 
 function server() {
-    var p2 = PubSub.subscribe('testStepsComplete', function() {
-        Global.setCounter++;
-        console.log('------TEST STEPS COMPLETE-----SetCounter::',Global.setCounter);
-        
-    });
     
     http.createServer(function(request, response) {
 
@@ -264,16 +259,49 @@ function server() {
             if (search === '?set') {
                 console.log('going for a set play');
                 main.reloadBrowser();
+		request.on('data', function(chunk) {
+		    console.log("Received body data:");
+		   // console.log(JSON.parse(chunk.toString()));
+		    var data=JSON.parse(chunk.toString());
+		     
+		    console.log('data:',data);
+		    main.reloadBrowser();
+		    var setCounter=0;
+		    var steps=load('steps',{name:data[setCounter]}).then(function(res){
+			main.run(res[0].content);
+			response.writeHead(200, responseHeaders);
+			response.write(JSON.stringify({status:"OK"}));
+			response.end();
+		    });
+		    var p2 = PubSub.subscribe('testStepsComplete', function() {
+			setCounter++;
+			steps=load('steps',{name:data[setCounter]}).then(function(res){
+			    main.run(res[0].content);
+			});
+			console.log('------TEST STEPS COMPLETE-----SetCounter::',setCounter);
+			if(setCounter==data.length){
+			    
+			    PubSub.clearAllSubscriptions();
+			}
+			
+			
+		    });
+		    //main.run(data[setCounter]);
+		    main.run(steps);
+		    
+		});
                 // console.log(Global.step);
                 // main.run(Global.steps);
-                main.start();
-                response.writeHead(200, responseHeaders);
-                response.end();
+                //main.start();
+                // response.writeHead(200, responseHeaders);
+                // response.end();
             }
+	
 	    else if (search === '?steps') {
                 console.log('going for a step play');
                 main.reloadBrowser();
                 // console.log(Global.step);
+		
                 main.run(Global.steps);
 
                 //main.start();

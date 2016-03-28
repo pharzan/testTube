@@ -6,7 +6,9 @@ var _Globals = {selectedStep:{name:'',
 			      categoery:'',
 			      content:[{description:''}]},
 		build:false,
-		set:{content:[]}
+		set:{content:[]},
+		selectedHeader:'report',
+		icons:{playStep:'.fa.fa-play-circle.fa-3x'}
 	       };
 //Globals.selected.name = 'nothing selected yet';
 socket.on('time', function(data) {
@@ -18,6 +20,15 @@ socket.on('time', function(data) {
     //addMessage(data.time);
 
 });
+socket.on('state',function(state){
+    console.log(state)
+    if(state.state=='pending'){
+	
+	_Globals.icons.playStep='.fa.fa-spinner.fa-pulse.fa-3x.disabled';
+    }
+    else
+	_Globals.icons.playStep='.fa.fa-play-circle.fa-3x';
+	})
 
 socket.on('error', console.error.bind(console));
 socket.on('message', console.log.bind(console));
@@ -49,10 +60,14 @@ var listTile=require( 'polythene/list-tile/list-tile');
 
 const loadBtn = m.component(btn, {
     label: 'Load',
-    raised: true,
+    raised: false,
+    borders:true,
+    
     events: {
-        onclick: function(){
+        onclick: function(e){
+	    
 	    m.route('/load')
+	    
 	}
     }
 });;
@@ -79,10 +94,23 @@ const buildBtn = m.component(btn, {
 	}
     }
 });;
-
+const deleteBtn = m.component(btn, {
+    label: 'delete',
+    raised: true,
+    
+    events: {
+        onclick: function(){
+	    
+	    _Globals.build=true;
+	    
+	}
+    }
+});;
 const SvgPlus='<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" width="24" height="24" viewBox="0 0 24.00 24.00" enable-background="new 0 0 24.00 24.00" xml:space="preserve"><path fill="#000000" fill-opacity="1" stroke-width="0.2" stroke-linejoin="round" d="M 18.9994,12.998L 12.9994,12.998L 12.9994,18.998L 10.9994,18.998L 10.9994,12.998L 4.99936,12.998L 4.99936,10.998L 10.9994,10.998L 10.9994,4.99805L 12.9994,4.99805L 12.9994,10.998L 18.9994,10.998L 18.9994,12.998 Z "></path></svg>';
 
 const SvgMinus='<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" width="24" height="24" viewBox="0 0 24.00 24.00" enable-background="new 0 0 24.00 24.00" xml:space="preserve"><path fill="#000000" fill-opacity="1" stroke-width="0.2" stroke-linejoin="round" d="M 18.9994,12.998L 12.9994,12.998L  10.9994,12.998L 4.99936,12.998L 4.99936,10.998L 10.9994,10.998L 12.9994,10.998L 18.9994,10.998L 18.9994,12.998 Z "></path></svg>';
+
+const SvgMenu='<i class="menuDots"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg></i>';
 
 var header={
     controller:function(){
@@ -94,30 +122,6 @@ var header={
 	return m('',m.component(loadBtn),m.component(reportBtn),m.component(buildBtn))
     }
 };
-// var header = {
-//     view: function() {
-	
-//         return m('.header',m.component(app),
-//             m('span', {
-//                 onclick: function() {
-//                     m.route('/load')
-//                 }
-//             }, 'Load'),
-//             m('span', {
-//                 onclick: function() {
-//                     m.route('/report')
-//                 }
-//             }, 'Report'),
-//             m('span', {
-//                 onclick: function() {
-//                     m.route('/build')
-//                 }
-//             }, 'New')
-
-//         );
-//     }
-
-// };
 
 var url = {
     view: function() {
@@ -296,7 +300,7 @@ var selectStepList = {
         var self = this;
 
         (typeof ctrl.list === 'undefined') ? ctrl.mappable = false: ctrl.mappable = true;
-        return m('select', {
+        return m('',m('select', {
                 config: function(selectElement, isinit) {
                     if (isinit)
                         return;
@@ -332,7 +336,7 @@ var selectStepList = {
                 if (ctrl.populated)
                     return;
                 self.selectElement.options[self.selectElement.options.length] = new Option(i + ') ' + name, name);
-            }) : null);
+            }) : null));
     }
 };
 
@@ -408,19 +412,20 @@ var actionButtons = {
     view: function() {
 
         var self = this;
-        return m('',
-            m('button', {
+        return m('span',
+            m('i.fa.fa-toggle-right.fa-3x.playBtncontainer', {
                 onclick: function() {
 
                     m.request({
-                        method: "GET",
+                        method: "post",
                         url: "http://127.0.0.1:8001/play/?set",
-                        background: true
+                        background: true,
+			data:_Globals.set.content
                     });
                 }
-            }, 'PLAY Set!'),
+            }),
 
-            m('button', {
+		 m('i.playBtncontainer'+_Globals.icons.playStep, {
                 onclick: function() {
 
                     m.request({
@@ -429,7 +434,7 @@ var actionButtons = {
                         background: true
                     });
                 }
-            }, 'PLAY Steps')
+            })
 
 
         );
@@ -442,7 +447,7 @@ var setList = {
         
         return m('ul', _Globals.set.map(function(set) {
             return m('li', set);
-        }))
+        }));
     }
 };
 
@@ -457,21 +462,6 @@ var stepList = {
     }
 };
 
-// var List = function() {
-
-//     var view = function(ctrl, actions) {
-
-//         return m('ul', actions.map(function(action) {
-//             return m('li', {
-//                 key: Math.random()
-//             }, action);
-//         }));
-//     };
-//     return {
-//         view: view
-//     };
-// };
-
 var build = {
     content: [],
     data: {},
@@ -483,31 +473,38 @@ var build = {
     
     fetchFlag: false,
     deleteFlag:false,
-    action:'waitForVisibility',
+    action:'',
     view: function(ctrl) {
         var self = this;
-        return [m.component(header),m.component(dialog),
+        return [m.component(header),
+		m.component(dialog),
 		m.component(selectStepList),
-		m('button',{
-		    onclick: function() {
-			_Globals.set.content.push(_Globals.selectedSteps.name);
+		m('.actions.span.twelve',
+		  m.component(actionButtons),
+		  m.component(btn, {
+		      label: 'Add to set',
+		      raised: true,
+		      events:{
+		      onclick: function() {
+			_Globals.set.content.push(_Globals.selectedStep.name);
 			console.log(_Globals.set.content)
-                    }},'Add to set'),
-		m('button', {
+                      }}
+		  }),
+		  m('button', {
                     onclick: function() {
-			console.log(_Globals.selectedStep.name,_Globals);
+			//console.log(_Globals.selectedStep.name,_Globals);
 			self.stepsName=_Globals.selectedStep.name;
 			self.content=_Globals.selectedStep.content;
 			self.fetchFlag = true;
                     }
 		}, 'fetch'),
-		m('button', {
+		  m('button', {
                     onclick: function() {
 			console.log(_Globals.selectedStep.name);
 			self.fetchFlag = false;
                     }
 		}, 'edit'),
-		m('button', {
+		  m('span', {
                     onclick: function() {
 			console.log(_Globals.selectedStep._id);
 			dialog.show({
@@ -542,9 +539,11 @@ var build = {
 			self.fetchFlag = false;
 			
                     }
-		}, 'delete'),
-		m('.form',
-		  m.component(textfield, {
+		  }, deleteBtn)
+		 ),
+		m('.span.twelve',
+		m('.stepForm.span.eight',
+		m.component(textfield, {
 		      label: 'Step Name',
 		      floatingLabel: true,
 		      class:'stepInputs',
@@ -559,7 +558,7 @@ var build = {
 		      	  self.stepsName=e.value;
 			  _Globals.selectedStep.name=e.value;
 		      }
-		  },self)),
+		  },self),
 		m.component(textfield, {
 		    class:'stepInputs',
 		      label: 'Steps Description',
@@ -589,33 +588,32 @@ var build = {
 			_Globals.selectedStep.categoery=e.value;
 			self.category = e.value;
 		      }
-		},self),
-		m('',
-		  m.component(actionsMenu,ctrl),
-		   m.component(textfield, {
-		      label: 'Add to Row',
-		       floatingLabel: true,
-		       type:'number',
-		      class:'stepInputs',
-		      help: 'Enter the row number to insert in to',
-		      focusHelp: true,
-		      dense:true,
-		      fullWidth:false,
-		      validateAtStart:false,
-		      getState:function(e){
-		      	 self.rowNumber=e.value;
-		      }
-		   },self),
-		m.component(fabtn, {
+		},self)
+		 )),
+		m('.span.twelve',
+		  m.component(actionsMenu,self),
+		  m('.span.twelve',
+		  // m.component(textfield, {
+		  //     label: 'Add to Row',
+		  //      floatingLabel: true,
+		  //      type:'number',
+		  //     class:'stepInputs',
+		  //     help: 'Enter the row number to insert in to',
+		  //     focusHelp: true,
+		  //     dense:true,
+		  //     fullWidth:false,
+		  //     validateAtStart:false,
+		  //     getState:function(e){
+		  //     	 self.rowNumber=e.value;
+		  //     }
+		  //    },self),
+		    m.component(fabtn, {
 		    class:'addBtn',
 			 small:true,
 			 content:m.trust(SvgPlus),
-			 events:{
-			     onclick: this.makeStep.bind(self)
-			 }
-			 
+			 events:{onclick: this.makeStep.bind(self)}
 		}),
-		  m.component(btn, {
+		    m.component(btn, {
 		      label: 'Build&Save',
 		      raised: true,
 		      events: {
@@ -623,7 +621,8 @@ var build = {
 			  
 		      }
 		  },self)
-		 ),
+		 
+		   )),
 		m('',
 		  m.component(testSteps,self),
 		  m.component(set)
@@ -650,7 +649,7 @@ var build = {
             this.content.push({
 		action: self.action,
 		tag: self.selector,
-		key: self.key?self.key:null,
+		key: self.keyz?self.keyz:null,
 		expect: self.expect?self.expect:null,
 		des: self.description
             });
@@ -708,17 +707,20 @@ var build = {
     }
 };
 
-    var set={view:function(){return m('',_Globals.set.content.map(function(setName,i){
+var set={view:function(){
+    return m('',
+	     _Globals.set.content.map(function(setName,i){
 	return  m.component(listTile, {
             title: setName,
 	    compact:true
         });
-    }));}
-	    };
+	     }));
+}};
 
 var actionsMenu={
     
     controller:function(parent){
+	
 	var onlyTag={view:function(){
 	    return m('', m.component(textfield, {
 		class:'stepInputs',
@@ -727,6 +729,7 @@ var actionsMenu={
 		dense:true,
 		fullWidth:false,
 		getState:function(e){
+		    console.log(e)
 		    build.selector = e.value;
 		}},self),m.component(textfield, {
 		    class:'stepInputs',
@@ -742,13 +745,13 @@ var actionsMenu={
     onlyKey={view:function(){
 	    return m('', m.component(textfield, {
 		class:'stepInputs',
-		label: 'Key',
+		label: 'Selector',
 		floatingLabel: true,
 		dense:true,
 		fullWidth:false,
 		getState:function(e){
-		    // _Globals.selectedStep.categoery=e.value;
-		    build.key = e.value;
+		    
+		    build.keyz = e.value;
 		}},self),m.component(textfield, {
 		    class:'stepInputs',
 		    label: 'Description',
@@ -756,10 +759,9 @@ var actionsMenu={
 		    dense:true,
 		    fullWidth:false,
 		    getState:function(e){
-			// _Globals.selectedStep.categoery=e.value;
 			build.description = e.value;
 		    }},self));
-	}},
+    }},
 
     tagAndKeyForm={view:function(){
 	    return m('', m.component(textfield, {
@@ -777,7 +779,7 @@ var actionsMenu={
 		dense:true,
 		fullWidth:false,
 		getState:function(e){
-		    build.key = e.value;
+		    build.keyz = e.value;
 		}},self),m.component(textfield, {
 		    class:'stepInputs',
 		    label: 'Description',
@@ -855,61 +857,76 @@ var actionsMenu={
 	    'wait':onlyKey,
 	    'compare':compareForm
 	    		    
-};
+	};
+	
+	
 	this.actions=Object.keys(this.actionForms);
     },
-    a:{view:function(){
-	return m('','hello');
+    
+    empty:{view:function(){
+	return m('');
     }},
-    view:function(ctrl){
+    
+    view:function(ctrl,parent){
 	var self=this;
-	return	  m('',m('select', {
-                      config: function(selectElement, isinit) {
-                          if (isinit)
-                              return;
-                          ctrl.actions.map(function(name, i) {
-                              if (i == ctrl.actions.length) {
-                                  ctrl.populated = true;
-                              }
-                              if (ctrl.populated)
-                                  return;
-                              selectElement.options[i] = new Option('(' + i + ') ' + name, name);
-                          });
-			  self.action=ctrl.actions[0];
-                      },
-                      oninput: function(e) {
-                          self.action = this.value;
-			  console.log(self.action)
-			  console.log(ctrl.actionForms[self.action])
-			  
-                      }
-	}
-			),m.component(ctrl.actionForms[self.action]?ctrl.actionForms[self.action]:this.a));
-				}
-		};
-
+	return m('',m('.actionsMenu.span.three',
+		      m('a',{
+		       
+		       href: 'javascript: void(0)',
+		       id: 'simple_btn', // use as menu's target
+		       onclick: () => (ctrl.open = true) // opens at next redraw
+		      },
+			m.trust(SvgMenu),'Action: '+ parent.action),
+		 m.component(menu, {
+		       size:5,
+		       transition:'both',
+		       target: 'simple_btn', // to align with the link
+		       offset: 0, // horizontally align with link
+		       show: ctrl.open, // should the menu be open or closed?
+		       didHide: () => (ctrl.open = false), // called after closing
+		       content: m.component(list,
+					    {
+			   tiles: ctrl.actions.map(function(name,i){
+			       return  m.component(listTile, {
+				   front:{view:function(){return m('i.fa.fa-bookmark');}},
+				   title: name,
+				   ink: true,
+				   ripple:true,
+				   events:{onclick:function(){
+				       parent.action = name;
+				       self.action=name;
+				   }}
+				   
+			       },parent,self);
+		})
+                
+                
+            })
+		   }
+		   
+			    )),
+		 m('.span.six',m.component(ctrl.actionForms[self.action]?ctrl.actionForms[self.action]:this.empty))
+		);
+    }
+};
 var testSteps={view:function(ctrl,self){
     
-    return m('', self.content.map(function(d, i) {
-	
-	
-	return m('',m.component(fabtn, {
-		    class:'removeBtn',
-			 small:true,
-			 content:m.trust(SvgMinus),
-			 events:{
-			     onclick: function(){
-				 self.content.splice(i, 1);
-			     }
+    return m('.span.twelve', self.content.map(function(d, i) {
+	return m('.span.twelve',
+		 m.component(btn, {
+		     class:'removeBtn',
+		     small:true,
+		     content:m.trust("<i class='fa fa-minus'></i>"),
+		     events:{
+			 onclick: function(){
+			     self.content.splice(i, 1);
 			 }
-			 
-	}),m.component(listTile, {
-	    class:'fab--mini',
-            title: JSON.stringify(d),
-	    subtitle:'i',
-	    
-	    compact:true
-        }));
+		     }
+		     
+		 }),m.component(listTile, {
+		     title: JSON.stringify(d),
+		     compact:true
+		 }));
 
 
     }));

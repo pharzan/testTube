@@ -38,11 +38,11 @@ a:hover {
     float: left;
     display: inline;
     min-height: 1em;
-    margin: 0 2% 20px 2%
+    margin: 0 2% 20px 0
 }
 
 .span:first-child {
-    margin-left: 0
+    //margin-left: 0
 }
 
 .span:last-child {
