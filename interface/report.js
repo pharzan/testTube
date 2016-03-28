@@ -445,12 +445,22 @@ var actionButtons = {
 var setList = {
     view: function() {
         
-        return m('ul', _Globals.set.content.map(function(set,i) {
-	    
-            return m('li',{onclick:function(){
-		_Globals.set.content.splice(i,1);
-	    }},set.name);
-        }));
+        return m('ul',
+		 _Globals.set.content.map(function(set,i) {
+		     return m('li',m('.fa.fa-minus',{
+			 onclick:function(){
+			     _Globals.set.content.splice(i,1);
+			 }}),
+			      m('input',
+				{onchange:m.withAttr('value',function(value){
+				    _Globals.set.content[i].repetition=value;    
+				}),
+				 placeholder:_Globals.set.content[i].repetition,
+				 style:{width:"50px"}
+				}),set.name
+			     );
+		 })
+		);
     }
 };
 
