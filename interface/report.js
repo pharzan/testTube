@@ -106,6 +106,7 @@ const deleteBtn = m.component(btn, {
 	}
     }
 });;
+
 const SvgPlus='<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" width="24" height="24" viewBox="0 0 24.00 24.00" enable-background="new 0 0 24.00 24.00" xml:space="preserve"><path fill="#000000" fill-opacity="1" stroke-width="0.2" stroke-linejoin="round" d="M 18.9994,12.998L 12.9994,12.998L 12.9994,18.998L 10.9994,18.998L 10.9994,12.998L 4.99936,12.998L 4.99936,10.998L 10.9994,10.998L 10.9994,4.99805L 12.9994,4.99805L 12.9994,10.998L 18.9994,10.998L 18.9994,12.998 Z "></path></svg>';
 
 const SvgMinus='<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" width="24" height="24" viewBox="0 0 24.00 24.00" enable-background="new 0 0 24.00 24.00" xml:space="preserve"><path fill="#000000" fill-opacity="1" stroke-width="0.2" stroke-linejoin="round" d="M 18.9994,12.998L 12.9994,12.998L  10.9994,12.998L 4.99936,12.998L 4.99936,10.998L 10.9994,10.998L 12.9994,10.998L 18.9994,10.998L 18.9994,12.998 Z "></path></svg>';
@@ -300,7 +301,7 @@ var selectStepList = {
         var self = this;
 
         (typeof ctrl.list === 'undefined') ? ctrl.mappable = false: ctrl.mappable = true;
-        return m('',m('select', {
+        return m('select', {
                 config: function(selectElement, isinit) {
                     if (isinit)
                         return;
@@ -329,14 +330,9 @@ var selectStepList = {
             },
 
             ctrl.mappable ? ctrl.list.map(function(name, i) {
-
-                if (i == ctrl.list.length - 1) {
-                    ctrl.populated = true;
-                }
-                if (ctrl.populated)
-                    return;
-                self.selectElement.options[self.selectElement.options.length] = new Option(i + ') ' + name, name);
-            }) : null));
+		return m('option',name);
+                
+            }) : null);
     }
 };
 
@@ -344,7 +340,8 @@ var selectSetList = {
 
     controller: function() {
         var self = this;
-
+	this.mappable = false;
+	this.list=[]
         var names = m.request({
             method: "GET",
             url: "http://127.0.0.1:8001/sets/?names",
@@ -352,6 +349,7 @@ var selectSetList = {
         }).then(function(response) {
             self.selected = response;
             self.list = response;
+	    console.log(self.list);
         });
 
         this.onunload = function() {
@@ -363,46 +361,38 @@ var selectSetList = {
     view: function(ctrl) {
         var self = this;
 
-        (typeof ctrl.list === 'undefined') ? ctrl.mappable = false: ctrl.mappable = true;
-        return m('', m('select', {
-                config: function(selectElement, isinit) {
-                    if (isinit)
-                        return;
-                    self.selectElement = selectElement;
-
-                },
-                oninput: function(e) {
+        
+        return m('select', {
+	    oninput: function(e) {	
                     if (typeof self.selected === 'undefined') {
                         self.selected = {};
                     }
-
                     self.selected.name = e.target.value;
                     m.request({
                         method: "GET",
                         url: "http://127.0.0.1:8001/set/?" + self.selected.name,
                         background: false
                     }).then(function(response) {
+                        //selectedStep:::
                         self.selected = response;
-                        _Globals.selectedSet = response;
-
-                        console.log('SelectedSet', _Globals.selectedSet);
+                        _Globals.set = response;
+                        console.log('SelectedStep', _Globals.set);
                         self.infoShowable = true;
+		
                     });
-                }
-
             },
-            ctrl.mappable ? ctrl.list.map(function(name, i) {
-
-                if (i == ctrl.list.length - 1) {
-                    ctrl.populated = true;
+            
+                config: function(selectElement, isinit) {
+                    if (isinit)
+                        return;
+                    self.selectElement = selectElement;
+		    ctrl.mappable =true;
+		    
                 }
-                if (ctrl.populated)
-                    return;
-
-                self.selectElement.options[self.selectElement.options.length] = new Option(i + ') ' + name, name);
-
-
-            }) : null));
+        },ctrl.list.map(function(name,i){
+	    return m('option',name);
+	})
+		     );
     }
 };
 
@@ -493,6 +483,7 @@ var build = {
         return [m.component(header),
 		m.component(dialog),
 		m.component(selectStepList),
+		m.component(selectSetList),
 		m('.actions.span.twelve',
 		  m.component(actionButtons),
 		  m.component(btn, {
@@ -506,6 +497,24 @@ var build = {
 			      console.log(_Globals.set);
                       }}
 		  }),
+		  m.component(btn, {
+		      label: 'Build&Save Set',
+		      raised: true,
+		      events:{
+			  onclick: function() {
+			      console.log(_Globals.set);
+			      m.request({
+				  method: "POST",
+				  url: "http://dev.testtube:8001/sets/?save",
+				  dataType: 'application/json',
+				  background: true,
+				  data: JSON.stringify(_Globals.set)
+			      }).then(function(response) {
+				  console.log("!!!!", response);
+
+			      });
+                      }}
+		  }),
 		  m('button', {
                     onclick: function() {
 			//console.log(_Globals.selectedStep.name,_Globals);
@@ -514,12 +523,6 @@ var build = {
 			self.fetchFlag = true;
                     }
 		}, 'fetch'),
-		  m('button', {
-                    onclick: function() {
-			console.log(_Globals.selectedStep.name);
-			self.fetchFlag = false;
-                    }
-		}, 'edit'),
 		  m('span', {
                     onclick: function() {
 			console.log(_Globals.selectedStep._id);
@@ -608,6 +611,7 @@ var build = {
 		 )),
 		m('.span.twelve',
 		  m.component(actionsMenu,self),
+		  m.component(testSteps,self),
 		  m('.span.twelve',
 		  // m.component(textfield, {
 		  //     label: 'Add to Row',
@@ -640,7 +644,43 @@ var build = {
 		 
 		   )),
 		m('',
-		  m.component(testSteps,self),_Globals.set?m.component(setList):null
+		  m('.span.twelve',
+		m('.stepForm.span.eight',
+		m.component(textfield, {
+		      label: 'Set Name',
+		      floatingLabel: true,
+		      class:'stepInputs',
+		      help: 'Enter the name for the test set',
+		      focusHelp: true,
+		      dense:true,
+		      required: true,
+		      fullWidth:false,
+		      validateAtStart:false,
+		      value:() => (_Globals.set.name),
+		      getState:function(e){
+		      	  self.setName=e.value;
+			  _Globals.set.name=e.value;
+		      }
+		  },self),
+		m.component(textfield, {
+		    class:'stepInputs',
+		      label: 'Set Description',
+		      floatingLabel: true,
+		      help: 'Input a description for all of the set',
+		      focusHelp: true,
+		      dense:true,
+		      required: true,
+		    fullWidth:false,
+		    validateAtStart:false,
+		    value:() => (_Globals.set.description),
+		    getState:function(e){
+			_Globals.set.description=e.value;
+			self.setDescription = e.value;
+			  
+		      }
+		},self)
+		 )),
+		 _Globals.set?m.component(setList):null
 		  //,
 		  //m.component(set)
 		    )
@@ -957,7 +997,7 @@ var load = {
 		m.component(simpleContainer),
             m.component(selectStepList),
             selectStepList.infoShowable ? m.component(stepList) : null,
-            m.component(selectSetList),
+            
             
 		
             //m('',Globals.selected.name)

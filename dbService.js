@@ -237,6 +237,32 @@ function server() {
                     response.end();
                 });
             }
+	    if (search === '?save'){
+		
+		request.on('data', function(chunk) {
+		    console.log("Received body data:");
+		   // console.log(JSON.parse(chunk.toString()));
+		    var data=JSON.parse(chunk.toString());
+		    var d=JSON.parse(data)
+		    console.log('SAVE:: name:',d.name)
+		    load('sets',{name:d.name}).then(function(result){
+			console.log("&&&&",data)
+			if(result==='empty'){
+			    console.log('data didn\'t exist so going to save it')
+			    save('sets',d);
+			}else{
+			    console.log('didnt save becuase a name already exists but updated');
+			    updateByName('sets',d.name,d)
+			}
+		    })
+		    //console.log(d.dataStore)
+		    
+		    response.writeHead(200, responseHeaders);
+		    
+		    response.write(JSON.stringify({status:"OK"}));
+		    response.end();
+		})
+	    }
 	    
         }
 	else if (path == '/set/') {
@@ -267,7 +293,8 @@ function server() {
 		    main.reloadBrowser();
 		    var setCounter=0;
 		    var steps=load('steps',{name:data[setCounter].name}).then(function(res){
-			console.log(data[setCounter].repetition)
+			console.log(data[setCounter].repetition);
+			console.log(data[setCounter].name);
 			for(var i=0;i<=data[setCounter].repetition;i++){
 			    main.run(res[0].content);}
 			response.writeHead(200, responseHeaders);
@@ -279,7 +306,7 @@ function server() {
 			
 			if(setCounter==data.length){   
 			    PubSub.clearAllSubscriptions();
-			    console.log('--------------- SET DONE -------',setCounter)
+			    console.log('--------------- SET DONE -------',setCounter);
 			    return;
 			}else{
 			    steps=load('steps',{name:data[setCounter].name}).then(function(res){

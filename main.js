@@ -184,6 +184,7 @@ function run(testSteps) {
     return new Promise(function(resolve) {
         testSteps.map(function(step) {
             function stepSwitchCheck(step, page) {
+		 
                 switch (step.action) {
                     case 'waitForVisibility':
                         return test.waitForVisibility(step.tag, page);
@@ -199,7 +200,7 @@ function run(testSteps) {
                     case 'getNetworkContent':
                         globalData.beakerKey = step.key;
                         return networkBeaker = test.getNetworkContent(networkResponses, step.key);
-                    case 'getUrlContent':
+                case 'getUrlContent':
                         return testTube = test.getUrlContent(page);
                     case 'compareTestTubeBeaker':
                         return test.compareTestTubeBeaker();
@@ -260,19 +261,26 @@ function run(testSteps) {
                             })
                         });
                         break;
-                    case 'navigateUrl':
-                        page.openUrl(step.key);
-                        break;
+                case 'navigateUrl':
+		    return new Promise(function(resolve) {
+			page.openUrl(step.key)
+			 return resolve('done');
+		    })
+			
+                        
                 };
             };
 
-            if (typeof(stepPromise) == 'undefined') 
-                stepPromise = stepSwitchCheck(step, page);
+            if (typeof(stepPromise) == 'undefined'){
+		
+                stepPromise = stepSwitchCheck(step, page);}
 	    else {
                 stepPromise = stepPromise.then(function(msg) {
+		
                     if (step.action == 'done') {
 			test.engineGlobal.state='done';
 			io.emit('state',{state:'done'});
+			
                         PubSub.publish('testStepsComplete');
                         return resolve('done');
                     }

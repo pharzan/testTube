@@ -182,7 +182,7 @@ function batchFileRead(){
 
 //batchFileRead();
 	   
-updateByName("",{categoery:"none"});
+//updateByName("",{categoery:"none"});
 //save('steps',data);
-//removeById('steps','LpLtIrILKwbIp9y0')
+removeById('sets','4g7BGcA8Vez6Fshp')
 //load('sets',{});
