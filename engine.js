@@ -11,7 +11,8 @@ var fs = require('fs'),
         networkResponses: [],
 	urlHistorySize:7,
 	urlHistory:[],
-	messagePool:[]
+	messagePool:[],
+	popup:{url:'',source:'unknown'}
 	
     };
 
@@ -379,7 +380,7 @@ function compareTestTubes(expect,type,expression){
 	    var T1=Number(Global.testTube);
 	    var T2=Number(Global.oldTestTube);
 	    var temp=eval(expression);
-	    
+	    Global.oldTestTube = Global.testTube;
 	    Global.testTube=temp;
 	    
 	    console.log(temp,T1,T2,'expect: '+expect,'comparision: ',temp==expect)
@@ -390,7 +391,7 @@ function compareTestTubes(expect,type,expression){
 	compare=(Global.oldTestTube==Global.testTube);
 	// console.log("Global.testTube = "+Global.testTube);
 	// console.log("Global.old = "+Global.oldTestTube);
-	// console.log(Global.testTube===Global.oldTestTube);
+	// console.log(Global.Global===testTube.oldTestTube);
 	
 	if(compare==expected)
 	    log('pass','compare pass');
@@ -600,8 +601,7 @@ var urlWatcher={
 		    Global.urlHistory.push(Global.currentUrl);
 		    log('url', ' Change: '+Global.currentUrl);
 		
-		return 
-	
+		    return;
 	    }else
 		return;	
 	    });

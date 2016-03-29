@@ -334,139 +334,6 @@ function start() {
     });
 };
 
-globalData.testSets = [
-
-    // jsons.networkAnswerCheck,
-
-    // jsons.networkTimerCheck,
-    // jsons.leftPlayCycle,
-    // jsons.checkViewsIncrease,
-    // jsons.rightPlayCycle,
-
-    // jsons.timerOutPlayCycle,
-
-    // //Timeout then check url to see if changed
-    // jsons.selectSubtitles,
-    // jsons.getUrlContent,
-    // jsons.clickNext,
-    // jsons.getUrlContent,
-    // jsons.compareTestTubesFail,
-
-    // //play then check url to see if changed
-    // jsons.selectSubtitles,
-    // jsons.getUrlContent,
-    // jsons.selectLeft,
-    // jsons.clickNext,
-    // jsons.getUrlContent,
-    // jsons.compareTestTubesFail,
-
-    // //play with subtitles and check if subtitles is shown
-    // jsons.subtitlesDisabled,
-
-    // // //check infopanel functionality:---------------------
-    // jsons.selectSubtitles,
-    // jsons.panelClick,
-    // jsons.selectLeft,
-    // jsons.clickNext,
-
-    // //history checks----------------------
-
-    // jsons.rightPlayCycle,
-    // jsons.urlHistory,
-    // jsons.leftPlayCycle,
-    // jsons.urlHistory,
-
-    // jsons.rightPlayCycle,
-    // jsons.getUrlContent,
-    // jsons.rightPlayCycle,
-    // jsons.getUrlContent,
-    // jsons.compareTestTubesFalse,
-
-    // jsons.rightPlayCycle,
-    // jsons.getUrlContent,
-    // jsons.goBack,
-    // jsons.goForward,
-    // jsons.goBack,
-    // jsons.goForward,
-    // jsons.goBack,
-    // jsons.goForward,
-    // jsons.getUrlContent,
-    // jsons.compareTestTubes,
-
-    // //play > get url > go back, go back > get url > see if the urls aren't the same
-    //     jsons.rightPlayCycle,
-    //     jsons.getUrlContent,
-    //     jsons.goBack,
-    //     jsons.goBack,
-    //     jsons.getUrlContent,
-    // jsons.compareTestTubesFalse,
-
-
-    // //correctAnswer Cycle
-    // jsons.selectSubtitles,
-    // jsons.correctAnswerClick,
-    // //incorrectAnswer Cycle
-    // jsons.selectSubtitles,
-    // jsons.incorrectAnswerClick,
-
-    //check session number success change after correct Answer
-
-    // jsons.selectSubtitles,
-    // jsons.getSuccessFromSessions,
-    // jsons.correctAnswerClick,
-    // jsons.getSuccessFromSessions,
-    // jsons.compareTestTubesFalse,
-
-    //check session number success change after incorrect 
-
-    // jsons.selectSubtitles,
-    // jsons.getSuccessFromSessions,
-    // jsons.incorrectAnswerClick,
-    // jsons.getSuccessFromSessions,
-    // jsons.compareTestTubes,
-    // jsons.clickNext,
-
-    //check session number fail correct after incorrect
-
-    // jsons.selectSubtitles,
-    // jsons.getFailFromSessions,
-    // jsons.incorrectAnswerClick,
-    // jsons.getFailFromSessions,
-    // jsons.compareTestTubesFalse,
-    // jsons.clickNext,
-
-    //check session number fail correct after incorrect
-
-    // jsons.selectSubtitles,
-    // jsons.getSuccessFromSessions,
-    // jsons.incorrectAnswerClick,
-    // jsons.getSuccessFromSessions,
-    // jsons.compareTestTubes,
-    // jsons.clickNext,
-
-    // //titlebar Components check
-    // jsons.checkTitleBarComponents,
-
-    // //products tests
-    // jsons.productsTestSet_Red,
-    // jsons.rightPlayCycle,
-    // jsons.urlCheckRed,
-
-    // jsons.productsTestSet_Green,
-    // jsons.rightPlayCycle,
-    // jsons.urlCheckGreen,
-
-    // jsons.productsTestSet_Yellow,
-    // jsons.rightPlayCycle,
-    // jsons.urlCheckYellow,
-
-    jsons.azeriSelect,
-    // jsons.urlCheckAZ,
-    // jsons.rightPlayCycle,
-    // jsons.urlCheckAZ,
-    // jsons.rightPlayCycle,
-];
-
 var page;
 
 function sendData() {
@@ -518,9 +385,33 @@ startBrowser(url).then(function() {
     });
     
 
+    globalData.page.onPageCreated = function(newPage){
+	newPage.onLoadFinished = function(a){
+	    //console.log('newPage::',a)
+            newPage.get('url',function(err,url){
+		var source='other';
+		console.log('NEW OPENED PAGE: URL:',url);
+		if(url.indexOf('youtube')!=-1){
+		    source='youtube';
+		}else if(url.indexOf('amazon')!=-1)
+		{
+		    source='amazon';
+		}
+		
+		test.engineGlobal.popup={url:url,
+				   source:source
+				  };
+		test.log('pass','Page Opened from source: '+source);
+		newPage.close();
+	    });
+            
+	};
+    }
+    
     page.get('settings',function(err,res){
 	console.log(res)
     })
+    
     page.settings.userName = 'tester';
     page.settings.password = 'testingit';
     
@@ -551,7 +442,6 @@ startBrowser(url).then(function() {
 // setTimeout(function(){console.log(beautify_js(globalData.domJson))},5000);
 
 exports.run = run;
-
 exports.start = start;
 exports.startBrowser = startBrowser;
 exports.networkTap = networkTap;
