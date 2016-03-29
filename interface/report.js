@@ -47,7 +47,7 @@ var test = {
     }
 };
 
-
+var checkbox=require( 'polythene/checkbox/checkbox');
 var btn= require ( 'polythene/button/button');
 var dialog= require( 'polythene/dialog/dialog');
 var textfield =require( 'polythene/textfield/textfield');
@@ -634,7 +634,7 @@ var build = {
 			 events:{onclick: this.makeStep.bind(self)}
 		}),
 		    m.component(btn, {
-		      label: 'Build&Save',
+		      label: 'Build&Save Steps',
 		      raised: true,
 		      events: {
 			  onclick: self.makeData.bind(self)
@@ -702,6 +702,19 @@ var build = {
 	    
 	// }
 	// else
+	if(self.action=='compareTestTubes' && self.custom){
+	    this.content.push({
+		action: self.action,
+		tag: self.selector,
+		key: self.keyz?self.keyz:null,
+		expect: self.expect?self.expect:null,
+		expression:self.customExpression,
+		type:'custom',
+		des: self.description
+            });
+	    
+	}
+	else
 	{
             this.content.push({
 		action: self.action,
@@ -868,8 +881,12 @@ var actionsMenu={
 		    }},self));
 	}},
 	
-    expect={view:function(){
-	    return m('', m.component(textfield, {
+	    expect={
+		custom:false,
+		view:function(){
+		    var self=this;
+	return m('',
+		 m.component(textfield, {
 		class:'stepInputs',
 		label: 'Expected Value',
 		floatingLabel: true,
@@ -878,7 +895,19 @@ var actionsMenu={
 		getState:function(e){
 		    // _Globals.selectedStep.categoery=e.value;
 		    build.expect = e.value;
-		}},self),m.component(textfield, {
+		}},self),
+		 this.custom?m.component(textfield, {
+		    class:'stepInputs',
+		     label: 'Evaluation Expression',
+		     help: 'example: (2*T1==T2)?Expected:',
+		    floatingLabel: true,
+		    dense:true,
+		    fullWidth:false,
+		    getState:function(e){
+			// _Globals.selectedStep.categoery=e.value;
+			build.customExpression = e.value;
+		    }},self):null,
+		 m.component(textfield, {
 		    class:'stepInputs',
 		    label: 'Description',
 		    floatingLabel: true,
@@ -887,7 +916,15 @@ var actionsMenu={
 		    getState:function(e){
 			// _Globals.selectedStep.categoery=e.value;
 			build.description = e.value;
-		    }},self));
+		    }},self),
+		 m('',m.component(checkbox, {
+		     label: 'Cutsom Operation',
+		     getState: function state(e){
+			 self.custom=e.el.checked
+			 build.custom=e.el.checked
+			 
+		     }
+		 },self)));
 	}},
 
     empty={view:function(){

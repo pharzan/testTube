@@ -366,13 +366,26 @@ function compareTestTubeBeaker() {
         log('warn', 'Match not Found in TestTube and Beaker');
 };
 
-function compareTestTubes(expect){
+function compareTestTubes(expect,type,expression){
     return new Promise(function(resolve){
     var old=Number(Global.oldTestTube),
 	current=Number(Global.testTube);
     var expected=(expect==='true')?true:false;
-    
-    if(isNaN(old)||isNaN(current)){
+	if (type==='custom'){
+
+	    console.log('operate');
+	    console.log('TestTube1: '+Global.testTube,'TestTube2: '+Global.oldTestTube)
+	    
+	    var T1=Number(Global.testTube);
+	    var T2=Number(Global.oldTestTube);
+	    var temp=eval(expression);
+	    
+	    Global.testTube=temp;
+	    
+	    console.log(temp,T1,T2,'expect: '+expect,'comparision: ',temp==expect)
+	    return resolve('done')
+	}
+	else if(isNaN(old)||isNaN(current)){
 	
 	compare=(Global.oldTestTube==Global.testTube);
 	// console.log("Global.testTube = "+Global.testTube);
@@ -386,7 +399,7 @@ function compareTestTubes(expect){
 	
 	return resolve('done')
     }
-    else{
+	else{
 	var diff=old-current;
 	
 	if(diff>0)
@@ -445,10 +458,14 @@ function compare(arg0,arg1,type,expect){
 	else
 	    log('fail',arg0+' compare '+arg1+" didn\'t returned expeced: "+expect);
 	break;
+
+	
 	
     }
     
 }
+
+
 
 function searchAndClickFromBeaker(page,searchTexts) {
     /*
@@ -506,11 +523,11 @@ function wait(t) {
         var i = 0;
         var inter = setInterval(function() {
             i++;
-            if (i == 10) {
+            if (i == t) {
                 clearInterval(inter);
                 return resolve('done'); // Note we're not returning `p` directly
             }
-        }, t);
+        }, 1000);
     });
 }
 

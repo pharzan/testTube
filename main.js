@@ -210,8 +210,9 @@ function run(testSteps) {
                         return test.onPlaybackStart(page, step.callback);
                     case 'searchAndClickFromBeaker':
                         return test.searchAndClickFromBeaker(page);
-                    case 'compareTestTubes':
-                        return test.compareTestTubes(step.expect);
+                case 'compareTestTubes':
+		    console.log('!!!!!!',step);
+                    return test.compareTestTubes(step.expect,step.type,step.expression);
                     case 'wait':
                         return test.wait(step.key);
                     case 'compare':
