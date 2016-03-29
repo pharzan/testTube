@@ -933,6 +933,7 @@ var actionsMenu={
 	
 	this.actionForms = {
 	    'navigateUrl':onlyKey,
+	    'navigateTestTube':empty,
 	    'waitForVisibility':onlyTag,
 	    'click':onlyTag,
 	    'focus':onlyTag,
@@ -949,8 +950,8 @@ var actionsMenu={
 	    'getNetworkContent':onlyKey,
 	    'compareTestTubes':expect,
 	    'wait':onlyKey,
-	    'compare':compareForm
-	    		    
+	    'compare':compareForm,
+	    'deadLinkChecker':empty
 	};
 	
 	

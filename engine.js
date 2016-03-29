@@ -20,6 +20,54 @@ var fs = require('fs'),
 //     //_reset();
 // });
 
+function deadLinkChecker(page){
+    return new Promise(function(resolve){
+	
+	var I=setInterval(function(){
+	    
+	    if(Global.popup.url!==''){
+		log('pass','*'+Global.popup.source+": "+Global.popup.url);
+		
+		var selector;
+		switch(Global.popup.source){
+		case 'amazon':
+		    clearInterval(I);
+		    console.log('AMAZON MATE');
+		    page.openUrl(Global.testTube);
+		    selector='#dv-action-box';
+		    waitForVisibility(selector,page,10).then(function(r){
+			console.log(r)
+			return resolve('done');	
+		    });
+		    break;
+		case 'youtube':
+		    clearInterval(I);
+		    console.log('YOUTUBE MATE!!!')
+		    page.openUrl(Global.testTube);
+		     selector='#movie_player > div.html5-video-container > video';
+		    waitForVisibility(selector,page,10).then(function(r){
+			console.log(r)
+			return resolve('done');
+		    
+		    });
+		    break;
+		default:
+		    console.log('dropped to defualt')
+		    clearInterval(I);
+		    return resolve('done');
+		    break;
+
+		}
+		clearInterval(I);
+		
+	    }else
+		{clearInterval(I);
+		    return resolve('done');}
+	},125);;
+
+    })
+};
+
 function sendKeys(element,key,page, callback) {
     return new Promise(function(resolve, reject) {
 	page.sendEvent('keypress', key, null, null,null);
@@ -466,8 +514,6 @@ function compare(arg0,arg1,type,expect){
     
 }
 
-
-
 function searchAndClickFromBeaker(page,searchTexts) {
     /*
      this function will find the element with same content as the network beacker
@@ -642,5 +688,6 @@ module.exports = {
     wait:wait,
     compare:compare,
     log: log,
-    engineGlobal: Global
+    engineGlobal: Global,
+    deadLinkChecker:deadLinkChecker
 };

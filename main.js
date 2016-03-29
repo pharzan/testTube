@@ -266,7 +266,29 @@ function run(testSteps) {
 		    return new Promise(function(resolve) {
 			page.openUrl(step.key)
 			 return resolve('done');
-		    })
+		    });
+		case 'navigateTestTube':
+		    return new Promise(function(resolve) {
+			//this navigates to test tube.
+			// fill the content of the testtube with a url
+			// or open a pop up and the test tube is automatigically
+			// filled with the poped up url
+			var I=setInterval(function(){
+			    console.log(test.engineGlobal.status)
+			    if(test.engineGlobal.status=='opened'){
+				
+				page.openUrl(test.engineGlobal.testTube);
+				clearInterval(I);
+				return resolve('done');
+			    }
+			},125);;
+			
+			 
+		    });
+		case 'deadLinkChecker':
+		    
+		    test.deadLinkChecker(page);
+		    break;
 			
                         
                 };
@@ -386,6 +408,7 @@ startBrowser(url).then(function() {
     
 
     globalData.page.onPageCreated = function(newPage){
+	test.engineGlobal.status='pending';
 	newPage.onLoadFinished = function(a){
 	    //console.log('newPage::',a)
             newPage.get('url',function(err,url){
@@ -397,13 +420,18 @@ startBrowser(url).then(function() {
 		{
 		    source='amazon';
 		}
-		
+		test.engineGlobal.oldTestTube = test.engineGlobal.testTube;
+		test.engineGlobal.testTube=url;
 		test.engineGlobal.popup={url:url,
 				   source:source
 				  };
-		test.log('pass','Page Opened from source: '+source);
 		newPage.close();
-	    });
+		
+		    test.engineGlobal.status='opened';
+		    test.log('pass','Page Opened from source: '+source);
+		    console.log('done')
+		
+	    })
             
 	};
     }
