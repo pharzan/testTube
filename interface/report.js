@@ -10,14 +10,14 @@ var _Globals = {selectedStep:{name:'',
 		selectedHeader:'report',
 		icons:{playStep:'.fa.fa-play-circle.fa-3x'}
 	       };
-//Globals.selected.name = 'nothing selected yet';
+
 socket.on('time', function(data) {
     //console.log(data.time);
     m.startComputation();
     time = data.time;
     Globals = data;
     m.endComputation();
-    //addMessage(data.time);
+
 
 });
 socket.on('state',function(state){
@@ -28,7 +28,7 @@ socket.on('state',function(state){
     }
     else
 	_Globals.icons.playStep='.fa.fa-play-circle.fa-3x';
-	})
+});
 
 socket.on('error', console.error.bind(console));
 socket.on('message', console.log.bind(console));
@@ -47,16 +47,16 @@ var test = {
     }
 };
 
-var checkbox=require( 'polythene/checkbox/checkbox');
-var btn= require ( 'polythene/button/button');
-var dialog= require( 'polythene/dialog/dialog');
-var textfield =require( 'polythene/textfield/textfield');
-var fabtn = require( 'polythene/fab/fab');
-var card = require( 'polythene/card/card');
+var checkbox=require('polythene/checkbox/checkbox');
+var btn= require ('polythene/button/button');
+var dialog= require('polythene/dialog/dialog');
+var textfield =require('polythene/textfield/textfield');
+var fabtn = require('polythene/fab/fab');
+var card = require('polythene/card/card');
 
-var menu=require( 'polythene/menu/menu');
-var list=require( 'polythene/list/list');
-var listTile=require( 'polythene/list-tile/list-tile');
+var menu=require('polythene/menu/menu');
+var list=require('polythene/list/list');
+var listTile=require('polythene/list-tile/list-tile');
 
 const loadBtn = m.component(btn, {
     label: 'Load',
@@ -322,10 +322,12 @@ var selectStepList = {
                         //selectedStep:::
                         self.selected = response;
                         _Globals.selectedStep = response;
+			 
                         console.log('SelectedStep', _Globals.selectedStep);
                         self.infoShowable = true;
 		
                     });
+		 
                 }
             },
 
@@ -454,16 +456,16 @@ var setList = {
     }
 };
 
-var stepList = {
-    view: function() {
+// var stepList = {
+//     view: function() {
 	
-        return m('ul',
+//         return m('ul',
 		 
-		 _Globals.selectedStep.content.map(function(step, i) {
-            return step.action ? m('li', 'Action: ' + i + ') ' + step.action, m('span.des', " >>> " + step.des)) : m('.des', step.description);
-        }));
-    }
-};
+// 		 _Globals.selectedStep.content.map(function(step, i) {
+//             return step.action ? m('li', 'Action: ' + i + ') ' + step.action, m('span.des', " >>> " + step.des)) : m('.des', step.description);
+//         }));
+//     }
+// };
 
 var build = {
     content: [],
@@ -520,7 +522,7 @@ var build = {
 			//console.log(_Globals.selectedStep.name,_Globals);
 			self.stepsName=_Globals.selectedStep.name;
 			self.content=_Globals.selectedStep.content;
-			self.fetchFlag = true;
+			
                     }
 		}, 'fetch'),
 		  m('span', {
@@ -555,7 +557,7 @@ var build = {
 			    }
 			    
 			},1);
-			self.fetchFlag = false;
+			
 			
                     }
 		  }, deleteBtn)
@@ -1004,27 +1006,31 @@ var actionsMenu={
 		);
     }
 };
+
 var testSteps={view:function(ctrl,self){
     
-    return m('.span.twelve', self.content.map(function(d, i) {
-	return m('.span.twelve',
-		 m.component(btn, {
-		     class:'removeBtn',
-		     small:true,
-		     content:m.trust("<i class='fa fa-minus'></i>"),
-		     events:{
-			 onclick: function(){
-			     self.content.splice(i, 1);
-			 }
-		     }
+    // return m('.span.twelve', self.content.map(function(d, i) {
+    // 	return m('.span.twelve',
+    // 		 m.component(btn, {
+    // 		     class:'removeBtn',
+    // 		     small:true,
+    // 		     content:m.trust("<i class='fa fa-minus'></i>"),
+    // 		     events:{
+    // 			 onclick: function(){
+    // 			     self.content.splice(i, 1);
+    // 			 }
+    // 		     }
 		     
-		 }),
-		 m.component(listTile, {
-		     title: JSON.stringify(d),
-		     compact:true
-		 }));
+    // 		 }),
+    // 		 m.component(listTile, {
+    // 		     title: JSON.stringify(d),
+    // 		     compact:true
+    // 		 }));
 
 
+    // }));
+    return m('.span.twelve' ,_Globals.selectedStep.content.map(function(step,i){
+	return m('span.span.eight',m('span','-'),JSON.stringify(step))
     }));
 }};;
 
@@ -1045,11 +1051,13 @@ var load = {
 };
 
 const simpleContainer = {};
+
 simpleContainer.controller = () => {
     return {
         open: false
     };
 };
+
 simpleContainer.view = (ctrl) => {
     return m('.container',{style:{position:'relative'}},
         m('a', {
@@ -1070,6 +1078,7 @@ simpleContainer.view = (ctrl) => {
         })
     );
 };
+
 var createList=function(){
 
     // var names = m.request({
@@ -1090,6 +1099,7 @@ var createList=function(){
 
 //	});
 };
+
 m.route.mode = 'pathname';
 
 m.route(document.body, '/', {
@@ -1101,6 +1111,7 @@ m.route(document.body, '/', {
 
 var initElement = document.getElementsByTagName("html")[0];
 var json = mapDOM(initElement, true);
+
 //console.log(json);
 
 // Test with a string.
