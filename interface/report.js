@@ -1030,7 +1030,13 @@ var testSteps={view:function(ctrl,self){
 
     // }));
     return m('.span.twelve' ,_Globals.selectedStep.content.map(function(step,i){
-	return m('span.span.eight',m('span','-'),JSON.stringify(step))
+	return m('span.span.twelve.noMargin',
+		 m('span',i+') '),
+		 m('i.fa.fa-minus-circle',
+		   {onclick:function(){
+		       _Globals.selectedStep.content.splice(i, 1);
+		   }}),
+		 JSON.stringify(step))
     }));
 }};;
 
