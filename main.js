@@ -511,6 +511,18 @@ startBrowser(url).then(function() {
         height: 700
     });
 
+    globalData.page.set('settings', {
+        userName: 'tester',
+        password: 'testingit'
+    });
+    
+
+    page.get('settings',function(err,res){
+	console.log(res)
+    })
+    page.settings.userName = 'tester';
+    page.settings.password = 'testingit';
+    
     test.urlWatcher.start(globalData.page, 250);
     
     
