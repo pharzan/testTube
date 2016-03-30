@@ -476,7 +476,7 @@ var build = {
         
     },
     
-    fetchFlag: false,
+    
     deleteFlag:false,
     action:'',
     view: function(ctrl) {
@@ -517,14 +517,7 @@ var build = {
 			      });
                       }}
 		  }),
-		  m('button', {
-                    onclick: function() {
-			//console.log(_Globals.selectedStep.name,_Globals);
-			self.stepsName=_Globals.selectedStep.name;
-			self.content=_Globals.selectedStep.content;
-			
-                    }
-		}, 'fetch'),
+		  
 		  m('span', {
                     onclick: function() {
 			console.log(_Globals.selectedStep._id);
@@ -613,26 +606,27 @@ var build = {
 		 )),
 		m('.span.twelve',
 		  m.component(actionsMenu,self),
-		  m.component(testSteps,self),
+		  
 		  m('.span.twelve',
-		  // m.component(textfield, {
-		  //     label: 'Add to Row',
-		  //      floatingLabel: true,
-		  //      type:'number',
-		  //     class:'stepInputs',
-		  //     help: 'Enter the row number to insert in to',
-		  //     focusHelp: true,
-		  //     dense:true,
-		  //     fullWidth:false,
-		  //     validateAtStart:false,
-		  //     getState:function(e){
-		  //     	 self.rowNumber=e.value;
-		  //     }
-		  //    },self),
-		    m.component(fabtn, {
+		    m.component(textfield, {
+		      label: 'Add to Row',
+		       floatingLabel: true,
+		       type:'number',
+		      class:'addToRow',
+		      help: 'Row to insert in to',
+		      focusHelp: true,
+		      dense:true,
+		      fullWidth:false,
+		      validateAtStart:false,
+		      getState:function(e){
+		      	 self.rowNumber=e.value;
+		      }
+		     },self),
+		    m.component(btn, {
 		    class:'addBtn',
-			 small:true,
-			 content:m.trust(SvgPlus),
+			small:true,
+			
+			content:m('i.fa.fa-plus.fa-3x'),
 			 events:{onclick: this.makeStep.bind(self)}
 		}),
 		    m.component(btn, {
@@ -645,6 +639,7 @@ var build = {
 		  },self)
 		 
 		   )),
+		m.component(testSteps,self),
 		m('',
 		  m('.span.twelve',
 		m('.stepForm.span.eight',
@@ -690,22 +685,24 @@ var build = {
     },
 
     makeStep: function() {
-        var self = this;
-	var row=Number(this.rowNumber);
+	
+        var self = this,row;
+	(this.rowNumber!=='')?(row=Number(this.rowNumber)):null;
+	console.log(row,this.rowNumber,'isnotanumber?',isNaN(row))
 	var key=self.key;
-	// if(!isNaN(row)){
-	//     this.content.splice(row, 0, {
-	// 	action: self.action,
-	// 	tag: self.selector,
-	// 	key: self.key?self.key:null,
-	// 	expect: self.expect?self.expect:null,
-	// 	des: self.description
-        //     });
-	    
-	// }
-	// else
+	if(!isNaN(row)){
+	    _Globals.selectedStep.content.splice(row, 0, {
+		action: self.action,
+		tag: self.selector,
+		key: self.key?self.key:null,
+		expect: self.expect?self.expect:null,
+		des: self.description
+            });
+	    this.rowNumber='';
+	}
+	else
 	if(self.action=='compareTestTubes' && self.custom){
-	    this.content.push({
+	    _Globals.selectedStep.content.push({
 		action: self.action,
 		tag: self.selector,
 		key: self.keyz?self.keyz:null,
@@ -718,7 +715,7 @@ var build = {
 	}
 	else
 	{
-            this.content.push({
+            _Globals.selectedStep.content.push({
 		action: self.action,
 		tag: self.selector,
 		key: self.keyz?self.keyz:null,
@@ -731,19 +728,19 @@ var build = {
     makeData: function() {
         var self = this;
 	
-	if(self.content[self.content.length-1].action!=='done')
-            self.content.push({
+	if(_Globals.selectedStep.content[_Globals.selectedStep.content.length-1].action!=='done')
+            _Globals.selectedStep.content.push({
 		action: 'done'
             });
 	
-	if(typeof self.content[0].description==='undefined')
-            self.content.unshift({
+	if(typeof _Globals.selectedStep.content[0].description==='undefined')
+            _Globals.selectedStep.content.unshift({
 		description: self.stepsDescription
             });
 	
         self.data = {
             name: self.stepsName,
-            content: self.content,
+            content: _Globals.selectedStep.content,
             dataStore: 'steps',
             categoery: self.category,
             infos: {
@@ -946,6 +943,7 @@ var actionsMenu={
 	    'waitPlaybackStart':empty,
 	    'waitPlaybackEnd':empty,
 	    'searchAndClickFromBeaker':empty,
+	    'searchAndClick':onlyKey,
 	    'reload':empty,
 	    'historyBack':empty,
 	    'historyForward':empty,
@@ -1008,27 +1006,6 @@ var actionsMenu={
 };
 
 var testSteps={view:function(ctrl,self){
-    
-    // return m('.span.twelve', self.content.map(function(d, i) {
-    // 	return m('.span.twelve',
-    // 		 m.component(btn, {
-    // 		     class:'removeBtn',
-    // 		     small:true,
-    // 		     content:m.trust("<i class='fa fa-minus'></i>"),
-    // 		     events:{
-    // 			 onclick: function(){
-    // 			     self.content.splice(i, 1);
-    // 			 }
-    // 		     }
-		     
-    // 		 }),
-    // 		 m.component(listTile, {
-    // 		     title: JSON.stringify(d),
-    // 		     compact:true
-    // 		 }));
-
-
-    // }));
     return m('.span.twelve' ,_Globals.selectedStep.content.map(function(step,i){
 	return m('span.span.twelve.noMargin',
 		 m('span',i+') '),
@@ -1036,7 +1013,7 @@ var testSteps={view:function(ctrl,self){
 		   {onclick:function(){
 		       _Globals.selectedStep.content.splice(i, 1);
 		   }}),
-		 JSON.stringify(step))
+		 JSON.stringify(step));
     }));
 }};;
 

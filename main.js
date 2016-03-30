@@ -289,6 +289,9 @@ function run(testSteps) {
 		    
 		    test.deadLinkChecker(page);
 		    break;
+		case 'searchAndClick':
+		    return test.searchAndClick(page,step.key);
+		    break;
 			
                         
                 };
@@ -395,7 +398,11 @@ dbService.server();
 startBrowser(url).then(function() {
     page = globalData.page;
     console.log('browser Started');
-
+    
+    	globalData.page.onConsoleMessage = function(msg, lineNum, sourceId) {
+    	    console.log('SLIMER CONSOLE: ' + msg );
+	};
+    
     globalData.page.set('viewportSize', {
         width: 1000,
         height: 700
@@ -450,18 +457,16 @@ startBrowser(url).then(function() {
     //setTimeout(function(){
     //start();},1000)
 
-    // 	page.onConsoleMessage = function(msg, lineNum, sourceId) {
-    // 	    console.log('SLIMER CONSOLE: ' + msg );
-    // };
-    //     setTimeout(function(){
-    // 	page.evaluate(function(){
-    // 	    console.log("!!!!!!!!!!!!!"+document.body.children);
-    // 	    return document.body.children[0];
-    // 	},function(err,val){
-    // 	    console.log("^^^^^^^^",val)
-    // 	});
+    
+        // setTimeout(function(){
+    	// page.evaluate(function(){
+    	//     console.log("!!!!!!!!!!!!!"+document.body.children);
+    	//     return document.body.children[0];
+    	// },function(err,val){
+    	//     console.log("^^^^^^^^",val)
+    	// });
 
-    //     },1000)
+        // },1000)
 
 
 

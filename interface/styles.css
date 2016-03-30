@@ -27,6 +27,7 @@ body{font-family: 'Dosis', sans-serif;
 .actionsMenu {
     
     position: relative;
+    
 }
 
 .fail{
@@ -81,4 +82,7 @@ span.des{
 }
 .noMargin{
     margin : 0;
+}
+.addToRow{
+    width:100px !important;
 }

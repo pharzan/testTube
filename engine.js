@@ -565,6 +565,65 @@ function searchAndClickFromBeaker(page,searchTexts) {
     });
 };
 
+function searchAndClick(page,searchText) {
+    /*
+     this function will find the element with same content as the network beacker
+     and it will then click.
+     */
+    console.log('HERE',searchText)
+    return new Promise(function(resolve) {
+	var found;
+	var beakers=[];
+	Global.networkBeaker.map(function(beaker){
+	    beakers.push(encodeURI(beaker));
+	});
+        page.evaluate(function(searchText) {
+	    
+	    var textContents=[];
+             var e= document.getElementsByTagName('a');
+	     var found=[];
+             var BreakException = {};
+	    
+            try {
+		
+		    for (var i = 0; i < e.length; i++) {
+			//textContents.push(e[i].textContent);
+			
+			if(e[i].textContent==searchText){
+			    found.push(e[i]);
+			    
+			}
+			
+		    };
+		
+		if (typeof found!=='undefined'){
+		    console.log(found.length);
+		    found.map(function(e){
+			e.click();
+			console.log(e.className+" tag:"+e.tagName)
+			;
+		    })
+		    //found.click();
+		    return true;}
+		else
+		    return false;
+        } catch (e) {
+            if (e !== BreakException) throw e;
+            return resolve('done');
+        }
+        },searchText,function(err,val){
+	    console.log('!!!!!!!'+val)
+	    if(true){
+		
+		return resolve('done');
+	    }
+	    else
+		return resolve('fail'); });
+
+        
+    });
+};
+
 function wait(t) {
     return new Promise(function(resolve) {;
         var i = 0;
@@ -679,6 +738,7 @@ module.exports = {
     onPlaybackEnded: onPlaybackEnded,
     onPlaybackStart: onPlaybackStart,
     searchAndClickFromBeaker:searchAndClickFromBeaker,
+    searchAndClick:searchAndClick,
     urlWatcher:urlWatcher,
     clickClass: clickClass,
     getUrlContent:getUrlContent,
