@@ -290,7 +290,7 @@ function run(testSteps) {
 		    test.deadLinkChecker(page);
 		    break;
 		case 'searchAndClick':
-		    return test.searchAndClick(page,step.key);
+		    return test.searchAndClick(page,step.key,step.tag);
 		    break;
 			
                         

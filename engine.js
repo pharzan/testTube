@@ -565,22 +565,22 @@ function searchAndClickFromBeaker(page,searchTexts) {
     });
 };
 
-function searchAndClick(page,searchText) {
+function searchAndClick(page,searchText,tagType) {
     /*
      this function will find the element with same content as the network beacker
      and it will then click.
      */
-    console.log('HERE',searchText)
+    
     return new Promise(function(resolve) {
+	/*finds a ui element with given text as key and finds all
+	 elements with certain tag type and clicks on it.
+	 */
 	var found;
-	var beakers=[];
-	Global.networkBeaker.map(function(beaker){
-	    beakers.push(encodeURI(beaker));
-	});
-        page.evaluate(function(searchText) {
+	
+        page.evaluate(function(searchText,tagType) {
 	    
 	    var textContents=[];
-             var e= document.getElementsByTagName('a');
+            var e= document.getElementsByTagName(tagType);
 	     var found=[];
              var BreakException = {};
 	    
@@ -611,7 +611,7 @@ function searchAndClick(page,searchText) {
             if (e !== BreakException) throw e;
             return resolve('done');
         }
-        },searchText,function(err,val){
+        },searchText,tagType,function(err,val){
 	    console.log('!!!!!!!'+val)
 	    if(true){
 		

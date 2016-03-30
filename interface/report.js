@@ -943,7 +943,7 @@ var actionsMenu={
 	    'waitPlaybackStart':empty,
 	    'waitPlaybackEnd':empty,
 	    'searchAndClickFromBeaker':empty,
-	    'searchAndClick':onlyKey,
+	    'searchAndClick':tagAndKeyForm,
 	    'reload':empty,
 	    'historyBack':empty,
 	    'historyForward':empty,
