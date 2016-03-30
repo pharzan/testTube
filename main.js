@@ -189,7 +189,9 @@ function run(testSteps) {
                     case 'waitForVisibility':
                         return test.waitForVisibility(step.tag, page);
                     case 'click':
-                        return test.clickClass(step.tag, page);
+                    return test.clickClass(step.tag, page);
+		case 'realClick':
+		    return test.realclickClass(step.tag,page);
                     case 'focus':
                         return test.focusClass(step.tag, page);
                     case 'sendKeys':
@@ -292,6 +294,8 @@ function run(testSteps) {
 		case 'searchAndClick':
 		    return test.searchAndClick(page,step.key,step.tag);
 		    break;
+		
+		
 			
                         
                 };

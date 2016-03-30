@@ -58,6 +58,8 @@ var menu=require('polythene/menu/menu');
 var list=require('polythene/list/list');
 var listTile=require('polythene/list-tile/list-tile');
 
+var tabs = require('polythene/tabs/tabs');
+
 const loadBtn = m.component(btn, {
     label: 'Load',
     raised: false,
@@ -483,6 +485,20 @@ var build = {
 	
         var self = this;
         return [m.component(header),
+		 m.component(tabs, {
+		     buttons:  [{
+				    label: 'Steps'
+				},
+				{
+				    label: 'Sets of Steps'
+				}],
+		     getState:function(e){
+			 console.log(e)
+			 
+		     },
+		     
+		     autofit: false
+		 }),
 		m.component(dialog),
 		m.component(selectStepList),
 		m.component(selectSetList),
@@ -694,7 +710,7 @@ var build = {
 	    _Globals.selectedStep.content.splice(row, 0, {
 		action: self.action,
 		tag: self.selector,
-		key: self.key?self.key:null,
+		key: self.keyz,
 		expect: self.expect?self.expect:null,
 		des: self.description
             });
@@ -935,6 +951,7 @@ var actionsMenu={
 	    'navigateTestTube':empty,
 	    'waitForVisibility':onlyTag,
 	    'click':onlyTag,
+	    'realClick':onlyTag,
 	    'focus':onlyTag,
 	    'sendKeys':tagAndKeyForm,
 	    'getElementContent':onlyTag,

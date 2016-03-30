@@ -80,7 +80,7 @@ function sendKeys(element,key,page, callback) {
 	    return true;
 	}, element,key,function(err,result){
 	    console.log("!!!!SEND KEYS",result);
-	if(result)
+	//if(result)
 	     return resolve('done');
     });
 	//e.value=key
@@ -335,8 +335,12 @@ function clickClass(selector, page) {
 	    
 	    if (a != null && typeof(a) !== 'undefined') {
 		if (a.offsetParent !== null) {
-                    a.click();
+                    
+		    
+		    a.click();
 		    return true;
+			    
+			   
 		}
             } else {
 		
@@ -345,6 +349,52 @@ function clickClass(selector, page) {
         }, selector,function(err,result){
 	    
 	    if (result){
+		log('pass', 'clickClass: ' + selector + ' clicked');
+		return resolve('done');
+	    }
+	    else{
+		log('fail', 'clickClass Something went wrong ' + selector + 'element Not Found! ');
+		return resolve('fail');
+	    }
+
+	});
+
+        
+    });
+
+
+};
+
+function realclickClass(selector, page) {
+    
+    return new Promise(function(resolve, reject) {
+	
+        page.evaluate(function(selector) {
+	    
+            var a= document.querySelector(selector);
+	    
+	    if (a != null && typeof(a) !== 'undefined') {
+		if (a.offsetParent !== null) {
+                    
+		    
+		    //a.click();
+		    return {status:true,
+			    top:a.getBoundingClientRect().top,
+			    right:a.getBoundingClientRect().right,
+			    left:a.getBoundingClientRect().left,
+			    bottom:a.getBoundingClientRect().bottom,
+			    width:a.getBoundingClientRect().width,
+			    height:a.getBoundingClientRect().height
+			   };
+		}
+            } else {
+		
+		return false;
+            }
+        }, selector,function(err,result){
+	    console.log('>>>>>>>',result)
+	    page.sendEvent('click', result.left+(result.width/2), result.top+(result.height/2), button='left');
+	    if (result.status){
 		log('pass', 'clickClass: ' + selector + ' clicked');
 		return resolve('done');
 	    }
@@ -741,6 +791,7 @@ module.exports = {
     searchAndClick:searchAndClick,
     urlWatcher:urlWatcher,
     clickClass: clickClass,
+    realclickClass:realclickClass,
     getUrlContent:getUrlContent,
     sendKeys:sendKeys,
     focusClass:focusClass,
