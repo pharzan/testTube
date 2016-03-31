@@ -547,13 +547,13 @@ var selectSetList = {
 var setList = {
     view: function() {
 
-        return m('ul',
+        return m('.span.twelve',m('ul',
             _Globals.set.content.map(function(set, i) {
-                return m('li', m('.fa.fa-minus', {
+                return m('li', m('span',i+') '),m('.fa.fa-minus-circle', {
                         onclick: function() {
                             _Globals.set.content.splice(i, 1);
                         }
-                    }),
+                }),
                     m('input', {
                         onchange: m.withAttr('value', function(value) {
                             _Globals.set.content[i].repetition = value;
@@ -565,7 +565,7 @@ var setList = {
                     }), set.name
                 );
             })
-        );
+				 ));
     }
 };
 
