@@ -10,6 +10,7 @@ var time = 'hi';
 var Globals = {
     screenShots:['',''],
     diffImage:''
+  
 };
 var _Globals = {
     selectedStep: {
@@ -31,7 +32,8 @@ var _Globals = {
 	loadRaised:false,
 	reportRaised:false,
 	buildRaised:false
-    }
+    },
+      setRow:''
     
 };
 
@@ -224,12 +226,14 @@ var screenShot = {
 	       )
 
 	     ),m('button',{onclick:function(){
+		 
 		   var diff = resemble(Globals.screenShots[0])
 			   .compareTo(Globals.screenShots[1])
 			   .ignoreColors()
 			   .onComplete(function(data){
 			       console.log(data);
 			       self.imgElementC.src=data.getImageDataUrl();
+			       console.log("Mismatch Percentage: ",data.misMatchPercentage)
 		       /*
 			{
 			misMatchPercentage : 100, // %
@@ -238,7 +242,20 @@ var screenShot = {
 			getImageDataUrl: function(){}
 			}
 			*/
-		   });
+			   });
+		 resemble.outputSettings({
+		     errorColor: {
+			 red: 255,
+			 green: 0,
+			 blue: 255
+		     },
+		     errorType: 'flat',
+		     transparency: 0.5,
+		     largeImageThreshold: 1200
+		     
+		 });
+		 diff.ignoreNothing();
+		 diff.repaint();
 	       }
 	       },'Compare'))
         ;
@@ -642,7 +659,7 @@ var build = {
 
     makeData: function() {
         var self = this;
-
+	
         if (_Globals.selectedStep.content[_Globals.selectedStep.content.length - 1].action !== 'done')
             _Globals.selectedStep.content.push({
                 action: 'done'
@@ -870,12 +887,19 @@ var setsTabView = {
                         raised: true,
                         events: {
                             onclick: function() {
-                                var data = {
+				var row;
+				var data = {
                                     name: _Globals.selectedStep.name,
                                     repetition: 0
                                 };
-                                _Globals.set.content.push(data);
-                                console.log(_Globals.set);
+				(_Globals.setRow !== '') ? (row = Number(_Globals.setRow)) : null;
+				console.log('R',row)
+				if (!isNaN(row)) {
+				    _Globals.set.content.splice(row, 0, data);
+				    _Globals.setRow = '';
+				}else{
+                                    _Globals.set.content.push(data);}
+                                
                             }
                         }
                     }),
@@ -934,7 +958,22 @@ var setsTabView = {
 
                         }
                     }, self)
-                )),
+                 ),m.component(textfield, {
+                        label: 'Add to Row',
+                        floatingLabel: true,
+                        type: 'number',
+                        class: 'addToRow',
+                        help: 'Row to insert in to',
+                        focusHelp: true,
+                        dense: true,
+                        fullWidth: false,
+                        validateAtStart: false,
+                        getState: function(e) {
+                            _Globals.setRow = e.value;
+			    console.log(_Globals.setRow)
+                        }
+                    }, self)
+	     ),
             _Globals.set ? m.component(setList) : null
 
         )
