@@ -539,7 +539,7 @@ function compareTestTubes(expect, type, expression) {
 };
 
 function compare(arg0, arg1, type, expect) {
-
+    console.log("HERE",arg0,arg1,type,expect)
     var expected = (expect === 'true') ? true : false;;
     // usage:
     //-------------------------------------------------------
@@ -570,6 +570,20 @@ function compare(arg0, arg1, type, expect) {
             log('detail', Global[arg0]);
             log('detail', Global[arg1]);
             var cmp = Global[arg0] == Global[arg1];
+
+            if (cmp == expected)
+                log('pass', arg0 + ' compare ' + arg1 + " returned expeced: " + expect);
+            else
+                log('fail', arg0 + ' compare ' + arg1 + " didn\'t returned expeced: " + expect);
+            break;
+
+        case 'dataToStringEquals':
+
+            //see's if arg0 from Global.Data,  contains Global.data:
+            //global.arg0 contains global.arg1?
+            log('detail', Global[arg0]);
+            log('detail', arg1);
+            var cmp = Global[arg0] == arg1;
 
             if (cmp == expected)
                 log('pass', arg0 + ' compare ' + arg1 + " returned expeced: " + expect);
@@ -636,6 +650,64 @@ function searchAndClickFromBeaker(page, searchTexts) {
 };
 
 function searchAndClick(page, searchText, tagType) {
+    /*
+     this function will find the element with same content as the network beacker
+     and it will then click.
+     */
+
+    return new Promise(function(resolve) {
+        /*finds a ui element with given text as key and finds all
+         elements with certain tag type and clicks on it.
+         */
+        var found;
+
+        page.evaluate(function(searchText, tagType) {
+
+            var textContents = [];
+            var e = document.getElementsByTagName(tagType);
+            var found = [];
+            var BreakException = {};
+
+            try {
+
+                for (var i = 0; i < e.length; i++) {
+                    //textContents.push(e[i].textContent);
+
+                    if (e[i].textContent == searchText) {
+                        found.push(e[i]);
+
+                    }
+
+                };
+
+                if (typeof found !== 'undefined') {
+                    console.log(found.length);
+                    found.map(function(e) {
+                            e.click();
+                            console.log(e.className + " tag:" + e.tagName);
+                        })
+                        //found.click();
+                    return true;
+                } else
+                    return false;
+            } catch (e) {
+                if (e !== BreakException) throw e;
+                return resolve('done');
+            }
+        }, searchText, tagType, function(err, val) {
+            console.log('!!!!!!!' + val)
+            if (true) {
+
+                return resolve('done');
+            } else
+                return resolve('fail');
+        });
+
+
+    });
+};
+
+function linkExtractor(page, searchText, tagType) {
     /*
      this function will find the element with same content as the network beacker
      and it will then click.

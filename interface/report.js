@@ -473,7 +473,7 @@ var selectSetList = {
     controller: function() {
         var self = this;
         this.mappable = false;
-        this.list = []
+        this.list = [];
         var names = m.request({
             method: "GET",
             url: "http://127.0.0.1:8001/sets/?names",
@@ -619,12 +619,14 @@ var build = {
     },
 
     makeStep: function() {
-	console.log('HERE',this)
         var self = this,
             row;
         (this.rowNumber !== '') ? (row = Number(this.rowNumber)) : null;
         
         var key = self.key;
+	
+	console.log('HERE',self.action);
+	
         if (!isNaN(row)) {
             _Globals.selectedStep.content.splice(row, 0, {
                 action: self.action,
@@ -634,8 +636,7 @@ var build = {
                 des: self.description
             });
             this.rowNumber = '';
-        } else
-        if (self.action == 'compareTestTubes' && self.custom) {
+        } else if (self.action == 'compareTestTubes' && self.custom) {
             _Globals.selectedStep.content.push({
                 action: self.action,
                 tag: self.selector,
@@ -646,7 +647,19 @@ var build = {
                 des: self.description
             });
 
-        } else {
+        } else if(self.action=='compare'){
+	    console.log('Compare DATA',self.arg0,self.arg1);
+	    _Globals.selectedStep.content.push({
+                action: self.action,
+		arg0:self.arg0,
+		arg1:self.arg1,
+		type:self.type,
+                expect: self.expect ? self.expect : null,
+                expression: self.customExpression,
+                des: self.description
+            });
+
+	} else{
             _Globals.selectedStep.content.push({
                 action: self.action,
                 tag: self.selector,
@@ -841,7 +854,6 @@ var stepsTabView = {
                     m.component(btn, {
                         class: 'addBtn',
                         small: true,
-
                         content: m('i.fa.fa-plus.fa-3x'),
                         events: {
 			    
@@ -1082,26 +1094,74 @@ var actionsMenu = {
             },
 
             compareForm = {
-                view: function() {
-                    return m('', m.component(textfield, {
-                        class: 'stepInputs',
-                        label: 'Key',
-                        floatingLabel: true,
-                        dense: true,
-                        fullWidth: false,
-                        getState: function(e) {
-                            parent.key = e.value;
-                        }
-                    }, self), m.component(textfield, {
-                        class: 'stepInputs',
-                        label: 'Description',
-                        floatingLabel: true,
-                        dense: true,
-                        fullWidth: false,
-                        getState: function(e) {
-                            parent.description = e.value;
-                        }
-                    }, self));
+		controller:function(){
+		    this.open=false;
+		    this.types=['dataContains','dataToDataEquals','dataToStringEquals'];
+		},
+                view: function(ctrl) {
+		    
+                    return m('.container',
+			     m('.actionsMenu',m('a', {
+				 href: 'javascript: void(0)',
+				 id: 'simple_btn', // use as menu's target
+				 onclick: () => (ctrl.open = true) // opens at next redraw
+			     }, 'Type'),
+			     m.component(menu, {
+				 target: 'simple_btn', // to align with the link
+				 offset: 0, // horizontally align with link
+				 show: ctrl.open, // should the menu be open or closed?
+				 didHide: () => (ctrl.open = false), // called after closing
+				 content: m.component(list, {
+				     tiles:ctrl.types.map(function(type){
+					 return m.component(listTile, {
+					     title: type,
+					     ink: true,
+					     events:{
+						 onclick:function(){
+						     parent.type=type;
+						     console.log(parent);
+						 }
+					     }
+					     
+					 });
+				     })
+
+
+				 })
+			     }),
+			     m.component(textfield, {
+				 class: 'stepInputs',
+				 label: 'argument 0',
+				 floatingLabel: true,
+				 dense: true,
+				 fullWidth: false,
+				 getState: function(e) {
+				     parent.arg0 = e.value;
+				 }
+			     }, self),
+			     m.component(textfield, {
+				 class: 'stepInputs',
+				 label: 'argument 1',
+				 floatingLabel: true,
+				 dense: true,
+				 fullWidth: false,
+				 getState: function(e) {
+				     parent.arg1 = e.value;
+				 }
+			     }, self),
+			      
+			     m.component(textfield, {
+				 class: 'stepInputs',
+				 label: 'expect',
+				 floatingLabel: true,
+				 dense: true,
+				 fullWidth: false,
+				 getState: function(e) {
+				     parent.expect = e.value;
+				 }
+			     }, self))
+			    );
+		    
                 }
             },
 
@@ -1154,7 +1214,7 @@ var actionsMenu = {
                         }, self)));
                 }
             },
-
+	    
             empty = {
                 view: function() {
                     return m('');
