@@ -1,7 +1,7 @@
 var fs = require('fs'),
     dbService = require('./dbService.js'),
     PubSub = require('./pubsub.js'),
-
+    main=require('./main.js'),
     Global = {
         oldUrl: '',
         currentUrl: '',
@@ -15,13 +15,79 @@ var fs = require('fs'),
         popup: {
             url: '',
             source: 'unknown'
-        }
-
+        },
+	screenShots:['',''],
+	currentScreenShot:'A'
     };
 
 // PubSub.subscribe('testStepsComplete', function() {
 //     //_reset();
 // });
+
+function log(type, message, report) {
+    main.sendLog(message,type);
+    var msg;
+
+    switch (type) {
+        case 'info':
+            msg = '\033[97m\033[44m INFO \033[37m\033[49m ';
+            break;
+        case 'detail':
+            msg = '\033[97m\033[46m ARG: \033[37m\033[49m ';
+            break;
+        case 'pass':
+            msg = '\033[97m\033[42m PASS \033[37m\033[49m ';
+            break;
+        case 'blink':
+            msg = '\x1b[5m WINK \033[37m\033[49m ';
+            break;
+        case 'next':
+            msg = '\033[1m NEXT \033[0m\033[37m\033[49m ';
+            break;
+
+        case 'fail':
+            msg = '\033[97m\033[41m FAIL \033[37m\033[49m ';
+            break;
+        case 'warn':
+            msg = '\033[97m\033[43m WARN \033[37m\033[49m ';
+            break;
+
+        case 'des':
+            msg = '\033[107m\033[34m >>>> \033[37m\033[49m ';
+            break;
+
+        case 'fin':
+            msg = '\033[1m DONE \033[0m\033[37m\033[49m';
+            break;
+
+        case 'url':
+            msg = '\033[97;48;5;165m URL  \033[0m\033[37m\033[49m';
+            break;
+
+    }
+    Global.messagePool.push({
+        status: msg,
+        content: message
+    })
+    console.log(msg + message);
+}
+
+function screenShot(path,fileName,page){
+    if(Global.currentScreenShot=='A')
+	Global.currentScreenShot='B';
+    else if (Global.currentScreenShot=='B') 
+	Global.currentScreenShot='C';
+    else
+	Global.currentScreenShot='A';
+
+    console.log(Global.currentScreenShot)
+    page.render("interface/"+path+'/'+Global.currentScreenShot);
+    Global.screenShots[1]=Global.screenShots[0]
+    Global.screenShots[0]=path+'/'+Global.currentScreenShot;
+    console.log(Global.screenShots)
+    
+    log('info','screenShot created');
+}
 
 function deadLinkChecker(page) {
     return new Promise(function(resolve) {
@@ -141,57 +207,6 @@ function onPlaybackEnded(page, callback) {
 
 
     })
-}
-
-function log(type, message, report) {
-
-    var msg;
-
-    switch (type) {
-        case 'info':
-            msg = '\033[97m\033[44m INFO \033[37m\033[49m ';
-            break;
-
-        case 'detail':
-            msg = '\033[97m\033[46m ARG: \033[37m\033[49m ';
-            break;
-
-        case 'pass':
-            msg = '\033[97m\033[42m PASS \033[37m\033[49m ';
-            break;
-        case 'blink':
-            msg = '\x1b[5m WINK \033[37m\033[49m ';
-            break;
-        case 'next':
-            msg = '\033[1m NEXT \033[0m\033[37m\033[49m ';
-            break;
-
-        case 'fail':
-            msg = '\033[97m\033[41m FAIL \033[37m\033[49m ';
-            break;
-
-        case 'warn':
-            msg = '\033[97m\033[43m WARN \033[37m\033[49m ';
-            break;
-
-        case 'des':
-            msg = '\033[107m\033[34m >>>> \033[37m\033[49m ';
-            break;
-
-        case 'fin':
-            msg = '\033[1m DONE \033[0m\033[37m\033[49m';
-            break;
-
-        case 'url':
-            msg = '\033[97;48;5;165m URL  \033[0m\033[37m\033[49m';
-            break;
-
-    }
-    Global.messagePool.push({
-        status: msg,
-        content: message
-    })
-    console.log(msg + message);
 }
 
 function waitForVisibility(selector, page, timeOut) {
@@ -804,5 +819,6 @@ module.exports = {
     compare: compare,
     log: log,
     engineGlobal: Global,
-    deadLinkChecker: deadLinkChecker
+    deadLinkChecker: deadLinkChecker,
+    screenShot:screenShot
 };

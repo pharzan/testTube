@@ -30,13 +30,13 @@ body{font-family: 'Dosis', sans-serif;
     
 }
 
+
 .fail{
     color:red;
 }
 
 .header{
-    background:black;
-    color:white
+    background:rgba(255, 237, 19, 0.63);
 }
 .des{
     color:red;

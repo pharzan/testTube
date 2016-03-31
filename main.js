@@ -35,13 +35,6 @@ var port = 8000,
 
 // Emit welcome message on connection
 io.on('connection', function(socket) {
-    // Use socket to communicate with this particular client only, sending it it's own id
-    // socket.emit('welcome', {
-    //     time: new Date().toJSON(),
-    //     message: 'Welcome!',
-    //     id: socket.id
-    // });
-    // socket.on('i am client', console.log);
 });
 
 app.listen(3000);
@@ -84,8 +77,6 @@ function startBrowser(url) {
         }, function(err, sl) {
             return sl.createPage(function(err, page) {
                 return new Promise(function(resolve, reject) {
-
-
                     sl.outputEncoding = "utf-8";
                     globalData.page = page;
                     networkTap();
@@ -184,8 +175,11 @@ function run(testSteps) {
     return new Promise(function(resolve) {
         testSteps.map(function(step) {
             function stepSwitchCheck(step, page) {
-
+		
                 switch (step.action) {
+		case 'screenShot':
+		    test.screenShot('./','test.png',page);
+		    break;
                     case 'waitForVisibility':
                         return test.waitForVisibility(step.tag, page);
                     case 'click':
@@ -377,14 +371,22 @@ function sendData() {
         beakerKey: globalData.beakerKey,
         testTubeKey: globalData.testTubeKey,
         messagePool: test.engineGlobal.messagePool,
-        state: test.engineGlobal.state
+        state: test.engineGlobal.state,
+	screenShots:test.engineGlobal.screenShots
+	
+	
     });
     io.emit('state', {
         state:  test.engineGlobal.state
     });
     // console.log(globalData.currentStepDescription)
 }
-
+function sendLog(msg,type){
+    io.emit('log', {
+	message:msg,
+	type:type
+    });
+}
 function reloadBrowser() {
     //PubSub.clearAllSubscriptions();
 }
@@ -486,5 +488,5 @@ exports.networkTap = networkTap;
 exports.globalData = globalData;
 exports.reloadBrowser = reloadBrowser;
 exports.globalData = globalData;
-
+exports.sendLog=sendLog;
 exports.exit = exit;

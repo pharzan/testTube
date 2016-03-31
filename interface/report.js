@@ -1,7 +1,16 @@
+const SvgPlus = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" width="24" height="24" viewBox="0 0 24.00 24.00" enable-background="new 0 0 24.00 24.00" xml:space="preserve"><path fill="#000000" fill-opacity="1" stroke-width="0.2" stroke-linejoin="round" d="M 18.9994,12.998L 12.9994,12.998L 12.9994,18.998L 10.9994,18.998L 10.9994,12.998L 4.99936,12.998L 4.99936,10.998L 10.9994,10.998L 10.9994,4.99805L 12.9994,4.99805L 12.9994,10.998L 18.9994,10.998L 18.9994,12.998 Z "></path></svg>';
+
+const SvgMinus = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" width="24" height="24" viewBox="0 0 24.00 24.00" enable-background="new 0 0 24.00 24.00" xml:space="preserve"><path fill="#000000" fill-opacity="1" stroke-width="0.2" stroke-linejoin="round" d="M 18.9994,12.998L 12.9994,12.998L  10.9994,12.998L 4.99936,12.998L 4.99936,10.998L 10.9994,10.998L 12.9994,10.998L 18.9994,10.998L 18.9994,12.998 Z "></path></svg>';
+
+const SvgMenu = '<i class="menuDots"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg></i>';
+
 var socket = io('http://127.0.0.1:3000');
 var time = 'hi';
 
-var Globals = {};
+var Globals = {
+    screenShots:['',''],
+    diffImage:''
+};
 var _Globals = {
     selectedStep: {
         name: '',
@@ -17,7 +26,13 @@ var _Globals = {
     selectedHeader: 'report',
     icons: {
         playStep: '.fa.fa-play-circle.fa-3x'
+    },
+    header:{
+	loadRaised:false,
+	reportRaised:false,
+	buildRaised:false
     }
+    
 };
 
 socket.on('time', function(data) {
@@ -26,22 +41,23 @@ socket.on('time', function(data) {
     time = data.time;
     Globals = data;
     m.endComputation();
+    screenShot.updateSource();
 
 
 });
-socket.on('state', function(state) {
-    console.log(state)
-    if (state.state == 'pending') {
-
-        _Globals.icons.playStep = '.fa.fa-spinner.fa-pulse.fa-3x.disabled';
-    } else
-        _Globals.icons.playStep = '.fa.fa-play-circle.fa-3x';
+socket.on('log', function(msg) {
+    console.log(msg);
+    
 });
 
 socket.on('error', console.error.bind(console));
 socket.on('message', console.log.bind(console));
 
 var test = {
+    controller:function(){
+	raiseHeader(2)
+	console.log(_Globals.header)
+    },
     view: function() {
         return m('',
             m.component(header),
@@ -50,7 +66,8 @@ var test = {
                 m.component(description),
                 m.component(url),
                 m.component(testTube),
-                m.component(beaker)
+              m.component(beaker),
+	      m.component(screenShot)
             ), m('.span.six', m.component(messages)));
     }
 };
@@ -70,12 +87,12 @@ var tabs = require('polythene/tabs/tabs');
 
 const loadBtn = m.component(btn, {
     label: 'Load',
-    raised: false,
+    raised: _Globals.header.loadRaised,
     borders: true,
 
     events: {
         onclick: function(e) {
-
+	    raiseHeader(1)
             m.route('/load')
 
         }
@@ -83,10 +100,12 @@ const loadBtn = m.component(btn, {
 });;
 const reportBtn = m.component(btn, {
     label: 'Report',
-    raised: false,
-    selected: _Globals.build,
+    raised: _Globals.header.reportRaised,
+    selected: _Globals.header.reportRaised,
+    disabled: _Globals.header.reportRaised,
     events: {
         onclick: function() {
+	    
             m.route('/report')
         }
     }
@@ -94,17 +113,32 @@ const reportBtn = m.component(btn, {
 const buildBtn = m.component(btn, {
 
     label: 'Build',
-    raised: false,
+    raised: _Globals.header.buildRaised,
 
     events: {
         onclick: function() {
-            console.log("1", _Globals.build)
-            _Globals.build = true;
-            console.log("2", _Globals.build)
+	    raiseHeader(3)
             m.route('/build')
         }
     }
 });;
+var raiseHeader=function(num){
+    _Globals.header.loadRaised=false;
+    _Globals.header.reportRaised=false;
+    _Globals.header.buildRaised=false;
+    switch(num){
+    case 1:
+	_Globals.header.loadRaised=true;
+	break;
+    case 2:
+	_Globals.header.reportRaised=true;
+	break;
+    case 3:
+	_Globals.header.buildRaised=true;
+	break;
+    }
+};
+
 const deleteBtn = m.component(btn, {
     label: 'delete',
     raised: true,
@@ -118,11 +152,6 @@ const deleteBtn = m.component(btn, {
     }
 });;
 
-const SvgPlus = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" width="24" height="24" viewBox="0 0 24.00 24.00" enable-background="new 0 0 24.00 24.00" xml:space="preserve"><path fill="#000000" fill-opacity="1" stroke-width="0.2" stroke-linejoin="round" d="M 18.9994,12.998L 12.9994,12.998L 12.9994,18.998L 10.9994,18.998L 10.9994,12.998L 4.99936,12.998L 4.99936,10.998L 10.9994,10.998L 10.9994,4.99805L 12.9994,4.99805L 12.9994,10.998L 18.9994,10.998L 18.9994,12.998 Z "></path></svg>';
-
-const SvgMinus = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" width="24" height="24" viewBox="0 0 24.00 24.00" enable-background="new 0 0 24.00 24.00" xml:space="preserve"><path fill="#000000" fill-opacity="1" stroke-width="0.2" stroke-linejoin="round" d="M 18.9994,12.998L 12.9994,12.998L  10.9994,12.998L 4.99936,12.998L 4.99936,10.998L 10.9994,10.998L 12.9994,10.998L 18.9994,10.998L 18.9994,12.998 Z "></path></svg>';
-
-const SvgMenu = '<i class="menuDots"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg></i>';
 
 var header = {
     controller: function() {
@@ -131,7 +160,7 @@ var header = {
     },
     view: function() {
 
-        return m('', m.component(loadBtn), m.component(reportBtn), m.component(buildBtn))
+        return m('.header', m.component(loadBtn), m.component(reportBtn), m.component(buildBtn))
     }
 };
 
@@ -152,6 +181,79 @@ var url = {
                     src: './img/linkGrey.png'
                 }), Globals.oldUrl))
         );
+    }
+};
+
+var screenShot = {
+    view: function() {
+	var self=this;
+	
+        return m('.span.twelve',
+            m('.span.twelve', 
+              m('img', {
+		  config:function(e,isinit){
+		      if(isinit)
+			  return;
+		      
+		      self.imgElementA=e;
+		  },
+		  style:{width:"70%"},
+                    src: ''
+              }),
+              m('img', {
+		  config:function(e,isinit){
+		      if(isinit)
+			  return;
+		      
+		      self.imgElementB=e;
+		  },
+		  style:{width:"70%"},
+                    src: ''
+                }
+	       ),
+	      m('img', {
+		  config:function(e,isinit){
+		      if(isinit)
+			  return;
+		      
+		      self.imgElementC=e;
+		  },
+		  style:{width:"70%"},
+                    src: Globals.diffImage
+                }
+	       )
+
+	     ),m('button',{onclick:function(){
+		   var diff = resemble(Globals.screenShots[0])
+			   .compareTo(Globals.screenShots[1])
+			   .ignoreColors()
+			   .onComplete(function(data){
+			       console.log(data);
+			       self.imgElementC.src=data.getImageDataUrl();
+		       /*
+			{
+			misMatchPercentage : 100, // %
+			isSameDimensions: true, // or false
+			dimensionDifference: { width: 0, height: -1 }, // defined if dimensions are not the same
+			getImageDataUrl: function(){}
+			}
+			*/
+		   });
+	       }
+	       },'Compare'))
+        ;
+    },
+    updateSource:function(){
+	//console.log(Globals.screenShots[0],this.imgElementA)
+	
+	// console.log(Globals.screenShots[1])
+	if(typeof this.imgElementA!=='undefined'){
+	    this.imgElementA.src=Globals.screenShots[0];
+	    }
+	if(typeof this.imgElementB!=='undefined'){
+	  this.imgElementB.src=Globals.screenShots[1];
+	    }
+	
     }
 };
 
@@ -466,7 +568,8 @@ var build = {
     data: {},
 
     controller: function() {
-
+	raiseHeader(3)
+	console.log(_Globals.header)
 
     },
 
@@ -499,11 +602,11 @@ var build = {
     },
 
     makeStep: function() {
-
+	console.log('HERE',this)
         var self = this,
             row;
         (this.rowNumber !== '') ? (row = Number(this.rowNumber)) : null;
-        console.log(row, this.rowNumber, 'isnotanumber?', isNaN(row))
+        
         var key = self.key;
         if (!isNaN(row)) {
             _Globals.selectedStep.content.splice(row, 0, {
@@ -611,8 +714,6 @@ var stepsTabView = {
                         });
                     }
                 }),
-
-
                 m('span', {
                     onclick: function() {
                         console.log(_Globals.selectedStep._id);
@@ -705,7 +806,6 @@ var stepsTabView = {
                 )),
             m('.span.twelve',
                 m.component(actionsMenu, self),
-
                 m('.span.twelve',
                     m.component(textfield, {
                         label: 'Add to Row',
@@ -727,14 +827,16 @@ var stepsTabView = {
 
                         content: m('i.fa.fa-plus.fa-3x'),
                         events: {
-                            onclick: parent.makeStep.bind(parent)
+			    
+                            onclick: parent.makeStep.bind(self)
+			    
                         }
                     }, parent),
                     m.component(btn, {
                         label: 'Build&Save Steps',
                         raised: true,
                         events: {
-                            onclick: parent.makeData.bind(parent)
+                            onclick: parent.makeData.bind(self)
 
                         }
                     }, parent)
@@ -867,7 +969,7 @@ var actionsMenu = {
                         fullWidth: false,
                         getState: function(e) {
                             console.log(e)
-                            build.selector = e.value;
+                            parent.selector = e.value;
                         }
                     }, self), m.component(textfield, {
                         class: 'stepInputs',
@@ -892,7 +994,7 @@ var actionsMenu = {
                         fullWidth: false,
                         getState: function(e) {
 
-                            build.keyz = e.value;
+                            parent.keyz = e.value;
                         }
                     }, self), m.component(textfield, {
                         class: 'stepInputs',
@@ -916,7 +1018,7 @@ var actionsMenu = {
                         dense: true,
                         fullWidth: false,
                         getState: function(e) {
-                            build.selector = e.value;
+                            parent.selector = e.value;
                         }
                     }, self), m.component(textfield, {
                         class: 'stepInputs',
@@ -925,7 +1027,7 @@ var actionsMenu = {
                         dense: true,
                         fullWidth: false,
                         getState: function(e) {
-                            build.keyz = e.value;
+                            parent.keyz = e.value;
                         }
                     }, self), m.component(textfield, {
                         class: 'stepInputs',
@@ -934,7 +1036,7 @@ var actionsMenu = {
                         dense: true,
                         fullWidth: false,
                         getState: function(e) {
-                            build.description = e.value;
+                            parent.description = e.value;
                         }
                     }, self));
                 }
@@ -949,7 +1051,7 @@ var actionsMenu = {
                         dense: true,
                         fullWidth: false,
                         getState: function(e) {
-                            build.key = e.value;
+                            parent.key = e.value;
                         }
                     }, self), m.component(textfield, {
                         class: 'stepInputs',
@@ -958,7 +1060,7 @@ var actionsMenu = {
                         dense: true,
                         fullWidth: false,
                         getState: function(e) {
-                            build.description = e.value;
+                            parent.description = e.value;
                         }
                     }, self));
                 }
@@ -977,7 +1079,7 @@ var actionsMenu = {
                             fullWidth: false,
                             getState: function(e) {
                                 // _Globals.selectedStep.categoery=e.value;
-                                build.expect = e.value;
+                                parent.expect = e.value;
                             }
                         }, self),
                         this.custom ? m.component(textfield, {
@@ -989,7 +1091,7 @@ var actionsMenu = {
                             fullWidth: false,
                             getState: function(e) {
                                 // _Globals.selectedStep.categoery=e.value;
-                                build.customExpression = e.value;
+                                parent.customExpression = e.value;
                             }
                         }, self) : null,
                         m.component(textfield, {
@@ -1000,14 +1102,14 @@ var actionsMenu = {
                             fullWidth: false,
                             getState: function(e) {
                                 // _Globals.selectedStep.categoery=e.value;
-                                build.description = e.value;
+                                parent.description = e.value;
                             }
                         }, self),
                         m('', m.component(checkbox, {
                             label: 'Cutsom Operation',
                             getState: function state(e) {
                                 self.custom = e.el.checked
-                                build.custom = e.el.checked
+                                parent.custom = e.el.checked
 
                             }
                         }, self)));
@@ -1042,6 +1144,7 @@ var actionsMenu = {
             'compareTestTubes': expect,
             'wait': onlyKey,
             'compare': compareForm,
+	    'screenShot':empty,
             'deadLinkChecker': empty
         };
 
@@ -1085,6 +1188,7 @@ var actionsMenu = {
                                     ripple: true,
                                     events: {
                                         onclick: function() {
+					    console.log(name)
                                             parent.action = name;
                                             self.action = name;
                                         }
@@ -1120,73 +1224,16 @@ var testSteps = {
 
 var load = {
     view: function() {
-        return [m.component(header),
-            m.component(actionButtons),
-            m.component(simpleContainer),
+        return [
+	    m.component(header),
             m.component(selectStepList),
-            selectStepList.infoShowable ? m.component(stepList) : null,
-
-
-
-            //m('',Globals.selected.name)
+            // selectStepList.infoShowable ? m.component(stepList) : null,
+	    //m('',Globals.selected.name)
         ];
 
     }
 };
 
-const simpleContainer = {};
-
-simpleContainer.controller = () => {
-    return {
-        open: false
-    };
-};
-
-simpleContainer.view = (ctrl) => {
-    return m('.container', {
-            style: {
-                position: 'relative'
-            }
-        },
-        m('a', {
-            href: 'javascript: void(0)',
-            id: 'simple_btn', // use as menu's target
-            onclick: () => (ctrl.open = true) // opens at next redraw
-        }, 'Open menu'),
-        m.component(menu, {
-            target: 'simple_btn', // to align with the link
-            offset: 0, // horizontally align with link
-            show: ctrl.open, // should the menu be open or closed?
-            didHide: () => (ctrl.open = false), // called after closing
-            content: m.component(list, {
-                tiles: createList()
-
-
-            })
-        })
-    );
-};
-
-var createList = function() {
-
-    // var names = m.request({
-    //         method: "GET",
-    //         url: "http://127.0.0.1:8001/steps/?names",
-    //         background: true
-    //     }).then(function(response) {
-    //         var components=[];
-    //         self.list = response;
-    // 	    self.list.map(function(name){
-    // 		components.push(m.component(listTile, {
-    //                     title: 'Yes',
-    //                     ink: true}
-    // 					   ));
-    //	    });
-
-    return;
-
-    //	});
-};
 
 m.route.mode = 'pathname';
 
