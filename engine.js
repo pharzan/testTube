@@ -414,7 +414,7 @@ function realclickClass(selector, page) {
                 return false;
             }
         }, selector, function(err, result) {
-            console.log('>>>>>>>', result)
+            //console.log('>>>>>>>', result)
             page.sendEvent('click', result.left + (result.width / 2), result.top + (result.height / 2), button = 'left');
             if (result.status) {
                 log('pass', 'clickClass: ' + selector + ' clicked');

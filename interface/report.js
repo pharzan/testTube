@@ -438,7 +438,7 @@ var selectStepList = {
                     self.selectElement = selectElement;
 
                 },
-                oninput: function(e) {
+                onchange: function(e) {
 
                     if (typeof self.selected === 'undefined') {
                         self.selected = {};
@@ -495,7 +495,7 @@ var selectSetList = {
 
 
         return m('select', {
-            oninput: function(e) {
+            onchange: function(e) {
                 if (typeof self.selected === 'undefined') {
                     self.selected = {};
                 }
