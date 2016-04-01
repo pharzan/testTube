@@ -40,8 +40,8 @@ io.on('connection', function(socket) {
 app.listen(3000);
 
 var globalData = {};
-globalData.jsonFileCounter = 0,
-    globalData.testSetCounter = 0;
+globalData.jsonFileCounter = 0;
+globalData.testSetCounter = 0;
 globalData.setCounter = 0;
 
 function networkTap() {
@@ -64,9 +64,9 @@ function networkTap() {
 
                 }
             }
-        }
+        };
         return resolve('done');
-    })
+    });
 };
 
 function startBrowser(url) {
@@ -184,6 +184,8 @@ function run(testSteps) {
                         return test.waitForVisibility(step.tag, page);
                     case 'click':
                         return test.clickClass(step.tag, page);
+                    case 'removeClass':
+                        return test.removeClass(step.tag, page);
                     case 'realClick':
                         return test.realclickClass(step.tag, page);
                     case 'focus':

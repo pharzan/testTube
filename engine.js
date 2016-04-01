@@ -211,13 +211,13 @@ function onPlaybackEnded(page, callback) {
 
 function waitForVisibility(selector, page, timeOut) {
     if (typeof timeOut == 'undefined')
-        timeOut = 60;
+        timeOut = 30;
     return new Promise(function(resolve, reject) {
-
+	console.log('here')
         var startTime = new Date().getTime();
         var interval = setInterval(function() {
 
-            var e = page.evaluate(function(selector) {
+            page.evaluate(function(selector) {
                 var a = document.querySelector(selector);
 
                 if (a.offsetParent !== null)
@@ -228,16 +228,17 @@ function waitForVisibility(selector, page, timeOut) {
             }, selector, function(err, result) {
 
                 if (result) {
-                    log('pass', 'waitForVisibility: ' + selector + ' element Now VISIBLE ');
                     clearInterval(interval);
+		    
+                    log('pass', 'waitForVisibility: ' + selector + ' element Now VISIBLE ');
                     return resolve('done');
                 }
 
             })
 
             if (new Date().getTime() - startTime > timeOut * 1000) {
-                log('fail', 'waitForVisibility: ' + selector + ' element Timed OUT');
                 clearInterval(interval);
+                log('fail', 'waitForVisibility: ' + selector + ' element Timed OUT');
                 return resolve('timeOut');
             }
 
@@ -375,6 +376,43 @@ function clickClass(selector, page) {
                 return resolve('done');
             } else {
                 log('fail', 'clickClass Something went wrong ' + selector + 'element Not Found! ');
+                return resolve('fail');
+            }
+
+        });
+
+
+    });
+
+
+};
+
+function removeClass(selector, page) {
+
+    return new Promise(function(resolve, reject) {
+	
+	/* this function removes a given class from the dom
+	 created for faster browsing */
+	
+        page.evaluate(function(selector) {
+	    
+            var a = document.querySelector(selector);
+
+            if (a != null && typeof(a) !== 'undefined') {
+                if (a.offsetParent !== null) {
+                    a.parentElement.remove();
+                    return true;
+                }
+            } else {
+                return false;
+            }
+        }, selector, function(err, result) {
+	    console.log('!!!!',result)
+            if (result) {
+                log('pass', 'removed: ' + selector + ' ');
+                return resolve('done');
+            } else {
+                log('fail', 'remove Something went wrong ' + selector + 'element Not Found! ');
                 return resolve('fail');
             }
 
@@ -882,6 +920,7 @@ module.exports = {
     searchAndClick: searchAndClick,
     urlWatcher: urlWatcher,
     clickClass: clickClass,
+    removeClass:removeClass,
     realclickClass: realclickClass,
     getUrlContent: getUrlContent,
     sendKeys: sendKeys,

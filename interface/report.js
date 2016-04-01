@@ -1226,6 +1226,7 @@ var actionsMenu = {
             'navigateTestTube': empty,
             'waitForVisibility': onlyTag,
             'click': onlyTag,
+            'removeClass': onlyTag,
             'realClick': onlyTag,
             'focus': onlyTag,
             'sendKeys': tagAndKeyForm,
