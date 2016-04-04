@@ -625,10 +625,10 @@ function compareTestTubes(expect, type, expression) {
                 log('pass', 'expected value matches the difference of testTubes');
             else
                 log('fail', 'expected value doesn\'t match');
-	    return resolve('done')
+	    return resolve('done');
         }
 
-        return
+        return resolve('done')
 
     });
 };
