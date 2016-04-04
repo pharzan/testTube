@@ -8,9 +8,6 @@ var socket = io('http://127.0.0.1:3000');
 var time = 'hi';
 
 var Globals = {
-    screenShots:['',''],
-    diffImage:''
-  
 };
 var _Globals = {
     selectedStep: {
@@ -33,8 +30,9 @@ var _Globals = {
 	reportRaised:false,
 	buildRaised:false
     },
-      setRow:''
-    
+    setRow:'',
+    screenShots:['http://dev.testtube/A','http://dev.testtube/B'],
+    diff:{screenShot:'',mismatch:0}
 };
 
 socket.on('time', function(data) {
@@ -43,34 +41,106 @@ socket.on('time', function(data) {
     time = data.time;
     Globals = data;
     m.endComputation();
-    screenShot.updateSource();
-
+    
 
 });
+function getImageDiff(){
+    
+	   var diff = resemble(_Globals.screenShots[0])
+			   .compareTo(_Globals.screenShots[1])
+			   .ignoreColors()
+			   .onComplete(function(data){
+			       _Globals.diff.screenShot=data.getImageDataUrl();
+			       _Globals.diff.mismatch=data.misMatchPercentage;
+			       // console.log("Mismatch Percentage: ",data.misMatchPercentage)
+		       /*
+			{
+			misMatchPercentage : 100, // %
+			isSameDimensions: true, // or false
+			dimensionDifference: { width: 0, height: -1 }, // defined if dimensions are not the same
+			getImageDataUrl: function(){}
+			}
+			*/
+			   });
+    
+    		 resemble.outputSettings({
+		     errorColor: {
+			 red: 255,
+			 green: 0,
+			 blue: 255
+		     },
+		     errorType: 'flat',
+		     transparency: 1,
+		     largeImageThreshold: 1200
+		     
+		 });
+
+    
+		 diff.ignoreNothing();
+		 diff.repaint();
+}
+
 socket.on('log', function(msg) {
     console.log(msg);
     
+});
+socket.on('screenShot',function(screenShots){
+    
+    console.log('io:screenShot Recieved',screenShots);
+    setTimeout(function(){
+	m.startComputation();
+	
+	_Globals.screenShots=screenShots.screenShots;
+	console.log('!!!!',screenShots);
+	// screenShot.updateSource();
+	
+	getImageDiff();
+	m.endComputation();
+    },1000)
 });
 
 socket.on('error', console.error.bind(console));
 socket.on('message', console.log.bind(console));
 
 var test = {
+    tab:0,
     controller:function(){
 	raiseHeader(2)
 	console.log(_Globals.header)
     },
     view: function() {
+	var self=this;
         return m('',
-            m.component(header),
-            m('.span.six',
-                m('.class', time),
-                m.component(description),
-                m.component(url),
-                m.component(testTube),
-              m.component(beaker),
-	      m.component(screenShot)
-            ), m('.span.six', m.component(messages)));
+		 m.component(header),
+		 m.component(tabs, {
+                buttons: [{
+                    label: 'Live'
+                }, {
+                    label: 'History'
+                },{
+		    label: 'Custom Report'
+		}
+
+			 ],
+                getState: function(e) {
+                    self.tab= e.index;
+
+                },
+
+                autofit: false
+            }),
+		 
+		
+            m('.tab',
+                m('.time', time),
+              (self.tab==0)?m.component(testTube):null,
+	      (self.tab==0)?m.component(beaker):null,
+              (self.tab==0)?m.component(url):null,
+              m.component(description),
+              
+	      (self.tab==0)?m.component(screenShot):null
+             ),
+		 (self.tab==1)?m('.span.six', m.component(messages)):null);
     }
 };
 
@@ -154,7 +224,6 @@ const deleteBtn = m.component(btn, {
     }
 });;
 
-
 var header = {
     controller: function() {
 
@@ -162,7 +231,10 @@ var header = {
     },
     view: function() {
 
-        return m('.header', m.component(loadBtn), m.component(reportBtn), m.component(buildBtn))
+        return m('.header',
+		 m.component(loadBtn),
+		 m.component(reportBtn),
+		 m.component(buildBtn));
     }
 };
 
@@ -170,13 +242,13 @@ var url = {
     view: function() {
 
         return m('.span.twelve',
-            m('.span.twelve', m('a', {
+            m('.span.six', m('a', {
                     href: Globals.currentUrl
                 },
                 m('img', {
                     src: './img/link.png'
                 }), Globals.currentUrl)),
-            m('.span.twelve', m('a', {
+            m('.span.six', m('a', {
                     href: Globals.oldUrl
                 },
                 m('img', {
@@ -192,82 +264,45 @@ var screenShot = {
 	
         return m('.span.twelve',
             m('.span.twelve', 
-              m('img', {
+              m('img.span.four', {
 		  config:function(e,isinit){
 		      if(isinit)
 			  return;
 		      
 		      self.imgElementA=e;
 		  },
-		  style:{width:"70%"},
-                    src: ''
+                    src:_Globals.screenShots[0]
               }),
-              m('img', {
+              m('img.span.four', {
 		  config:function(e,isinit){
 		      if(isinit)
 			  return;
 		      
 		      self.imgElementB=e;
 		  },
-		  style:{width:"70%"},
-                    src: ''
-                }
-	       ),
-	      m('img', {
+                    src: _Globals.screenShots[1]
+              }),
+	      m('img.span.four', {
 		  config:function(e,isinit){
-		      if(isinit)
-			  return;
+		      if(isinit){
+			  return;}
+		      setTimeout(getImageDiff,100)
 		      
 		      self.imgElementC=e;
 		  },
-		  style:{width:"70%"},
-                    src: Globals.diffImage
-                }
-	       )
-
-	     ),m('button',{onclick:function(){
-		 
-		   var diff = resemble(Globals.screenShots[0])
-			   .compareTo(Globals.screenShots[1])
-			   .ignoreColors()
-			   .onComplete(function(data){
-			       console.log(data);
-			       self.imgElementC.src=data.getImageDataUrl();
-			       console.log("Mismatch Percentage: ",data.misMatchPercentage)
-		       /*
-			{
-			misMatchPercentage : 100, // %
-			isSameDimensions: true, // or false
-			dimensionDifference: { width: 0, height: -1 }, // defined if dimensions are not the same
-			getImageDataUrl: function(){}
-			}
-			*/
-			   });
-		 resemble.outputSettings({
-		     errorColor: {
-			 red: 255,
-			 green: 0,
-			 blue: 255
-		     },
-		     errorType: 'flat',
-		     transparency: 0.5,
-		     largeImageThreshold: 1200
-		     
-		 });
-		 diff.ignoreNothing();
-		 diff.repaint();
-	       }
-	       },'Compare'))
-        ;
+                    src: _Globals.diff.screenShot
+              })
+	       ))
+        
     },
     updateSource:function(){
 	//console.log(Globals.screenShots[0],this.imgElementA)
-	
-	// console.log(Globals.screenShots[1])
-	if(typeof this.imgElementA!=='undefined'){
-	    this.imgElementA.src=Globals.screenShots[0];
-	    }
-	if(typeof this.imgElementB!=='undefined'){
+	//var screenShotA=_Globals.screenShots[0];
+	//console.log('>>>>',screenShotA,this.imgElementA);
+	//this.imgElementA.src=screenShotA;
+	    
+	//console.log("AAAA",this.imgElementA.src);
+	if(typeof this.imgElementB!=='undefined' && typeof Globals.screenShots !==  'undefined'){
 	  this.imgElementB.src=Globals.screenShots[1];
 	    }
 	
@@ -277,16 +312,16 @@ var screenShot = {
 var testTube = {
     view: function() {
         return m('.span.twelve',
-            m('.span.three',
+            m('.span.four',
                 m('img', {
                     src: './img/keys.png'
                 }),
                 m('', Globals.testTubeKey)),
-            m('.span.three',
+            m('.span.four',
                 m('img', {
                     src: (Globals.testTube !== '') ? './img/testTube.png' : './img/testTubeEmpty.png'
                 }), Globals.testTube),
-            m('.span.three',
+            m('.span.four',
                 m('img', {
                     src: (Globals.oldTestTube !== '') ? './img/testTube.png' : './img/testTubeEmpty.png'
                 }), Globals.oldTestTube));
@@ -301,7 +336,7 @@ var beaker = {
         if (typeof Globals.beaker !== 'undefined')
             var mappable = true;
         return m('.span.twelve',
-            m('.span.three',
+            m('.span.four',
                 m('img', {
                     src: './img/network.png'
                 }), m('', Globals.beakerKey)), mappable ? Globals.beaker.map(function(beakerContent) {
@@ -585,18 +620,14 @@ var build = {
     data: {},
 
     controller: function() {
-	raiseHeader(3)
-	console.log(_Globals.header)
 
     },
-
-
-    deleteFlag: false,
     action: '',
     view: function(ctrl) {
 
         var self = this;
-        return [m.component(header),
+        return m('.page',
+	    m.component(header),
             m.component(tabs, {
                 buttons: [{
                     label: 'Steps'
@@ -610,12 +641,13 @@ var build = {
 
                 autofit: false
             }),
-            (_Globals.tab == 0) ? m.component(stepsTabView, self) : null,
-            (_Globals.tab == 1) ? m.component(setsTabView) : null,
+		 (_Globals.tab == 0) ? m.component(stepsTabView, self) : null,
+		 (_Globals.tab == 1) ? m.component(setsTabView) : null
+		);
 
 
 
-        ];
+        
     },
 
     makeStep: function() {
@@ -873,12 +905,12 @@ var stepsTabView = {
                 )),
             m.component(testSteps, self));
     }
-}
+};
 
 var setsTabView = {
     view: function() {
         return m('',
-            m('.span.twelve',
+            m('.span.twelve.hello',
 
                 m.component(selectStepList),
                 m.component(selectSetList),
@@ -991,7 +1023,7 @@ var setsTabView = {
         )
 
     }
-}
+};
 
 
 var set = {

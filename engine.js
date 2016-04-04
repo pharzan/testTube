@@ -73,20 +73,37 @@ function log(type, message, report) {
 }
 
 function screenShot(path,fileName,page){
-    if(Global.currentScreenShot=='A')
-	Global.currentScreenShot='B';
-    else if (Global.currentScreenShot=='B') 
-	Global.currentScreenShot='C';
-    else
+    return new Promise(function(resolve){
+    if(Global.currentScreenShot=='B')
 	Global.currentScreenShot='A';
+    else
+	Global.currentScreenShot='B';
 
-    console.log(Global.currentScreenShot)
     page.render("interface/"+path+'/'+Global.currentScreenShot);
-    Global.screenShots[1]=Global.screenShots[0]
+    Global.screenShots[1]=Global.screenShots[0];
     Global.screenShots[0]=path+'/'+Global.currentScreenShot;
-    console.log(Global.screenShots)
+    console.log(Global.screenShots);
     
-    log('info','screenShot created');
+	
+	var count=0;
+	var I=setInterval(function(){
+	
+	    
+	    return fs.stat("/home/pharzan/dev/www/testTube/interface/"+Global.currentScreenShot,
+			       function(err, buf) {
+				   
+				   if(err==null){
+				       clearInterval(I);
+				       log('pass','Screen Shot captured');
+				       return resolve('done');
+				   }
+				   return err;
+			       });
+	    
+	    
+	},10);
+	
+    });
 }
 
 function deadLinkChecker(page) {
@@ -213,39 +230,38 @@ function waitForVisibility(selector, page, timeOut) {
     if (typeof timeOut == 'undefined')
         timeOut = 30;
     return new Promise(function(resolve, reject) {
-	console.log('here')
+	
         var startTime = new Date().getTime();
-        var interval = setInterval(function() {
-
-            page.evaluate(function(selector) {
-                var a = document.querySelector(selector);
-
-                if (a.offsetParent !== null)
-                    return true;
-                else
-                    return false;
-
-            }, selector, function(err, result) {
-
-                if (result) {
+        
+	var interval = setInterval(function() {
+	    page.evaluate(function(selector) {
+		var a = document.querySelector(selector);
+		
+			if (a.offsetParent !== null)
+			    return true;
+			else
+			    return false;
+		
+	    },function(err,result){
+		
+		if (new Date().getTime() - startTime > timeOut * 1000){
                     clearInterval(interval);
+                    log('fail', 'waitForVisibility: ' + selector + ' element Timed OUT');
+                    return resolve('timeOut');
+		}
+		if(result){
+		    clearInterval(interval);
+		    log('pass', 'waitForVisibility: ' + selector + ' element Now VISIBLE ');
+		    return resolve('done');
+		}
 		    
-                    log('pass', 'waitForVisibility: ' + selector + ' element Now VISIBLE ');
-                    return resolve('done');
-                }
-
-            })
-
-            if (new Date().getTime() - startTime > timeOut * 1000) {
-                clearInterval(interval);
-                log('fail', 'waitForVisibility: ' + selector + ' element Timed OUT');
-                return resolve('timeOut');
-            }
-
-        }, 250);
-
+	    },selector);
+        
+	},100);
+	
+    
     });
-};
+}
 
 function getElementContent(element, page) {
     /*
@@ -875,11 +891,11 @@ function _getKeys(obj, val) {
 var urlWatcher = {
 
     start: function(page, frequency) {
-            var urlCheckInterval = setInterval(function() {
-                // console.log(page.url)
-
+          
+        var urlCheckInterval = setInterval(function() {
+		
                 page.get('url', function(err, url) {
-                    if (Global.currentUrl != url) {
+	           if (Global.currentUrl != url) {
                         Global.oldUrl = Global.currentUrl;
                         Global.currentUrl = url;
                         Global.urlHistory.push(Global.currentUrl);
@@ -891,7 +907,7 @@ var urlWatcher = {
                 });
 
 
-            }, 250);
+        }, 125);
         }
         // stop:function(urlCheckInterval){
 

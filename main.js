@@ -40,6 +40,7 @@ io.on('connection', function(socket) {
 app.listen(3000);
 
 var globalData = {};
+
 globalData.jsonFileCounter = 0;
 globalData.testSetCounter = 0;
 globalData.setCounter = 0;
@@ -84,7 +85,7 @@ function startBrowser(url) {
                         page.evaluate(function() {
                             var initElement = document.getElementsByTagName("html")[0];
                             var json = mapDOM(initElement, true);
-                            console.log(json);
+                            //console.log(json);
 
                             function mapDOM(element, json) {
                                 var treeObject = {};
@@ -178,7 +179,11 @@ function run(testSteps) {
 		
                 switch (step.action) {
 		case 'screenShot':
-		    test.screenShot('./','test.png',page);
+		    test.screenShot('./','test.png',page).then(function(){
+			io.emit('screenShot',{
+			    screenShots:test.engineGlobal.screenShots
+			});
+		    })
 		    break;
                     case 'waitForVisibility':
                         return test.waitForVisibility(step.tag, page);
@@ -331,7 +336,7 @@ function start() {
 
     p2 = PubSub.subscribe('testStepsComplete', function() {
         globalData.jsonFileCounter++;
-        console.log("****************************", typeof testSet[globalData.jsonFileCounter])
+        console.log("****************************", typeof testSet[globalData.jsonFileCounter]);
         if (typeof testSet[globalData.jsonFileCounter] !== 'undefined' && testSet[globalData.jsonFileCounter].status == 'testSetComplete') {
             PubSub.publish('nextSet');
         } else {
@@ -373,11 +378,9 @@ function sendData() {
         beakerKey: globalData.beakerKey,
         testTubeKey: globalData.testTubeKey,
         messagePool: test.engineGlobal.messagePool,
-        state: test.engineGlobal.state,
-	screenShots:test.engineGlobal.screenShots
-	
-	
+        state: test.engineGlobal.state
     });
+    
     io.emit('state', {
         state:  test.engineGlobal.state
     });
@@ -405,6 +408,7 @@ var url = 'http://dev.fev1/';
 dbService.server();
 
 startBrowser(url).then(function() {
+   
     page = globalData.page;
     console.log('browser Started');
 
@@ -445,21 +449,21 @@ startBrowser(url).then(function() {
 
                 test.engineGlobal.status = 'opened';
                 test.log('pass', 'Page Opened from source: ' + source);
-                console.log('done')
+                
 
             })
 
         };
-    }
+    };
 
     page.get('settings', function(err, res) {
+	
         console.log(res)
     })
+console.log('HERE')
+    
 
-    page.settings.userName = 'tester';
-    page.settings.password = 'testingit';
-
-    test.urlWatcher.start(globalData.page, 250);
+    //test.urlWatcher.start(globalData.page, 250);
 
 
 
