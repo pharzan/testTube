@@ -226,42 +226,83 @@ function onPlaybackEnded(page, callback) {
     })
 }
 
+// function waitForVisibility(selector, page, timeOut) {
+//     if (typeof timeOut == 'undefined')
+//         timeOut = 30;
+//     return new Promise(function(resolve, reject) {
+	
+//         var startTime = new Date().getTime();
+        
+// 	var interval = setInterval(function() {
+// 	    page.evaluate(function(selector) {
+// 		var a = document.querySelector(selector);
+		
+// 			if (a.offsetParent !== null)
+// 			    return true;
+// 			else
+// 			    return false;
+		
+// 	    },function(err,result){
+		
+// 		// if (new Date().getTime() - startTime > timeOut * 1000){
+//                 //     clearInterval(interval);
+//                 //     log('fail', 'waitForVisibility: ' + selector + ' element Timed OUT');
+//                 //     return resolve('timeOut');
+// 		// }
+// 		if(result){
+// 		    clearInterval(interval);
+// 		    log('pass', 'waitForVisibility: ' + selector + ' element Now VISIBLE ');
+// 		    return resolve('done');
+// 		}else{
+// 		    clearInterval(interval);
+// 		    log('fail', 'waitForVisibility: ' + selector + ' element Not VISIBLE ');
+// 		    return resolve('fail');
+// 		}
+		    
+// 	    });
+        
+// 	},selector,100);
+	
+    
+//     });
+// }
+
 function waitForVisibility(selector, page, timeOut) {
     if (typeof timeOut == 'undefined')
         timeOut = 30;
     return new Promise(function(resolve, reject) {
-	
+	 
         var startTime = new Date().getTime();
-        
-	var interval = setInterval(function() {
-	    page.evaluate(function(selector) {
-		var a = document.querySelector(selector);
+        var interval = setInterval(function() {
+	   
+            var e = page.evaluate(function(selector) {
+                var a=document.querySelector(selector);
 		
-			if (a.offsetParent !== null)
-			    return true;
-			else
-			    return false;
+		if(a.offsetParent !== null)
+		    return true;
+		else
+		    return false;
 		
-	    },function(err,result){
-		
-		if (new Date().getTime() - startTime > timeOut * 1000){
-                    clearInterval(interval);
-                    log('fail', 'waitForVisibility: ' + selector + ' element Timed OUT');
-                    return resolve('timeOut');
-		}
-		if(result){
-		    clearInterval(interval);
-		    log('pass', 'waitForVisibility: ' + selector + ' element Now VISIBLE ');
-		    return resolve('done');
-		}
-		    
-	    },selector);
-        
-	},100);
+            },selector,function(err,result){
 	
-    
+		if (result) {
+                    log('pass', 'waitForVisibility: ' + selector + ' element Now VISIBLE ');
+                    clearInterval(interval);
+                    return resolve('done');
+		}
+	    
+	    })
+	    
+            if (new Date().getTime() - startTime > timeOut * 1000) {
+                log('fail', 'waitForVisibility: ' + selector + ' element Timed OUT');
+                clearInterval(interval);
+                return resolve('timeOut');
+            }
+	    
+        }, 125);
+	     
     });
-}
+};
 
 function getElementContent(element, page) {
     /*
@@ -570,7 +611,7 @@ function compareTestTubes(expect, type, expression) {
             else
                 log('fail', 'compare didn\'t pass!');
 
-            return resolve('done')
+            return resolve('done');
         } else {
             var diff = old - current;
 
@@ -584,7 +625,7 @@ function compareTestTubes(expect, type, expression) {
                 log('pass', 'expected value matches the difference of testTubes');
             else
                 log('fail', 'expected value doesn\'t match');
-
+	    return resolve('done')
         }
 
         return
