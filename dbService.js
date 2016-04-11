@@ -80,7 +80,7 @@ function updateByName(dbName,name,updateData){
 function server() {
     
     http.createServer(function(request, response) {
-
+	console.log('in the Server')
         var responseHeaders = {
             "access-control-allow-origin": "*",
 
@@ -103,7 +103,7 @@ function server() {
         var search = url.parse(request.url).search;
 	search=decodeURI(search);
         var answer;
-
+	
         console.log('path', path);
         console.log('search', search);
 

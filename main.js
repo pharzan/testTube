@@ -3,7 +3,7 @@ var port = 8000,
     //slimerjs=require('node-phantom'),
     test = require('./engine.js'),
     PubSub = require('./pubsub.js'),
-    Parse = require('parse/node').Parse,
+    // Parse = require('parse/node').Parse,
     // server = http.createServer(),
     jsons = require('./data.js'),
     beautify_js = require('js-beautify').js_beautify,
@@ -34,8 +34,8 @@ var port = 8000,
 
 
 // Emit welcome message on connection
-io.on('connection', function(socket) {
-});
+// io.on('connection', function(socket) {
+// });
 
 app.listen(3000);
 
@@ -386,12 +386,14 @@ function sendData() {
     });
     // console.log(globalData.currentStepDescription)
 }
+
 function sendLog(msg,type){
     io.emit('log', {
 	message:msg,
 	type:type
     });
 }
+
 function reloadBrowser() {
     //PubSub.clearAllSubscriptions();
 }
@@ -401,7 +403,7 @@ function exit() {
 };
 
 // Send current time every 10 secs
-setInterval(sendData, 50);
+//setInterval(sendData, 50);
 
 var url = 'http://dev.fev1/';
 

@@ -504,7 +504,7 @@ var selectStepList = {
 };
 
 var selectSetList = {
-
+    
     controller: function() {
         var self = this;
         this.mappable = false;
@@ -545,7 +545,7 @@ var selectSetList = {
                     _Globals.set = response;
                     console.log('SelectedStep', _Globals.set);
                     self.infoShowable = true;
-
+		    m.redraw();
                 });
             },
 
@@ -580,8 +580,10 @@ var selectSetList = {
 // };
 
 var setList = {
+    
     view: function() {
-
+	
+	
         return m('.span.twelve',m('ul',
             _Globals.set.content.map(function(set, i) {
                 return m('li', m('span',i+') '),m('.fa.fa-minus-circle', {
@@ -1366,14 +1368,70 @@ var load = {
     }
 };
 
+socket.on('time',function(time){
+    console.log('time :',time);
+    
+});
+var post={
+    view:function(){
+	return [m('button',{onclick:function(){
+	    console.log('yay');
+	    m.request({
+            method: "POST",
+            url: "http://dev.testtube:8001/",
+            dataType: 'application/json',
+            background: true,
+		data: JSON.stringify({'name':'farzan'})
+        }).then(function(response) {
+            console.log("!!!!", response);
 
+        });
+	    
+	}
+			   },'Click'),
+		m('button',{onclick:function(){
+		    console.log('kitty');
+		    m.request({
+			method: "POST",
+			url: "http://dev.testtube:8001/kitty",
+			dataType: 'application/json',
+            background: true,
+		data: JSON.stringify({'name':'farzan'})
+        }).then(function(response) {
+            console.log("!!!!", response);
+
+        });
+	    
+	}
+			   },'kitty'),
+		m('button',{onclick:function(){
+		    console.log('puppy');
+		    m.request({
+			method: "POST",
+			url: "http://dev.testtube:8001/puppy",
+			dataType: 'application/json',
+            background: true,
+		data: JSON.stringify({'name':'farzan'})
+        }).then(function(response) {
+            console.log("!!!!", response);
+
+        });
+	    
+	}
+			   },'puppy')
+
+
+	       ];
+    }
+}
 m.route.mode = 'pathname';
 
 m.route(document.body, '/', {
     '/': test,
     '/report': test,
     '/load': load,
-    '/build': build
+    '/build': build,
+    '/post':post
 });
 
 var initElement = document.getElementsByTagName("html")[0];
@@ -1432,3 +1490,4 @@ function mapDOM(element, json) {
 
     return (json) ? JSON.stringify(treeObject) : treeObject;
 }
+
