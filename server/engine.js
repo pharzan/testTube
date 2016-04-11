@@ -32,7 +32,7 @@ exports.TestEngine=function TestEngine(cfg){
     if (!(this instanceof TestEngine)) {
 	return new TestEngine(cfg);
     }
-	
+    this.PromiseRunner=new promiseRunner();
     this.EventHandler=new EventHandler();
     this.Globals={
 	viewport:{},
@@ -83,19 +83,21 @@ exports.TestEngine=function TestEngine(cfg){
     };
 
     this.waitFor=function(fn){
-	retryTimeout=100;
-	this.EventHandler.emit('waitStart');
-	
+	var self=this
+	return new Promise(function(resolve){
+	var retryTimeout=100;
+	self.EventHandler.emit('waitStart');
 	var start=new Date().getTime();
-	var timeout=1000;
+	var timeout=3000;
 	var condition=false;
-	
-	self.EventHandler.on('exists',function(exists){
+	    
+	self.EventHandler.on('exists',function(exists){ 
 	    condition=exists;
+	    
 	});
 	
-	var interval = setInterval(function _check(self) {
             
+	var interval = setInterval(function _check(self) {
             if ((new Date().getTime() - start < timeout) && !condition) {
 		condition=fn.call(self,self);
                 return;
@@ -103,16 +105,18 @@ exports.TestEngine=function TestEngine(cfg){
 	     
 	    if (!condition) {
 		console.log("waitFor() failed in %d ms.", new Date().getTime() - start);
-		 self.log('done');
-		 clearInterval(interval);
+		resolve('fail');
+		clearInterval(interval);
 	     }else{
-		 
-                console.log("waitFor() passed in %d ms.", new Date().getTime() - start);
+                 console.log("waitFor() passed in %d ms.", new Date().getTime() - start);
+		resolve('pass'); 
                 clearInterval(interval);
 	     }
 	     
-        },retryTimeout,this,condition);
-    };
+        },retryTimeout,self,condition);
+	},self)
+    }
+						
 
     this.waitStart=function(){
 	var time=new Date().getTime();
@@ -126,7 +130,7 @@ exports.TestEngine=function TestEngine(cfg){
 	    expect=true;
 	page.evaluate(function(selector) {
             var element=document.querySelector(selector);
-	    
+
 	    if(element.offsetParent !== null)
 		return true;
 	    else
@@ -135,6 +139,7 @@ exports.TestEngine=function TestEngine(cfg){
         },selector,expect,function(err,result){
 	    
 	    self.EventHandler.emit('exists',result && expect);
+	    
 	    return result;
 	    
 	});
