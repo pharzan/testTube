@@ -1,5 +1,5 @@
 var Datastore = require('nedb'),
-    PubSub = require('./pubsub.js'),
+    PubSub = require('./lib/pubsub.js'),
     http = require('http'),
     fs = require('fs'),
     url = require('url'),

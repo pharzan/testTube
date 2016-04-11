@@ -1,6 +1,6 @@
 var fs = require('fs'),
     dbService = require('./dbService.js'),
-    PubSub = require('./pubsub.js'),
+    PubSub = require('./lib/pubsub.js'),
     main=require('./main.js'),
     Global = {
         oldUrl: '',

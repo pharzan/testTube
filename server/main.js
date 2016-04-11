@@ -2,7 +2,7 @@ var port = 8000,
     slimerjs = require('node-phantom-simple'),
     //slimerjs=require('node-phantom'),
     test = require('./engine.js'),
-    PubSub = require('./pubsub.js'),
+    PubSub = require('./lib/pubsub.js'),
     // Parse = require('parse/node').Parse,
     // server = http.createServer(),
     jsons = require('./data.js'),
@@ -17,7 +17,7 @@ var port = 8000,
     fs = require('fs'),
 
     // NEVER use a Sync function except at start-up!
-    index = fs.readFileSync(__dirname + '/interface/index.html'),
+    index = fs.readFileSync( '../interface/index.html'),
 
     // Send index.html to all requests
     app = http.createServer(function(req, res) {
