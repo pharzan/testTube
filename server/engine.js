@@ -1,7 +1,11 @@
+const EventHandler = require('events');
+
 var fs = require('fs'),
-    dbService = require('./dbService.js'),
-    PubSub = require('./lib/pubsub.js'),
-    main=require('./main.js'),
+    slimerjs = require('node-phantom-simple'),
+    promiseRunner = require('promiserunner'),    
+    // dbService = require('./dbService.js'),
+    // PubSub = require('./lib/pubsub.js'),
+    // main=require('./main.js'),
     Global = {
         oldUrl: '',
         currentUrl: '',
@@ -23,6 +27,97 @@ var fs = require('fs'),
 // PubSub.subscribe('testStepsComplete', function() {
 //     //_reset();
 // });
+exports.TestEngine=function TestEngine(cfg){
+    var self=this;
+    if (!(this instanceof TestEngine)) {
+	return new TestEngine(cfg);
+    }
+	
+    this.EventHandler=new EventHandler();
+    this.Globals={
+	viewport:{},
+	history:{},
+	urls:{},
+	screenShots:{}
+	
+    };
+    cfg.slimerjs?this.Globals.slimerjs=true:false;
+    
+    this.EventHandler.on('waitStart',function(){self.waitStart()});
+    
+    this.log=function(message){
+	console.log(message);
+	
+    };
+
+    this.startBrowser=function(resolve){
+	var self=this;
+	return new Promise(function(resolve) {
+            slimerjs.create({path: self.Globals.slimerjs?require('slimerjs').path:require('phantomjs').path }, function(err, sl) {
+		return sl.createPage(function(err, page) {
+                    return new Promise(function(resolve, reject) {
+			sl.outputEncoding = "utf-8";
+			self.Globals.page=page;
+			
+			// networkTap();
+			page.open('http://www.google.com', function(err, status) {
+                            
+                            if (status == "success") {
+				console.log('Success: page opened');
+				return resolve('done');
+                            } else {
+				console.log('Failed to open page');
+				return resolve('fail');
+                            }
+			});
+
+                    }).then(function() {
+			self.Globals.BROWSER = sl;
+			return resolve('done');
+
+                    });
+		    
+		});
+            });
+	});
+    };
+
+    this.waitFor=function(fn){
+	retryTimeout=100;
+	this.EventHandler.emit('waitStart');
+	var start=new Date().getTime();
+	var timeout=500;
+	var condition=false;
+	
+	var interval = setInterval(function _check(self) {
+	    console.log('hi');
+            
+            if ((new Date().getTime() - start < timeout) && !condition) {
+                //console.log('done')
+		condition=fn.call(self,self);
+                return;
+            }
+	     
+	     if (!condition) {
+		 self.log('done');
+		 clearInterval(interval);
+	     }
+	     
+             },retryTimeout,this);
+    };
+
+    this.waitStart=function(){
+	var time=new Date().getTime();
+	console.log('wait started',time);
+	
+	this.pendingWait = true;
+    };
+    
+    this.exists=function(selector){
+	console.log('exists',selector)
+    };
+};
+
 
 function log(type, message, report) {
     main.sendLog(message,type);
@@ -965,28 +1060,28 @@ function reset() {
     // };
 }
 
-module.exports = {
-    compareTestTubeBeaker: compareTestTubeBeaker,
-    compareTestTubes: compareTestTubes,
-    waitForVisibility: waitForVisibility,
-    getElementContent: getElementContent,
-    getNetworkContent: getNetworkContent,
-    onPlaybackEnded: onPlaybackEnded,
-    onPlaybackStart: onPlaybackStart,
-    searchAndClickFromBeaker: searchAndClickFromBeaker,
-    searchAndClick: searchAndClick,
-    urlWatcher: urlWatcher,
-    clickClass: clickClass,
-    removeClass:removeClass,
-    realclickClass: realclickClass,
-    getUrlContent: getUrlContent,
-    sendKeys: sendKeys,
-    focusClass: focusClass,
-    load: load,
-    wait: wait,
-    compare: compare,
-    log: log,
-    engineGlobal: Global,
-    deadLinkChecker: deadLinkChecker,
-    screenShot:screenShot
-};
+// module.exports = {
+//     compareTestTubeBeaker: compareTestTubeBeaker,
+//     compareTestTubes: compareTestTubes,
+//     waitForVisibility: waitForVisibility,
+//     getElementContent: getElementContent,
+//     getNetworkContent: getNetworkContent,
+//     onPlaybackEnded: onPlaybackEnded,
+//     onPlaybackStart: onPlaybackStart,
+//     searchAndClickFromBeaker: searchAndClickFromBeaker,
+//     searchAndClick: searchAndClick,
+//     urlWatcher: urlWatcher,
+//     clickClass: clickClass,
+//     removeClass:removeClass,
+//     realclickClass: realclickClass,
+//     getUrlContent: getUrlContent,
+//     sendKeys: sendKeys,
+//     focusClass: focusClass,
+//     load: load,
+//     wait: wait,
+//     compare: compare,
+//     log: log,
+//     engineGlobal: Global,
+//     deadLinkChecker: deadLinkChecker,
+//     screenShot:screenShot
+// };
