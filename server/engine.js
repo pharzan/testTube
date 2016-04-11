@@ -60,7 +60,7 @@ exports.TestEngine=function TestEngine(cfg){
 			self.Globals.page=page;
 			
 			// networkTap();
-			page.open('http://www.google.com', function(err, status) {
+			page.open('http://www.voscreen.com', function(err, status) {
                             
                             if (status == "success") {
 				console.log('Success: page opened');
@@ -85,36 +85,60 @@ exports.TestEngine=function TestEngine(cfg){
     this.waitFor=function(fn){
 	retryTimeout=100;
 	this.EventHandler.emit('waitStart');
+	
 	var start=new Date().getTime();
-	var timeout=500;
+	var timeout=1000;
 	var condition=false;
 	
+	self.EventHandler.on('exists',function(exists){
+	    condition=exists;
+	});
+	
 	var interval = setInterval(function _check(self) {
-	    console.log('hi');
             
             if ((new Date().getTime() - start < timeout) && !condition) {
-                //console.log('done')
 		condition=fn.call(self,self);
                 return;
             }
 	     
-	     if (!condition) {
+	    if (!condition) {
+		console.log("waitFor() failed in %d ms.", new Date().getTime() - start);
 		 self.log('done');
 		 clearInterval(interval);
+	     }else{
+		 
+                console.log("waitFor() passed in %d ms.", new Date().getTime() - start);
+                clearInterval(interval);
 	     }
 	     
-             },retryTimeout,this);
+        },retryTimeout,this,condition);
     };
 
     this.waitStart=function(){
 	var time=new Date().getTime();
 	console.log('wait started',time);
-	
 	this.pendingWait = true;
     };
     
-    this.exists=function(selector){
-	console.log('exists',selector)
+    this.exists=function(selector,expect){
+	var page=this.Globals.page;
+	if(typeof expect=='undefined')
+	    expect=true;
+	page.evaluate(function(selector) {
+            var element=document.querySelector(selector);
+	    
+	    if(element.offsetParent !== null)
+		return true;
+	    else
+		return false;
+		
+        },selector,expect,function(err,result){
+	    
+	    self.EventHandler.emit('exists',result && expect);
+	    return result;
+	    
+	});
+	
     };
 };
 
