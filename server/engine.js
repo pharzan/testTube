@@ -61,7 +61,10 @@ exports.TestEngine=function TestEngine(cfg){
 			
 			// networkTap();
 			page.open('http://www.voscreen.com', function(err, status) {
-                            
+                            page.set('viewportSize', {
+				width: 1000,
+				height: 700
+			    });
                             if (status == "success") {
 				console.log('Success: page opened');
 				return resolve('done');
@@ -81,26 +84,21 @@ exports.TestEngine=function TestEngine(cfg){
             });
 	});
     };
-
+    
     this.waitFor=function(fn){
-	var self=this
+	var self=this;
 	return new Promise(function(resolve){
 	var retryTimeout=100;
 	self.EventHandler.emit('waitStart');
 	var start=new Date().getTime();
 	var timeout=3000;
 	var condition=false;
-	    
-	self.EventHandler.on('exists',function(exists){ 
-	    condition=exists;
-	    
-	});
-	
             
-	var interval = setInterval(function _check(self) {
-            if ((new Date().getTime() - start < timeout) && !condition) {
-		condition=fn.call(self,self);
-                return;
+	    var interval = setInterval(function _check(self) {
+		
+		if ((new Date().getTime() - start < timeout) && !condition) {
+		    condition=fn.call(self,self);
+		    return
             }
 	     
 	    if (!condition) {
@@ -113,24 +111,17 @@ exports.TestEngine=function TestEngine(cfg){
                 clearInterval(interval);
 	     }
 	     
-        },retryTimeout,self,condition);
-	},self)
-    }
-						
-
-    this.waitStart=function(){
-	var time=new Date().getTime();
-	console.log('wait started',time);
-	this.pendingWait = true;
+        },retryTimeout,self);
+	},self);
     };
     
-    this.exists=function(selector,expect){
+    this.visibility=function(selector,expect){
+	var self=this;
 	var page=this.Globals.page;
 	if(typeof expect=='undefined')
 	    expect=true;
 	page.evaluate(function(selector) {
             var element=document.querySelector(selector);
-
 	    if(element.offsetParent !== null)
 		return true;
 	    else
@@ -138,13 +129,69 @@ exports.TestEngine=function TestEngine(cfg){
 		
         },selector,expect,function(err,result){
 	    
-	    self.EventHandler.emit('exists',result && expect);
+	    self.result=result && expect;
+	    
+	});
+	return this.result;
+    };
+
+    this.exists=function(selector,expect){
+	var page=this.Globals.page;
+	if(typeof expect=='undefined')
+	    expect=true;
+	
+	page.evaluate(function(selector) {
+            var element=document.querySelector(selector);
+
+	    if(element !== null)
+		return true;
+	    else
+		return false;
+		
+        },selector,expect,function(err,result){
+	    
+	    self.EventHandler.emit('exists',result == expect);
 	    
 	    return result;
 	    
 	});
+    };
+    
+    this.waitStart=function(){
+	var time=new Date().getTime();
+	console.log('wait started',time);
+	this.pendingWait = true;
+    };
+
+    this.mouseEvent=function(selector){
+	var page=this.Globals.page;
+	var X,Y;
+	function computeCenter(selector,callback){
+	    page.evaluate(function(selector) {
+		var element=document.querySelector(selector);
+
+		var bounds=element.getBoundingClientRect();
+		return bounds;
+		
+		
+            },selector,function(err,bounds){
+		
+		var x = Math.round(bounds.left + bounds.width / 2),
+		    y = Math.round(bounds.top + bounds.height / 2);
+		console.log(bounds)
+		callback([x,y]);
+	    });
+
+	};
+
+	computeCenter(selector,function(result){
+	    console.log(result);
+	    var x=result[0],y=result[1];
+	    page.sendEvent('click', x, y, button = 'left');
+	})
 	
     };
+    
 };
 
 
@@ -301,6 +348,7 @@ function sendKeys(element, key, page, callback) {
 
     });
 }
+
 
 function onPlaybackStart(page, callback) {
     return new Promise(function(resolve, reject) {
@@ -633,8 +681,8 @@ function realclickClass(selector, page) {
                 return false;
             }
         }, selector, function(err, result) {
-            //console.log('>>>>>>>', result)
             page.sendEvent('click', result.left + (result.width / 2), result.top + (result.height / 2), button = 'left');
+            //console.log('>>>>>>>', result)
             if (result.status) {
                 log('pass', 'clickClass: ' + selector + ' clicked');
                 return resolve('done');
