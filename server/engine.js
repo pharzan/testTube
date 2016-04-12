@@ -43,7 +43,7 @@ exports.TestEngine=function TestEngine(cfg){
     };
     cfg.slimerjs?this.Globals.slimerjs=true:false;
     
-    this.EventHandler.on('waitStart',function(){self.waitStart()});
+    // this.EventHandler.on('waitStart',function(){self.waitStart()});
     
     this.log=function(message){
 	console.log(message);
@@ -88,28 +88,39 @@ exports.TestEngine=function TestEngine(cfg){
     this.waitFor=function(fn){
 	var self=this;
 	return new Promise(function(resolve){
-	    var retryTimeout=100;
+	    
+	    var retryTimeout=250;
 	    self.EventHandler.emit('waitStart');
-	    self.EventHandler.on('result',function(result){
+	    self.EventHandler.once('result',function(result,act){
 		
+		self.screenShot()
+		action=act;
 		condition=result;
+		self.EventHandler.removeAllListeners()
 	    });
+	    var action='unidentified';
 	    var start=new Date().getTime();
 	    var timeout=3000;
 	    var condition=false;
+	    
             
 	    var interval = setInterval(function _check(self) {
 		
 		if ((new Date().getTime() - start < timeout) && !condition) {
 		    fn.call(self,self);
-		    
-		}else if (!condition) {
-		    console.log("waitFor() failed in %d ms.", new Date().getTime() - start);
+		    return
+		}
+		 if (!condition) {
+		     console.log("waitFor(%s) failed in %d ms.",action,new Date().getTime() - start);
 		    clearInterval(interval);
+		     self.EventHandler.removeAllListeners()
 		    return resolve('fail');
-		}else{
-                    console.log("waitFor() passed in %d ms.", new Date().getTime() - start);
+		 }
+
+		else{
+                    console.log("waitFor(%s) passed in %d ms.", action,new Date().getTime() - start);
                     clearInterval(interval);
+		    self.EventHandler.removeAllListeners()
 		    return resolve('pass'); 
 		}
 		
@@ -132,7 +143,7 @@ exports.TestEngine=function TestEngine(cfg){
 		
         },selector,expect,function(err,result){
 	    
-	    self.EventHandler.emit('result',result && expect);
+	    self.EventHandler.emit('result',result && expect,'visibility');
 	    //console.log(selector,result)
 	});
 	
@@ -152,38 +163,83 @@ exports.TestEngine=function TestEngine(cfg){
 		return true;
 	    else
 		return false;
-		
         },selector,expect,function(err,result){
-	    self.EventHandler.emit('result',result == expect);
-	    return;
+	    self.EventHandler.emit('result',result == expect,'exists');
+	    
 	});
     };
     
     this.waitStart=function(){
 	var time=new Date().getTime();
-	console.log('wait started',time);
+	//console.log('wait started',time);
 	this.pendingWait = true;
     };
 
     this.mouseEvent=function(selector){
 	var page=this.Globals.page,self=this;
-	
 	page.evaluate(function(selector) {
 	    var element=document.querySelector(selector);
-	    if (element != null && typeof(element) !== 'undefined') {
-                if (element.offsetParent !== null) {
+	    if (element != null) {
                     element.click();
                     return true;
-                }
             } else 
                 return false;
-	    
         },selector,function(err,result){
-	    self.EventHandler.emit('result',result);
+	    self.EventHandler.emit('result',result,'mouseEvent');
+	    
 	});
 
     };
-    
+
+    this.keyboardEvent=function(selector,key){
+	
+	var page=this.Globals.page,self=this;
+        page.evaluate(function(selector, key) {
+            var input = document.querySelector(selector); // Get the element where you want to press.
+	    if (input != null) {
+		input.focus();
+		return true;}
+	    else
+		return false;
+        }, selector, key, function(err, result) {
+	    if(result){
+		page.sendEvent('keypress', key, null, null, null);
+		page.evaluate(function(selector, key) {
+		    var input = document.querySelector(selector); // Get the element where you want to press.
+		    var myEvent = new Event('change');
+		    input.dispatchEvent(myEvent);
+		    myEvent = new Event('input');
+		    input.dispatchEvent(myEvent);
+		    return true;
+		},selector,key,function(err,result){
+		    
+			self.EventHandler.emit('result',result,'keyboardEvent');
+		})
+	    }
+	    
+        });
+    };
+
+    this.screenShot=function(){
+	
+	var self=this;
+	    var fileNameGenerator=function(){
+		var date = new Date();
+		var year = date.getFullYear();
+		var month = date.getMonth() + 1;      // "+ 1" becouse the 1st month is 0
+		var day = date.getDate();
+		var hour = date.getHours();
+		var minutes = date.getMinutes();
+		var secconds = date.getSeconds();
+		var milliseconds = date.getMilliseconds();
+		var name = year+ '-'+ month+ '-'+ day+ '_'+ hour+ '_'+ minutes+ '_'+ secconds+'_'+milliseconds;
+		return name;
+	    };
+	
+	var name=fileNameGenerator();
+	console.log(name)
+	self.Globals.page.render('./screenShots/'+name+'.png');	
+}
 };
 
 
@@ -235,39 +291,7 @@ function log(type, message, report) {
     console.log(msg + message);
 }
 
-function screenShot(path,fileName,page){
-    return new Promise(function(resolve){
-    if(Global.currentScreenShot=='B')
-	Global.currentScreenShot='A';
-    else
-	Global.currentScreenShot='B';
 
-    page.render("interface/"+path+'/'+Global.currentScreenShot);
-    Global.screenShots[1]=Global.screenShots[0];
-    Global.screenShots[0]=path+'/'+Global.currentScreenShot;
-    console.log(Global.screenShots);
-    
-	
-	var count=0;
-	var I=setInterval(function(){
-	
-	    
-	    return fs.stat("/home/pharzan/dev/www/testTube/interface/"+Global.currentScreenShot,
-			       function(err, buf) {
-				   
-				   if(err==null){
-				       clearInterval(I);
-				       log('pass','Screen Shot captured');
-				       return resolve('done');
-				   }
-				   return err;
-			       });
-	    
-	    
-	},10);
-	
-    });
-}
 
 function deadLinkChecker(page) {
     return new Promise(function(resolve) {
