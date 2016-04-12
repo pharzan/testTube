@@ -10,7 +10,10 @@ var fs = require('fs'),
         oldUrl: '',
         currentUrl: '',
         oldTestTube: '',
-        testTube: '',
+        testTube: [{
+	    content:'',
+	    type:''
+		  }],
         networkBeaker: [],
         networkResponses: [],
         urlHistorySize: 7,
@@ -50,7 +53,7 @@ exports.TestEngine=function TestEngine(cfg){
 	
     };
 
-    this.startBrowser=function(resolve){
+    this.startBrowser=function(){
 	var self=this;
 	return new Promise(function(resolve) {
             slimerjs.create({path: self.Globals.slimerjs?require('slimerjs').path:require('phantomjs').path }, function(err, sl) {
@@ -93,7 +96,7 @@ exports.TestEngine=function TestEngine(cfg){
 	    self.EventHandler.emit('waitStart');
 	    self.EventHandler.once('result',function(result,act){
 		
-		self.screenShot()
+		
 		action=act;
 		condition=result;
 		self.EventHandler.removeAllListeners()
@@ -127,7 +130,7 @@ exports.TestEngine=function TestEngine(cfg){
             },retryTimeout,self);
 	},self);
     };
-    
+
     this.visibility=function(selector,expect){
 	
 	var self=this;
@@ -238,8 +241,65 @@ exports.TestEngine=function TestEngine(cfg){
 	
 	var name=fileNameGenerator();
 	console.log(name)
-	self.Globals.page.render('./screenShots/'+name+'.png');	
-}
+	self.Globals.page.render('./screenShots/'+name+'.png');
+	self.EventHandler.emit('result',true,'screenShot');
+    };
+
+    this.getContent=function(selector){
+	_getElementInfo(selector,function(info){
+	    var result;
+	    switch(info.tagName){
+	    case 'INPUT':
+		result=info.value;
+		break;
+	    default:
+		result=info.textContent;
+		break;
+	    }
+	    
+	    _fillTestTube(result);
+	    
+	    if(info!==false)
+		self.EventHandler.emit('result',true,'getContent '+info.tagName);
+	    else
+		self.EventHandler.emit('result',false,'getContent');
+	});
+    };
+
+    var _getText=function(){};
+
+    var _getElementInfo=function(selector,callback){
+	
+	var page=self.Globals.page;
+	page.evaluate(function(selector) {
+            var element=document.querySelector(selector);
+	    if(element !== null){
+		
+		return { tagName:element.tagName,
+			 tagClass:element.className,
+			 tagId:element.id,
+			 innerHtml:element.innerHTML,
+			 textContent:element.textContent,
+			 value:element.value,
+			 href:element.href
+		       };
+	    }
+	    else
+		return false;
+		
+        },selector,function(err,result){
+	    
+	    // self.EventHandler.emit('result',result,'visibility');
+	    //console.log(selector,result)
+	    callback(result);
+	});
+
+    }
+
+    var _fillTestTube=function(value){
+	
+	console.log('>>>',value);
+    };
 };
 
 
