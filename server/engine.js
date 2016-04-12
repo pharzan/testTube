@@ -88,34 +88,37 @@ exports.TestEngine=function TestEngine(cfg){
     this.waitFor=function(fn){
 	var self=this;
 	return new Promise(function(resolve){
-	var retryTimeout=100;
-	self.EventHandler.emit('waitStart');
-	var start=new Date().getTime();
-	var timeout=3000;
-	var condition=false;
+	    var retryTimeout=100;
+	    self.EventHandler.emit('waitStart');
+	    self.EventHandler.on('result',function(result){
+		
+		condition=result;
+	    });
+	    var start=new Date().getTime();
+	    var timeout=3000;
+	    var condition=false;
             
 	    var interval = setInterval(function _check(self) {
 		
 		if ((new Date().getTime() - start < timeout) && !condition) {
-		    condition=fn.call(self,self);
-		    return
-            }
-	     
-	    if (!condition) {
-		console.log("waitFor() failed in %d ms.", new Date().getTime() - start);
-		resolve('fail');
-		clearInterval(interval);
-	     }else{
-                 console.log("waitFor() passed in %d ms.", new Date().getTime() - start);
-		resolve('pass'); 
-                clearInterval(interval);
-	     }
-	     
-        },retryTimeout,self);
+		    fn.call(self,self);
+		    
+		}else if (!condition) {
+		    console.log("waitFor() failed in %d ms.", new Date().getTime() - start);
+		    clearInterval(interval);
+		    return resolve('fail');
+		}else{
+                    console.log("waitFor() passed in %d ms.", new Date().getTime() - start);
+                    clearInterval(interval);
+		    return resolve('pass'); 
+		}
+		
+            },retryTimeout,self);
 	},self);
     };
     
     this.visibility=function(selector,expect){
+	
 	var self=this;
 	var page=this.Globals.page;
 	if(typeof expect=='undefined')
@@ -129,14 +132,16 @@ exports.TestEngine=function TestEngine(cfg){
 		
         },selector,expect,function(err,result){
 	    
-	    self.result=result && expect;
-	    
+	    self.EventHandler.emit('result',result && expect);
+	    //console.log(selector,result)
 	});
-	return this.result;
+	
+	
+	
     };
 
     this.exists=function(selector,expect){
-	var page=this.Globals.page;
+	var page=this.Globals.page,self=this;
 	if(typeof expect=='undefined')
 	    expect=true;
 	
@@ -149,11 +154,8 @@ exports.TestEngine=function TestEngine(cfg){
 		return false;
 		
         },selector,expect,function(err,result){
-	    
-	    self.EventHandler.emit('exists',result == expect);
-	    
-	    return result;
-	    
+	    self.EventHandler.emit('result',result == expect);
+	    return;
 	});
     };
     
@@ -164,32 +166,22 @@ exports.TestEngine=function TestEngine(cfg){
     };
 
     this.mouseEvent=function(selector){
-	var page=this.Globals.page;
-	var X,Y;
-	function computeCenter(selector,callback){
-	    page.evaluate(function(selector) {
-		var element=document.querySelector(selector);
-
-		var bounds=element.getBoundingClientRect();
-		return bounds;
-		
-		
-            },selector,function(err,bounds){
-		
-		var x = Math.round(bounds.left + bounds.width / 2),
-		    y = Math.round(bounds.top + bounds.height / 2);
-		console.log(bounds)
-		callback([x,y]);
-	    });
-
-	};
-
-	computeCenter(selector,function(result){
-	    console.log(result);
-	    var x=result[0],y=result[1];
-	    page.sendEvent('click', x, y, button = 'left');
-	})
+	var page=this.Globals.page,self=this;
 	
+	page.evaluate(function(selector) {
+	    var element=document.querySelector(selector);
+	    if (element != null && typeof(element) !== 'undefined') {
+                if (element.offsetParent !== null) {
+                    element.click();
+                    return true;
+                }
+            } else 
+                return false;
+	    
+        },selector,function(err,result){
+	    self.EventHandler.emit('result',result);
+	});
+
     };
     
 };
@@ -587,8 +579,6 @@ function clickClass(selector, page) {
 
             if (a != null && typeof(a) !== 'undefined') {
                 if (a.offsetParent !== null) {
-
-
                     a.click();
                     return true;
 
