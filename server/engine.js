@@ -18,13 +18,13 @@ exports.TestEngine=function TestEngine(cfg){
 	return new TestEngine(cfg);
     }
     this.Global = {
-        oldUrl: '',
-        currentUrl: '',
-        oldTestTube: '',
         testTubes: [],
 	maxTestTubes:4,
-        networkBeaker: [],
-        networkResponses: [],
+	//--------------------
+        beakers: [],
+        maxBeakers: 4,
+	networkTapUrl:'question_service',
+	//------------------
         urlHistorySize: 7,
         urlHistory: [],
         messagePool: [],
@@ -32,18 +32,14 @@ exports.TestEngine=function TestEngine(cfg){
             url: '',
             source: 'unknown'
         },
-	screenShots:['',''],
+	//screenShots:['',''],
+	slimerjs:false
 	
     };
-    this.PromiseRunner=new promiseRunner();
+    
     this.EventHandler=new EventHandler();
-    this.Globals={
-	viewport:{},
-	history:{},
-	urls:{},
-	screenShots:{}
-    };
-    cfg.slimerjs?this.Globals.slimerjs=true:false;
+    
+    cfg.slimerjs?this.Global.slimerjs=true:false;
     
     // this.EventHandler.on('waitStart',function(){self.waitStart()});
     
@@ -54,13 +50,13 @@ exports.TestEngine=function TestEngine(cfg){
     this.startBrowser=function(){
 	var self=this;
 	return new Promise(function(resolve) {
-            slimerjs.create({path: self.Globals.slimerjs?require('slimerjs').path:require('phantomjs').path }, function(err, sl) {
+            slimerjs.create({path: self.Global.slimerjs?require('slimerjs').path:require('phantomjs').path }, function(err, sl) {
 		return sl.createPage(function(err, page) {
                     return new Promise(function(resolve, reject) {
 			sl.outputEncoding = "utf-8";
-			self.Globals.page=page;
+			self.Global.page=page;
 			
-			// networkTap();
+			_networkTap();
 			page.open('http://www.voscreen.com', function(err, status) {
                             page.set('viewportSize', {
 				width: 1000,
@@ -76,7 +72,7 @@ exports.TestEngine=function TestEngine(cfg){
 			});
 
                     }).then(function() {
-			self.Globals.BROWSER = sl;
+			self.Global.BROWSER = sl;
 			return resolve('done');
 
                     });
@@ -85,6 +81,29 @@ exports.TestEngine=function TestEngine(cfg){
             });
 	});
     };
+
+    var _networkTap=function () {
+	return new Promise(function(resolve) {
+	    var url=self.Global.networkTapUrl;
+	    var beakers=self.Global.beakers;
+	    var maxSize=self.Global.maxBeakers;
+            self.Global.page.onResourceReceived = function(response, networkRequest) {
+
+		if (response.stage == 'end') {
+                    if (response.url.indexOf(url) != -1 && response.bodySize != 0) {
+			
+			response.body = JSON.parse(response.body);
+			beakers.unshift(response.body);
+			if (beakers.length> maxSize) {  
+                           beakers.pop();
+			}
+                    }
+		}
+            };
+            return resolve('done');
+	});
+    };
+
     
     this.waitFor=function(fn){
 	var self=this;
@@ -132,7 +151,7 @@ exports.TestEngine=function TestEngine(cfg){
     this.visibility=function(selector,expect){
 	
 	var self=this;
-	var page=this.Globals.page;
+	var page=this.Global.page;
 	if(typeof expect=='undefined')
 	    expect=true;
 	page.evaluate(function(selector) {
@@ -153,7 +172,7 @@ exports.TestEngine=function TestEngine(cfg){
     };
 
     this.exists=function(selector,expect){
-	var page=this.Globals.page,self=this;
+	var page=this.Global.page,self=this;
 	if(typeof expect=='undefined')
 	    expect=true;
 	
@@ -177,7 +196,7 @@ exports.TestEngine=function TestEngine(cfg){
     };
 
     this.mouseEvent=function(selector){
-	var page=this.Globals.page,self=this;
+	var page=this.Global.page,self=this;
 	page.evaluate(function(selector) {
 	    var element=document.querySelector(selector);
 	    if (element != null) {
@@ -194,7 +213,7 @@ exports.TestEngine=function TestEngine(cfg){
 
     this.keyboardEvent=function(selector,key){
 	
-	var page=this.Globals.page,self=this;
+	var page=this.Global.page,self=this;
         page.evaluate(function(selector, key) {
             var input = document.querySelector(selector); // Get the element where you want to press.
 	    if (input != null) {
@@ -215,7 +234,7 @@ exports.TestEngine=function TestEngine(cfg){
 		},selector,key,function(err,result){
 		    
 			self.EventHandler.emit('result',result,'keyboardEvent');
-		})
+		});
 	    }
 	    
         });
@@ -239,7 +258,7 @@ exports.TestEngine=function TestEngine(cfg){
 	
 	var name=fileNameGenerator();
 	console.log(name)
-	self.Globals.page.render('./screenShots/'+name+'.png');
+	self.Global.page.render('./screenShots/'+name+'.png');
 	self.EventHandler.emit('result',true,'screenShot');
     };
 
@@ -249,12 +268,12 @@ exports.TestEngine=function TestEngine(cfg){
 	    switch(info.tagName){
 	    case 'INPUT':
 		result={text:info.value,
-			tagName:info.tagName
+			type:info.tagName
 		       };
 		break;
 	    default:
 		result={text:info.textContent,
-			tagName:info.tagName
+			type:info.tagName
 		       };
 		break;
 	    }
@@ -272,7 +291,7 @@ exports.TestEngine=function TestEngine(cfg){
 
     var _getElementInfo=function(selector,callback){
 	
-	var page=self.Globals.page;
+	var page=self.Global.page;
 	
 	page.evaluate(function(selector) {
             var element=document.querySelector(selector);
@@ -310,15 +329,14 @@ exports.TestEngine=function TestEngine(cfg){
 
     this.clickTestTube=function(){
 	var lable=this.Global.testTubes[0].text;
-	var tagType=this.Global.testTubes[0].tagName;
+	var tagType=this.Global.testTubes[0].type;
 	this.findAndClick(lable,tagType);
     };
     
     this.findAndClick=function(lable,tagType){
 	/*Searchs the dom for the selector and return the selector*/
 	
-	
-	var page=self.Globals.page;
+	var page=self.Global.page;
         page.evaluate(function(lable, tagType) {
 
             var textContents = [];
@@ -354,6 +372,26 @@ exports.TestEngine=function TestEngine(cfg){
             else
 		self.EventHandler.emit('result',false,'findAndClick :'+lable);
         });
+    };
+
+    this.getUrlContent=function() {
+    /*
+     Get the url and store it in a test tube
+     the oldTest tube is set to current testTube
+     the new url is set to current url,
+     */
+	var page=self.Global.page;
+        page.get('url', function(err, url) {
+            if (url != null && typeof(url) != 'undefined') {
+		self.fillTestTube(
+		    {text:url,
+		     type:'URL'});
+
+            } 
+
+        });
+
+
     };
 };
 
