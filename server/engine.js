@@ -259,10 +259,12 @@ exports.TestEngine=function TestEngine(cfg){
 		break;
 	    }
 	    
-	    _fillTestTube(result);
 	    
-	    if(info!==false)
+	    
+	    if(info!==false){
+		self.fillTestTube(result);
 		self.EventHandler.emit('result',true,'getContent '+info.tagName);
+	    }
 	    else
 		self.EventHandler.emit('result',false,'getContent');
 	});
@@ -294,7 +296,7 @@ exports.TestEngine=function TestEngine(cfg){
 
     };
 
-    var _fillTestTube=function(value){
+    this.fillTestTube=function(value){
 	
 	var testTubes=self.Global.testTubes;
 	
@@ -303,12 +305,18 @@ exports.TestEngine=function TestEngine(cfg){
 	    testTubes.pop();
 
 	console.log(value,'>>>',testTubes);
+	self.EventHandler.emit('result',true,'fillTestTube');
     };
-    
+
     this.clickTestTube=function(){
-	/*Searchs the dom for the selector and return the selector*/
 	var lable=this.Global.testTubes[0].text;
 	var tagType=this.Global.testTubes[0].tagName;
+	this.findAndClick(lable,tagType);
+    };
+    
+    this.findAndClick=function(lable,tagType){
+	/*Searchs the dom for the selector and return the selector*/
+	
 	
 	var page=self.Globals.page;
         page.evaluate(function(lable, tagType) {
@@ -321,21 +329,17 @@ exports.TestEngine=function TestEngine(cfg){
             try {
 
                 for (var i = 0; i < e.length; i++) {
-                   //textContents.push(e[i].textContent);
                     if (e[i].textContent == lable) {
                         found.push(e[i]);
-
                     }
-
                 };
-
-                if (typeof found !== 'undefined') {
-                    console.log(found.length);
+                if (typeof found !== 'undefined' && found.length>0) {
+                    
                     found.map(function(e) {
                         e.click();
                         console.log(e.className + " tag:" + e.tagName);
-                    })
-                   
+                    });
+                
                     return true;
                 } else
                     return false;
@@ -343,16 +347,13 @@ exports.TestEngine=function TestEngine(cfg){
                 if (e !== BreakException) throw e;
                 return true;
             }
-        }, lable, tagType, function(err, val) {
+        }, lable, tagType, function(err, result) {
             
-            if (val) {
-
-                return true;
-            } else
-                return false;
+            if (result) 
+		self.EventHandler.emit('result',true,'findAndClick :'+lable);
+            else
+		self.EventHandler.emit('result',false,'findAndClick :'+lable);
         });
-	
-
     };
 };
 
