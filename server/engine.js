@@ -2,18 +2,27 @@ const EventHandler = require('events');
 
 var fs = require('fs'),
     slimerjs = require('node-phantom-simple'),
-    promiseRunner = require('promiserunner'),    
+    promiseRunner = require('promiserunner');
     // dbService = require('./dbService.js'),
     // PubSub = require('./lib/pubsub.js'),
     // main=require('./main.js'),
-    Global = {
+    
+// PubSub.subscribe('testStepsComplete', function() {
+//     //_reset();
+// });
+exports.TestEngine=function TestEngine(cfg){
+    
+
+    var self=this;
+    if (!(this instanceof TestEngine)) {
+	return new TestEngine(cfg);
+    }
+    this.Global = {
         oldUrl: '',
         currentUrl: '',
         oldTestTube: '',
-        testTube: [{
-	    content:'',
-	    type:''
-		  }],
+        testTubes: [],
+	maxTestTubes:4,
         networkBeaker: [],
         networkResponses: [],
         urlHistorySize: 7,
@@ -24,17 +33,8 @@ var fs = require('fs'),
             source: 'unknown'
         },
 	screenShots:['',''],
-	currentScreenShot:'A'
+	
     };
-
-// PubSub.subscribe('testStepsComplete', function() {
-//     //_reset();
-// });
-exports.TestEngine=function TestEngine(cfg){
-    var self=this;
-    if (!(this instanceof TestEngine)) {
-	return new TestEngine(cfg);
-    }
     this.PromiseRunner=new promiseRunner();
     this.EventHandler=new EventHandler();
     this.Globals={
@@ -42,7 +42,6 @@ exports.TestEngine=function TestEngine(cfg){
 	history:{},
 	urls:{},
 	screenShots:{}
-	
     };
     cfg.slimerjs?this.Globals.slimerjs=true:false;
     
@@ -50,7 +49,6 @@ exports.TestEngine=function TestEngine(cfg){
     
     this.log=function(message){
 	console.log(message);
-	
     };
 
     this.startBrowser=function(){
@@ -250,10 +248,14 @@ exports.TestEngine=function TestEngine(cfg){
 	    var result;
 	    switch(info.tagName){
 	    case 'INPUT':
-		result=info.value;
+		result={text:info.value,
+			tagName:info.tagName
+		       };
 		break;
 	    default:
-		result=info.textContent;
+		result={text:info.textContent,
+			tagName:info.tagName
+		       };
 		break;
 	    }
 	    
@@ -266,11 +268,10 @@ exports.TestEngine=function TestEngine(cfg){
 	});
     };
 
-    var _getText=function(){};
-
     var _getElementInfo=function(selector,callback){
 	
 	var page=self.Globals.page;
+	
 	page.evaluate(function(selector) {
             var element=document.querySelector(selector);
 	    if(element !== null){
@@ -288,17 +289,70 @@ exports.TestEngine=function TestEngine(cfg){
 		return false;
 		
         },selector,function(err,result){
-	    
-	    // self.EventHandler.emit('result',result,'visibility');
-	    //console.log(selector,result)
 	    callback(result);
 	});
 
-    }
+    };
 
     var _fillTestTube=function(value){
 	
-	console.log('>>>',value);
+	var testTubes=self.Global.testTubes;
+	
+	testTubes.unshift(value);
+	if(testTubes.length>self.Global.maxTestTubes)
+	    testTubes.pop();
+
+	console.log(value,'>>>',testTubes);
+    };
+    
+    this.clickTestTube=function(){
+	/*Searchs the dom for the selector and return the selector*/
+	var lable=this.Global.testTubes[0].text;
+	var tagType=this.Global.testTubes[0].tagName;
+	
+	var page=self.Globals.page;
+        page.evaluate(function(lable, tagType) {
+
+            var textContents = [];
+            var e = document.getElementsByTagName(tagType);
+            var found = [];
+            var BreakException = {};
+
+            try {
+
+                for (var i = 0; i < e.length; i++) {
+                   //textContents.push(e[i].textContent);
+                    if (e[i].textContent == lable) {
+                        found.push(e[i]);
+
+                    }
+
+                };
+
+                if (typeof found !== 'undefined') {
+                    console.log(found.length);
+                    found.map(function(e) {
+                        e.click();
+                        console.log(e.className + " tag:" + e.tagName);
+                    })
+                   
+                    return true;
+                } else
+                    return false;
+            } catch (e) {
+                if (e !== BreakException) throw e;
+                return true;
+            }
+        }, lable, tagType, function(err, val) {
+            
+            if (val) {
+
+                return true;
+            } else
+                return false;
+        });
+	
+
     };
 };
 
