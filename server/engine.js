@@ -19,12 +19,13 @@ exports.TestEngine=function TestEngine(cfg){
     }
     this.Global = {
         testTubes: [],
-	maxTestTubes:4,
+	maxTestTubes:2,
 	//--------------------
         beakers: [],
         maxBeakers: 4,
 	networkTapUrl:'question_service',
 	//------------------
+	initialUrl:'http://www.voscreen.com',
         urlHistorySize: 7,
         urlHistory: [],
         messagePool: [],
@@ -56,8 +57,8 @@ exports.TestEngine=function TestEngine(cfg){
 			sl.outputEncoding = "utf-8";
 			self.Global.page=page;
 			
-			_networkTap();
-			page.open('http://www.voscreen.com', function(err, status) {
+			_networkTap().then(function(){
+			    page.open(self.Global.initialUrl, function(err, status) {
                             page.set('viewportSize', {
 				width: 1000,
 				height: 700
@@ -70,6 +71,7 @@ exports.TestEngine=function TestEngine(cfg){
 				return resolve('fail');
                             }
 			});
+			})
 
                     }).then(function() {
 			self.Global.BROWSER = sl;
@@ -82,6 +84,10 @@ exports.TestEngine=function TestEngine(cfg){
 	});
     };
 
+    this.stopBrowser=function(){
+	self.Global.BROWSER.exit();
+    };
+    
     var _networkTap=function () {
 	return new Promise(function(resolve) {
 	    var url=self.Global.networkTapUrl;
@@ -97,13 +103,13 @@ exports.TestEngine=function TestEngine(cfg){
 			if (beakers.length> maxSize) {  
                            beakers.pop();
 			}
+			
                     }
 		}
             };
             return resolve('done');
 	});
     };
-
     
     this.waitFor=function(fn){
 	var self=this;
@@ -257,7 +263,7 @@ exports.TestEngine=function TestEngine(cfg){
 	    };
 	
 	var name=fileNameGenerator();
-	console.log(name)
+	console.log(name);
 	self.Global.page.render('./screenShots/'+name+'.png');
 	self.EventHandler.emit('result',true,'screenShot');
     };
@@ -323,7 +329,7 @@ exports.TestEngine=function TestEngine(cfg){
 	if(testTubes.length>self.Global.maxTestTubes)
 	    testTubes.pop();
 
-	console.log(value,'>>>',testTubes);
+	//console.log(value,'>>>',testTubes);
 	self.EventHandler.emit('result',true,'fillTestTube');
     };
 
@@ -355,7 +361,7 @@ exports.TestEngine=function TestEngine(cfg){
                     
                     found.map(function(e) {
                         e.click();
-                        console.log(e.className + " tag:" + e.tagName);
+                        //console.log(e.className + " tag:" + e.tagName);
                     });
                 
                     return true;
@@ -387,12 +393,50 @@ exports.TestEngine=function TestEngine(cfg){
 		    {text:url,
 		     type:'URL'});
 
+		self.EventHandler.emit('result',true,'GetUrlContent');
             } 
 
         });
+	self.EventHandler.emit('result',false,'GetUrlContent');
 
 
     };
+
+    this.analyze=function(args){
+	var arg0=this.Global.testTubes[args.arg0].text;
+	var arg1=this.Global.testTubes[args.arg1].text;
+	var expect;
+	
+	if(args.expect==='true')
+	    expect=true;
+	else if(args.expect==='false')
+	    expect=false;
+	else
+	    expect=args.expect;
+	var result;
+	
+	switch(args.type){
+	    
+	case 'stringCompare':
+	    result=(arg0==arg1)===expect;
+	    break;
+	    
+	case 'operateCompare':
+	    var expression=args.expression;
+	    var T1 = Number(arg0);
+            var T2 = Number(arg1);
+            var temp = eval(expression);
+	    result=(temp==expect);
+	    break;
+	}
+	
+	//console.log(result)
+	
+	    self.EventHandler.emit('result',result,'analyze :'+args.type);
+	
+	    
+    };
+    
 };
 
 
@@ -441,7 +485,7 @@ function log(type, message, report) {
         status: msg,
         content: message
     })
-    console.log(msg + message);
+    //console.log(msg + message);
 }
 
 
