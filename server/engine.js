@@ -25,7 +25,7 @@ exports.TestEngine=function TestEngine(cfg){
         maxBeakers: 4,
 	networkTapUrl:'question_service',
 	//------------------
-	initialUrl:'http://www.voscreen.com',
+	
         urlHistorySize: 7,
         urlHistory: [],
         messagePool: [],
@@ -33,6 +33,18 @@ exports.TestEngine=function TestEngine(cfg){
             url: '',
             source: 'unknown'
         },
+	pageConfig:{
+	    initialUrl:'http://www.voscreen.com',
+	    userName: 'tester',
+            password: 'testingit',
+	    viewPortSize:{
+		width: '1000',
+		height: '700'},
+	    onConsoleMessage : function(msg, lineNum, sourceId) {
+		console.log('SLIMER CONSOLE: ' + msg);
+	    }
+	},
+	
 	//screenShots:['',''],
 	slimerjs:false
 	
@@ -58,11 +70,9 @@ exports.TestEngine=function TestEngine(cfg){
 			self.Global.page=page;
 			
 			_networkTap().then(function(){
-			    page.open(self.Global.initialUrl, function(err, status) {
-                            page.set('viewportSize', {
-				width: 1000,
-				height: 700
-			    });
+			    pageInit();
+			    page.open(self.Global.pageConfig.initialUrl, function(err, status) {
+                           
                             if (status == "success") {
 				console.log('Success: page opened');
 				return resolve('done');
@@ -86,6 +96,31 @@ exports.TestEngine=function TestEngine(cfg){
 
     this.stopBrowser=function(){
 	self.Global.BROWSER.exit();
+    };
+
+    var pageInit=function(){
+	var configs=Object.keys(self.Global.pageConfig);
+	var options=self.Global.pageConfig;
+	var page=self.Global.page;
+	
+	configs.map(function(cfg){
+	    
+	    switch(cfg){
+	    case 'viewPortSize':
+		page.set('viewportSize',
+			 {
+			     width: options[cfg].width,
+			     height:options[cfg].height
+			 });
+		return;
+		defualt:
+		page[cfg]=options[cfg];
+		break;
+	    }
+	    
+	    
+	});
+	console.log('initial config....')
     };
     
     var _networkTap=function () {
@@ -111,42 +146,42 @@ exports.TestEngine=function TestEngine(cfg){
 	});
     };
     
-    this.waitFor=function(fn){
+    this.waitFor=function(fn,timeout){
 	var self=this;
 	return new Promise(function(resolve){
 	    
 	    var retryTimeout=250;
 	    self.EventHandler.emit('waitStart');
 	    self.EventHandler.once('result',function(result,act){
-		
-		
 		action=act;
 		condition=result;
-		self.EventHandler.removeAllListeners()
+		self.EventHandler.removeAllListeners();
 	    });
 	    var action='unidentified';
 	    var start=new Date().getTime();
-	    var timeout=3000;
+	    
+	    if(!timeout)
+		timeout=3000;
+	    
 	    var condition=false;
 	    
-            
 	    var interval = setInterval(function _check(self) {
-		
+	
 		if ((new Date().getTime() - start < timeout) && !condition) {
 		    fn.call(self,self);
-		    return
+		    return;
 		}
 		 if (!condition) {
 		     console.log("waitFor(%s) failed in %d ms.",action,new Date().getTime() - start);
-		    clearInterval(interval);
-		     self.EventHandler.removeAllListeners()
+		     clearInterval(interval);
+		     self.EventHandler.removeAllListeners();
 		    return resolve('fail');
 		 }
 
 		else{
                     console.log("waitFor(%s) passed in %d ms.", action,new Date().getTime() - start);
                     clearInterval(interval);
-		    self.EventHandler.removeAllListeners()
+		    self.EventHandler.removeAllListeners();
 		    return resolve('pass'); 
 		}
 		
@@ -201,6 +236,16 @@ exports.TestEngine=function TestEngine(cfg){
 	this.pendingWait = true;
     };
 
+    this.sleep=function(timeOut){
+	var result=false;
+	console.log('here')
+	setInterval(function(){
+	    
+	    self.EventHandler.emit('result',result,'sleep');
+	},timeOut);
+	return
+    };
+    
     this.mouseEvent=function(selector){
 	var page=this.Global.page,self=this;
 	page.evaluate(function(selector) {
