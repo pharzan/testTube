@@ -367,8 +367,11 @@ var test=require('./engine.js').TestEngine(cfg);
 var stepPromise;
 var Events=require('events');
 var EventHandler=new Events();
+var runStart;
+var server=require('./server.js').Server();
+server.start();
 function run(testSteps) {
-    console.log(testSteps)
+    runStart=new Date();
     return new Promise(function(resolve) {
         testSteps.map(function(step) {
             function stepSwitchCheck(step) {
@@ -391,7 +394,9 @@ function run(testSteps) {
 		    return test.waitFor(function _noCheck(){
 			return this.clickTestTube();
 		    },step.timeout);
-		    
+		case 'describe':
+		    console.log('Test description: %s',step.key);
+		    break;
 		case 'screenShot':
 		    test.screenShot('./','test.png',page).then(function(){
 			io.emit('screenShot',{
@@ -509,10 +514,6 @@ function run(testSteps) {
                     case 'searchAndClick':
                         return test.searchAndClick(page, step.key, step.tag);
                         break;
-
-
-
-
                 };
             };
 
@@ -526,9 +527,9 @@ function run(testSteps) {
                         EventHandler.emit('stepsComplete');
                         return resolve('done');
                     }
+		    
                     if (typeof step.des !== 'undefined') {
-                        globalData.currentStepDescription = step.des;
-                        test.log('des', step.des);
+                        console.log('description: %s', step.des);
                     }
                     return stepSwitchCheck(step);
                     
@@ -537,13 +538,20 @@ function run(testSteps) {
         });
     });
 };
+
 EventHandler.on('stepsComplete',function(){
-    console.log('----------Steps Complete');
-})
-run([{action:'startBrowser'},
-     {action:'visibility',tag:'#content_area',expect:'true'},
-     {action:'wait',key:'1500'},
-     {action:'getContent',tag:'#tabs > div.clickable.inactive > span',timeout:'1500'},
-     {action:'clickTestTube',timeout:'800'},
-     {action:'done'}
+    var runEnd=new Date();
+    var elapsed=runEnd-runStart;
+    
+    server.emit('time',{time:elapsed});
+    console.log('Steps Complete in %d ms',elapsed);
+});
+run([
+    {action:'startBrowser'},
+    {action:'describe',key:'blah blah, blah'},
+    {action:'visibility',tag:'#content_area',expect:'true',des:'Check for the visibility of'},
+    {action:'wait',key:'1500'},
+    {action:'getContent',tag:'#tabs > div.clickable.inactive > span',timeout:'1500'},
+    {action:'clickTestTube',timeout:'800'},
+    {action:'done'}
     ]);

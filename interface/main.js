@@ -4,7 +4,6 @@ var firstconnect = true;
 function connect() {
     if(firstconnect) {
         socket = io.connect('http://dev.testtube:8000');
-
         socket.on('serverMessage', function(data){ message(data); });
         socket.on('connect', function(){ console.log("Connected to Server"); });
 
@@ -17,4 +16,7 @@ function connect() {
 
 connect();
 
-
+socket.on('time',function(time){
+    console.log(time)
+    socket.emit('data',{data:'recieved'})
+});
