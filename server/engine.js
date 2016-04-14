@@ -379,9 +379,11 @@ exports.TestEngine=function TestEngine(cfg){
     };
 
     this.clickTestTube=function(){
-	var lable=this.Global.testTubes[0].text;
-	var tagType=this.Global.testTubes[0].type;
-	this.findAndClick(lable,tagType);
+	if(this.Global.testTubes[0]){
+	    var lable=this.Global.testTubes[0].text;
+	    var tagType=this.Global.testTubes[0].type;
+	    this.findAndClick(lable,tagType);}
+	
     };
     
     this.findAndClick=function(lable,tagType){

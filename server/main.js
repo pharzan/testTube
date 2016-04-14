@@ -365,7 +365,8 @@
 var cfg={slimerjs:true};
 var test=require('./engine.js').TestEngine(cfg);
 var stepPromise;
-
+var Events=require('events');
+var EventHandler=new Events();
 function run(testSteps) {
     console.log(testSteps)
     return new Promise(function(resolve) {
@@ -386,6 +387,11 @@ function run(testSteps) {
 			this.getContent(step.tag);
 		    },step.timeout);
 
+		case 'clickTestTube':
+		    return test.waitFor(function _noCheck(){
+			return this.clickTestTube();
+		    },step.timeout);
+		    
 		case 'screenShot':
 		    test.screenShot('./','test.png',page).then(function(){
 			io.emit('screenShot',{
@@ -517,9 +523,7 @@ function run(testSteps) {
                 stepPromise = stepPromise.then(function(msg) {
 
                     if (step.action == 'done') {
-                        test.engineGlobal.state = 'done';
-			
-                        PubSub.publish('testStepsComplete');
+                        EventHandler.emit('stepsComplete');
                         return resolve('done');
                     }
                     if (typeof step.des !== 'undefined') {
@@ -533,10 +537,13 @@ function run(testSteps) {
         });
     });
 };
-
+EventHandler.on('stepsComplete',function(){
+    console.log('----------Steps Complete');
+})
 run([{action:'startBrowser'},
      {action:'visibility',tag:'#content_area',expect:'true'},
      {action:'wait',key:'1500'},
-     {action:'getContent',tag:'#tabs > div.clickable.inactive > span',timeout:'1500'}
-
+     {action:'getContent',tag:'#tabs > div.clickable.inactive > span',timeout:'1500'},
+     {action:'clickTestTube',timeout:'800'},
+     {action:'done'}
     ]);
