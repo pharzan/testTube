@@ -194,6 +194,7 @@ const buildBtn = m.component(btn, {
         }
     }
 });;
+
 var raiseHeader=function(num){
     _Globals.header.loadRaised=false;
     _Globals.header.reportRaised=false;
@@ -562,23 +563,6 @@ var selectSetList = {
     }
 };
 
-// var actionButtons = {
-
-//     actions: [],
-//     view: function() {
-
-//         var self = this;
-//         return m('span',
-
-
-
-
-
-//         );
-
-//     }
-// };
-
 var setList = {
     
     view: function() {
@@ -605,17 +589,6 @@ var setList = {
 				 ));
     }
 };
-
-// var stepList = {
-//     view: function() {
-
-//         return m('ul',
-
-// 		 _Globals.selectedStep.content.map(function(step, i) {
-//             return step.action ? m('li', 'Action: ' + i + ') ' + step.action, m('span.des', " >>> " + step.des)) : m('.des', step.description);
-//         }));
-//     }
-// };
 
 var build = {
     content: [],
@@ -647,9 +620,6 @@ var build = {
 		 (_Globals.tab == 1) ? m.component(setsTabView) : null
 		);
 
-
-
-        
     },
 
     makeStep: function() {
@@ -1026,7 +996,6 @@ var setsTabView = {
 
     }
 };
-
 
 var set = {
     view: function() {
@@ -1424,8 +1393,8 @@ var post={
 	       ];
     }
 }
-m.route.mode = 'pathname';
 
+m.route.mode = 'pathname';
 m.route(document.body, '/', {
     '/': test,
     '/report': test,

@@ -546,6 +546,7 @@ EventHandler.on('stepsComplete',function(){
     server.emit('time',{time:elapsed});
     console.log('Steps Complete in %d ms',elapsed);
 });
+
 run([
     {action:'startBrowser'},
     {action:'describe',key:'blah blah, blah'},
