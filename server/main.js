@@ -364,7 +364,6 @@
 
 var cfg={slimerjs:true};
 var test=require('./engine.js').TestEngine(cfg);
-var stepPromise;
 var Events=require('events');
 var EventHandler=new Events();
 var runStart;
