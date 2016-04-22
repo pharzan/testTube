@@ -13,28 +13,49 @@ function connect() {
         Global.socket.socket.reconnect();
     }
 }
-var dropDown=require('./components/mithDropDown.js');
+var MithDropDown=require('./components/mithDropDown.js');
+var dropDown2= new MithDropDown();
+
+dropDown2.update(['apple','banana','orange']);
 
 var chosenCfg = {
     list: ['brown','apple','red'],
-    itemsPerPage: 2,
+    itemsPerPage: 100,
     sortByName: true,
     styles: {
-	width: "200px",
+	width: "500px",
         selectedBackground: 'black',
         selectedForeground: 'white',
         background: 'white',
         foreground: 'black'
     }
 };
-var MithChosen=require('./components/mithChosen.js');
+
+var MithChosen=require('./components/mithChosen.js').MithChosen;
+
 var chosen=new MithChosen(chosenCfg);
 
 connect();
 
 Global.socket.on('time',function(time){
     console.log(time);
-    socket.emit('data',{data:'recieved'});
+    Global.socket.emit('data',{data:'recieved'});
+    
+});
+Global.socket.on('messageToClient',function(data){
+    console.log(data);
+    switch(data.type){
+    case 'updateLoad':
+	var array=[];
+	data.data.map(function(d){
+				  array.push(d.content[0].description)
+				  
+	});
+	console.log(data.data)
+	chosen.update(array);
+	break;
+    }
+
 });
 
 var header=require('./components/header.js').header;
@@ -45,29 +66,8 @@ var main={
 	return [
 	    m.component(load),
 	    m.component(header),
-	    m.component(dropDown),
 	    m.component(chosen),
-	    m('button',{
-		onclick:function(){
-		    var list=['fasd','afdsfdsa','fasdfdsaf','fasdfsda'];
-		    dropDown.update(list);
-		    console.log(dropDown.getSelected());
-		}
-	    },'AA'),
-	    m('button',{
-		onclick:function(){
-		    var newList=['zdsafdsf','fdsafdsa','afarzan','psdddfsafdsfdsaf','_dsa3133135'];
-		    dropDown.update(newList);
-		    console.log(dropDown.getSelected());
-		}
-	    },'AA'),
-	    
-	    m('button',{
-		onclick:function(){
-		    dropDown.sort();
-		    console.log(dropDown.getSelected());
-		}
-	    },'cc')
+	    m('','some content')
 	       ];
     }
     
@@ -80,5 +80,5 @@ m.route.mode = 'pathname';
 m.route(document.body, '/', {
     '/': main
 });
+exports.MainGlobal=Global;
 
-exports.Global=Global;
