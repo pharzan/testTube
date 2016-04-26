@@ -546,12 +546,12 @@ EventHandler.on('stepsComplete',function(){
     console.log('Steps Complete in %d ms',elapsed);
 });
 
-run([
-    {action:'startBrowser'},
-    {action:'describe',key:'blah blah, blah'},
-    {action:'visibility',tag:'#content_area',expect:'true',des:'Check for the visibility of'},
-    {action:'wait',key:'1500'},
-    {action:'getContent',tag:'#tabs > div.clickable.inactive > span',timeout:'1500'},
-    {action:'clickTestTube',timeout:'800'},
-    {action:'done'}
-    ]);
+// run([
+//     {action:'startBrowser'},
+//     {action:'describe',key:'blah blah, blah'},
+//     {action:'visibility',tag:'#content_area',expect:'true',des:'Check for the visibility of'},
+//     {action:'wait',key:'1500'},
+//     {action:'getContent',tag:'#tabs > div.clickable.inactive > span',timeout:'1500'},
+//     {action:'clickTestTube',timeout:'800'},
+//     {action:'done'}
+//     ]);
