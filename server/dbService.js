@@ -402,7 +402,7 @@ var Datastore = require('nedb'),
 function dbService (cfg){
     
     if (!(this instanceof dbService)) {
-    return new dbService(cfg);
+	return new dbService(cfg);
     }
     
     this.dbPath=cfg.path;
@@ -412,7 +412,8 @@ function dbService (cfg){
      */
     this.db=new Datastore({filename:this.dbPath, autoload: true });
     this.db.loadDatabase(function(err){
-	console.log(err)
+	console.log(err);
+	
     });
     
     
@@ -425,7 +426,7 @@ dbService.prototype.load=function(query){
             if (result.length == 0){
                 return resolve('empty');	 
 	    }
-	    console.log('data Fetched',result);
+	    console.log('DBSERVICES::data Fetched');
 	    return resolve(result);
 	    
         });

@@ -1,4 +1,4 @@
-var Global;
+var Global={data:''};
 var Server=function(){
     var responseHeaders= {"access-control-allow-origin": "*",
 			      "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS, XMODIFY",
@@ -13,6 +13,7 @@ var Server=function(){
     if (!(this instanceof Server)) {
     return new Server();
     }
+    
     this.start=function(){
 	self.server = require('http').createServer(function(request,response){
 	    var realUrl = (request.connection.encrypted ? 'https': 'http') + '://' + request.headers.host + request.url;
@@ -33,23 +34,9 @@ var Server=function(){
 	      //setInterval(function(){self.io.emit('time',{data:new Date()});},1000)
 	      socket.on('CMD_LOAD',function(data){
 		  console.log('Load Command Recieved',data);
-		  dbService=require('./dbService.js').init(data);
-		  dbService.load().then(function(data){
-		      self.io.emit('messageToClient',{
-			  type:'updateLoad',
-			  data:data});
-		      Global.Data=data;
-		  });
+		  
 	      });
 
-	      socket.on('CMD_GET_DBS',function(data){
-		  socket.emit('CMD_SET_DBS',{dbsArray:['/home/pharzan/dev/www/testTube/data/sets.db',
-						       '/home/pharzan/dev/www/testTube/data/steps.db']
-					     
-					    });
-		  
-		  
-	      });
 	      
 	      socket.on('data',function(data){
 		  console.log(data);
@@ -72,16 +59,47 @@ var Server=function(){
 	}
 
 	var _routePost=function(urlParts,req,res){
-	    console.log('here')
+	    
 	    req.on('data', function(chunk) {
 		   
 		var data=JSON.parse(chunk);
 		if(typeof data=='string')
 		    data=JSON.parse(data);
-		console.log('Data Received::',data);
-		res.writeHead(200, responseHeaders);
-		res.write(JSON.stringify({message:'hi'}));
-		res.end();
+		// console.log('Data Received::',data);
+		if (data.command){
+		    switch(data.command){
+		    case "getDataBaseList":
+			console.log(' get DBs List');
+			res.writeHead(200, responseHeaders);
+			var dbList=['/home/pharzan/dev/www/testTube/data/sets.db',
+	      			    '/home/pharzan/dev/www/testTube/data/steps.db'];
+			res.write(JSON.stringify({response:dbList}));
+			res.end();
+			break;
+			case "loadDatabase":
+			console.log(' load DBs List',data.dbName.name);
+			
+			res.writeHead(200, responseHeaders);
+			dbService=require('./dbService.js').init({path:data.dbName.name});
+			dbService.load({}).then(function(data){
+			    Global.data=data;
+			    
+			    res.writeHead(200, responseHeaders);
+			    res.write(JSON.stringify({status:'ok',response:data}));
+			    res.end();
+			});
+			
+			break;
+		    default:
+			console.log('command not found');
+			break;
+		    }
+		}
+		else{
+		    res.writeHead(200, responseHeaders);
+		    res.write(JSON.stringify({message:'hi'}));
+		    res.end();
+		}
 	});
 	    //res.end();	
 	};
